@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import codecs
+from utils.connect import *
 from utils.constants import *
-from pymongo import MongoClient
 
-# connect to mongodb
-client = MongoClient()
-appInfo = client['appInfo']
-appDetails = appInfo['appDetails']
-allAppDetails = appDetails.find()
-
+# get db object
+appDetails = getAppDetails()
 
 # open file use utf-8 encoding
-open_in_utf8 = lambda filename:\
+open_in_utf8 = lambda filename: \
     codecs.open(filename, encoding='utf-8')
 
 
@@ -51,7 +47,7 @@ def load_perm_dict():
 
 
 # load some number of apps to test
-def load_apps(number=ALL_APP_NUMBER):
+def load_apps(number=NUMBER_ALL_APP):
     apps = []
     for app in appDetails.find({}, {'title': True})[:number]:
         apps.append(app['title'])
@@ -72,3 +68,7 @@ def tags(app):
 
 def permissions(app):
     return appDetails.find_one({'title': app})['permissions']
+
+
+def packageName(app):
+    return appDetails.find_one({'title': app})['packageName']

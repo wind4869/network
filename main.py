@@ -30,7 +30,7 @@ def get_call_edges(apps):
 
     # delete some app form call_edges
     for app in call_edges:
-        for af in app_filter:
+        for af in APP_FILTER:
             if af in call_edges[app]:
                 call_edges[app].remove(af)
 
@@ -71,7 +71,7 @@ def draw_network(test=ALL_MASK):
     tag_io, tag_all = load_tag_io()
 
     # load test apps
-    apps = load_apps(TEST_APP_NUMBER)
+    apps = load_apps(NUMBER_TO_TEST)
 
     # data edges
     if test & DATA_MASK:

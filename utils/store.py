@@ -1,33 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import json
+from utils.connect import *
+from utils.constants import *
 from urllib2 import urlopen
-from pymongo import MongoClient
 
-# connect to mongodb
-client = MongoClient()
-appInfo = client['appInfo']
-appDetails = appInfo['appDetails']
-
-
-url = 'http://apps.wandoujia.com/api/v1/apps?type=top&max=%d&start=%d&\
-opt_fields=packageName,title,description,editorComment,changelog,categories.*.name,tags.*,apks.permissions'
-directAttr = ['packageName', 'title', 'description', 'editorComment', 'changelog']
-
-total = 1000
-maxOnce = 60
-start = 0
-count = total / maxOnce
-
+# data to store
 allAppDetails = []
-for i in xrange(count + 1):
-    apps = urlopen(url % (maxOnce, start)).read()
-    start += maxOnce
+# get db object
+appDetails = getAppDetails()
+
+for i in xrange(COUNT + 1):
+    apps = urlopen(DETAIL_URL % (MAX_ONCE, START)).read()
+    START += MAX_ONCE
 
     tidyApp = {}
     apps = json.loads(apps)
     for app in apps:
-        for attr in directAttr:
+        for attr in DIRECT_ATTR:
             tidyApp[attr] = app[attr]
         categories = []
         for c in app['categories']:
@@ -42,5 +32,5 @@ for i in xrange(count + 1):
         allAppDetails.append(tidyApp)
 
 # store to mongodb
-# appDetails.insert(allAppDetails)
+appDetails.insert(allAppDetails)
 print len(allAppDetails)
