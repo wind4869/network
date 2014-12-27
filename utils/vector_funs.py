@@ -1,4 +1,4 @@
-from utils.read import *
+from utils.db_read import *
 
 
 # edges = {app1: set([]), app2: set([]), ...}

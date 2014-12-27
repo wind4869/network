@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import codecs
-from utils.connect import *
-from utils.constants import *
+from utils.db_connect import *
+from utils.global_consts import *
 
 # get db object
 appDetails = getAppDetails()
@@ -47,7 +47,7 @@ def load_perm_dict():
 
 
 # load some number of apps to test
-def load_apps(number=NUMBER_ALL_APP):
+def load_apps(number=NUMBER_OF_APP):
     apps = []
     for app in appDetails.find({}, {'title': True})[:number]:
         apps.append(app['title'])

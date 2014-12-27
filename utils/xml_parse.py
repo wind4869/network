@@ -1,10 +1,11 @@
-from utils.constants import *
-import xml.etree.cElementTree as ET
+from utils.db_read import *
+from utils.global_consts import *
+import xml_parse.etree.cElementTree as ET
 
 
-def xml_parer():
-    tree = ET.parse(XML_PATH)
-    intent_filter = []
+def xml_parer(xml):
+    tree = ET.parse(xml)
+    intent_filters = []
     ns = {'android': '{http://schemas.android.com/apk/res/android}'}
     keys = ['mimeType', 'scheme', 'host', 'port', 'path', 'pathPrefix', 'pathPattern']
 
@@ -21,12 +22,17 @@ def xml_parer():
                 if value: piece[key] = value
             if piece: data.append(piece)
 
-        piece = {'action': action, 'category': category, 'data': data}
+        piece = {'actions': action, 'categories': category, 'datas': data}
         [piece.pop(key) for key in piece.copy() if not piece[key]]
-        if piece: intent_filter.append(piece)
+        if piece:
+            intent_filters.append(piece)
 
-    return intent_filter
+    return intent_filters
+
 
 if __name__ == '__main__':
-    for f in xml_parer():
-        print f
+    apps = load_apps(NUMBER_FOR_TEST)
+    for app in apps:
+        print '%d intent-filters extracting ---> %s.apk' % (apps.index(app), app)
+        f = open(INTENT_FILTER_PATH % app, 'w')
+        f.write(str(xml_parer(XML_PATH % app)) + '\n')

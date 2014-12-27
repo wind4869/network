@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-from utils.connect import *
-from utils.constants import *
+from utils.db_connect import *
+from utils.global_consts import *
 from urllib2 import urlopen
 
 # data to store

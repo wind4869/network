@@ -1,12 +1,12 @@
 import os
-from utils.read import *
-from utils.constants import *
+from utils.db_read import *
+from utils.global_consts import *
 
 run = lambda cmd: os.popen(cmd.encode('utf-8'))
 
 
 def dex_decompile(app):
-    print '---> decompiling classes.dex for %s.jar ... ' % app
+    print '-> decompiling classes.dex for %s.jar ... ' % app
     run(D2J_CMD % (app, app))
 
 
@@ -16,11 +16,12 @@ def xml_extract(app):
 
 
 def apk_decompile(app):
-    print 'decompiling %s.apk' % app
     dex_decompile(app)
     xml_extract(app)
 
+
 if __name__ == '__main__':
     apps = load_apps()
-    for app in apps[:1]:
+    for app in apps[:NUMBER_FOR_TEST]:
+        print '%d decompiling ---> %s.apk' % (apps.index(app), app)
         apk_decompile(app)

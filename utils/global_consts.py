@@ -23,6 +23,8 @@ APK_PATH = ROOT_DIR + 'apks/%s.apk'
 APP_DIR = ROOT_DIR + 'apps/%s/'
 JAR_PATH = APP_DIR + 'classes.jar'
 XML_PATH = APP_DIR + 'AndroidManifest.xml'
+INTENT_PATH = APP_DIR + 'intents.txt'
+INTENT_FILTER_PATH = APP_DIR + 'intent-filters.txt'
 
 # Tools for apk analysis
 TOOL_DIR = ROOT_DIR + 'tools/'
@@ -30,16 +32,15 @@ APK_PARSER = TOOL_DIR + 'APKParser.jar'
 DEX_TO_JAR = TOOL_DIR + 'dex2jar/d2j-dex2jar.sh'
 
 # CMDs for apk analysis
-LOG_TXT = ROOT_DIR + 'log.txt'
-XML_CMD = 'java -jar %s %s 2> %s' % \
+XML_CMD = 'java -jar %s "%s" > "%s"' % \
           (APK_PARSER, APK_PATH, XML_PATH)
-D2J_CMD = '%s %s -o %s --force 2> %s' % \
-          (DEX_TO_JAR, APK_PATH, JAR_PATH, LOG_TXT)
+D2J_CMD = '%s "%s" -o "%s" --force' % \
+          (DEX_TO_JAR, APK_PATH, JAR_PATH)
 
 # Number of all app
-NUMBER_ALL_APP = 1000
-# Test amount
-NUMBER_TO_TEST = 50
+NUMBER_OF_APP = 1000
+# Number for test
+NUMBER_FOR_TEST = 50
 
 # URLs for wandoujia api
 DOWNLOAD_URL = 'http://apps.wandoujia.com/apps/%s/download'
