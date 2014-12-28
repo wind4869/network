@@ -1,6 +1,6 @@
 from utils.db_read import *
 from utils.global_consts import *
-import xml_parse.etree.cElementTree as ET
+import xml.etree.cElementTree as ET
 
 
 def xml_parer(xml):
@@ -24,15 +24,14 @@ def xml_parer(xml):
 
         piece = {'actions': action, 'categories': category, 'datas': data}
         [piece.pop(key) for key in piece.copy() if not piece[key]]
-        if piece:
-            intent_filters.append(piece)
+        intent_filters.append(piece)
 
     return intent_filters
 
 
 if __name__ == '__main__':
-    apps = load_apps(NUMBER_FOR_TEST)
-    for app in apps:
+    apps = load_apps()
+    for app in apps[NUMBER_FOR_TEST:100]:
         print '%d intent-filters extracting ---> %s.apk' % (apps.index(app), app)
         f = open(INTENT_FILTER_PATH % app, 'w')
         f.write(str(xml_parer(XML_PATH % app)) + '\n')

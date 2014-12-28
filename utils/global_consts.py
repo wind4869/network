@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ROOT_DIR = '/Users/wind/Desktop/network/'
+APPS_TXT = '/Users/wind/Desktop/IntentAnalysis/apps.txt'  # apps to be extracted intents
 
 # Files to be used
 FILE_DIR = ROOT_DIR + 'files/'
@@ -40,7 +41,7 @@ D2J_CMD = '%s "%s" -o "%s" --force' % \
 # Number of all app
 NUMBER_OF_APP = 1000
 # Number for test
-NUMBER_FOR_TEST = 50
+NUMBER_FOR_TEST = 100
 
 # URLs for wandoujia api
 DOWNLOAD_URL = 'http://apps.wandoujia.com/apps/%s/download'

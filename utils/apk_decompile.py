@@ -22,6 +22,6 @@ def apk_decompile(app):
 
 if __name__ == '__main__':
     apps = load_apps()
-    for app in apps[:NUMBER_FOR_TEST]:
+    for app in apps[NUMBER_FOR_TEST:100]:
         print '%d decompiling ---> %s.apk' % (apps.index(app), app)
         apk_decompile(app)
