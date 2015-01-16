@@ -6,7 +6,7 @@ from utils.vector_funs import get_edges
 
 
 # use pickle to store the adjacent matrix of app network
-def store_network(edges):
+def store_network(edges, path):
     length = len(edges)
     apps = load_apps(length)
     network = [[0 for j in xrange(length)] for i in xrange(length)]
@@ -17,12 +17,12 @@ def store_network(edges):
             index_to = apps.index(app_to)
             network[index_from][index_to] = 1
 
-    pickle.dump(network, open(NETWORK_TXT, 'w'))
+    pickle.dump(network, open(path, 'w'))
 
 
 # load network from pickle file
-def load_network():
-    network = pickle.load(open(NETWORK_TXT))
+def load_network(path):
+    network = pickle.load(open(path))
     length = len(network)
     apps = load_apps(length)
     edges = get_edges(apps)

@@ -1,9 +1,12 @@
 from pymongo import MongoClient
 
+client = MongoClient()
+appInfo = client['appInfo']
+
 
 def getAppDetails():
-    client = MongoClient()
-    appInfo = client['appInfo']
-    appDetails = appInfo['appDetails']
+    return appInfo['appDetails']
 
-    return appDetails
+
+def getUsageRecords():
+    return appInfo['usageRecords']

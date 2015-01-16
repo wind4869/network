@@ -8,6 +8,7 @@ from urllib2 import urlopen
 
 # get db object
 appDetails = getAppDetails()
+usageRecords = getUsageRecords()
 
 
 def store_top_info():
@@ -101,5 +102,27 @@ def store_intents():
                 'filters': get_intent_filters(app)}})
 
 
+# store personal usage records to mongodb
+def store_usage_records(uid):
+    usage_records = []
+
+    f = open_in_utf8('Dhao.txt')
+    attrs = ['startTime', 'endTime', 'appName', 'appID', 'userID']
+    for line in f.readlines():
+        record = {}
+        parts = line.strip().replace(u'\x00', '').\
+            replace(u'\x02', '').split(',')
+        parts.append(uid)
+        for i in xrange(len(attrs)):
+            record.setdefault(attrs[i], parts[i])
+        usage_records.append(record)
+
+    f.close()
+    usageRecords.insert(usage_records)
+
+
 if __name__ == '__main__':
-    store_intents()
+    # store_usage_records('F07')
+    # usageRecords.remove({'userID': 'F05'})
+    for r in usageRecords.find({'userID': 'F05'}):
+        print r

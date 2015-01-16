@@ -4,7 +4,7 @@ import Levenshtein
 from utils.graph import *
 from utils.network_rs import *
 from utils.vector_funs import *
-from utils.intent_analyse import *
+from utils.intent_match import *
 from itertools import combinations
 
 
@@ -102,7 +102,7 @@ def draw_network(test=ALL_MASK):
         intent_edges = get_intent_edges(apps)
         graph.add_edges(intent_edges)
 
-    store_network(intent_edges)
+    store_network(intent_edges, NETWORK_TXT)
     graph.draw(IMAGE[test])
 
 

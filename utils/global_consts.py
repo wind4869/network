@@ -9,7 +9,16 @@ DATA_DICT_TXT = FILE_DIR + 'data_dict.txt'
 PERM_DICT_TXT = FILE_DIR + 'perm_dict.txt'
 APPS_TXT = FILE_DIR + 'apps.txt'
 CATEGORIES_TXT = FILE_DIR + 'categories.txt'
-NETWORK_TXT = FILE_DIR + 'network.txt'
+
+# Test
+TEST_DIR = ROOT_DIR + 'test/'
+
+OUTPUT_DIR = TEST_DIR + 'output/'
+NETWORK_TXT = OUTPUT_DIR + 'network.txt'
+PICKLE_PATH = OUTPUT_DIR + '%s.txt'
+GRAPH_PATH = OUTPUT_DIR + '%s.jpg'
+
+DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'
