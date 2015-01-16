@@ -1,54 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
-from utils.graph import *
-from utils.vector_funs import *
-from itertools import permutations
-
-
-# get content from file
-def content(path):
-    f = open(path)
-    lines = f.readlines()
-    f.close()
-    return eval(lines[0]) if lines else None
-
-
-# get raw intents, process, return (explicits, implicits)
-def get_intents(app):
-    commons, systems = [], []  # two kinds of explict intents
-    implicits = []  # implicit intents
-
-    # raw string of intents
-    raw_intents = content(INTENT_PATH % app)
-    # pattern for removing self-calling intents
-    self_pattern = re.compile(packageName(app))
-    # pattern for recognizing system-app-calling intents
-    sys_pattern = re.compile('com.android')
-
-    if raw_intents:
-        for typed_intens in [raw_intents.get(i) for i in ['called', 'queried']]:
-            if typed_intens:
-                for key in typed_intens:
-                    for intent in typed_intens[key]:
-                        if intent['explicit'] == 'true':  # explicit intents
-                            class_name = intent.get('class')
-                            if class_name:
-                                class_name = class_name.replace(r'/', r'.')  # remove self-calling intents
-                                if not self_pattern.match(class_name):
-                                    if sys_pattern.match(class_name):  # system-app-calling intents
-                                        systems.append(class_name)
-                                    else:
-                                        commons.append(class_name)
-                        else:
-                            intent.pop('explicit')  # implicit intents
-                            if intent:
-                                implicits.append(intent)
-    return {'common': commons, 'system': systems}, implicits
-
-
-def get_intent_filters(app):
-    return content(INTENT_FILTER_PATH % app)
+from utils.db_read import *
+from utils.vector_funs import get_edges
+from itertools import combinations
 
 
 def check_action(action, actions):
@@ -89,7 +44,7 @@ def get_uri(data):
 
 
 def check_data_one(uri, mimeType, data):
-    uri_pattern = re.compile(get_uri(data))
+    uri_pattern = re.compile(get_uri(data).replace('*', '.*'))
 
     # case # 1
     if not uri and mimeType:
@@ -138,6 +93,8 @@ def implicit_match_one(implicit, intent_filter):
 
 def implicit_match(implicits, intent_filters):
     for implicit in implicits:
+        if not intent_filters:
+            continue
         for intent_filter in intent_filters:
             if implicit_match_one(implicit, intent_filter):
                 return True
@@ -153,38 +110,15 @@ def explicit_match(commons, package_name):
 
 
 def get_intent_edges(apps):
-    explicit_edges, implicit_edges, system_edges = \
-        get_edges(apps), get_edges(apps), get_edges(apps)
+    intent_edges = get_edges(apps)
+    for app_pair in combinations(apps, 2):
+        explicits_pair = [explicit_intents(app) for app in app_pair]
+        implicits_pair = [implicit_intents(app) for app in app_pair]
+        filters_pair = [intent_filters(app) for app in app_pair]
 
-    for app1, app2 in permutations(apps, 2):
-        explicits, implicits = get_intents(app1)
-        intent_filters = get_intent_filters(app2)
+        for i in xrange(2):
+            if explicit_match(explicits_pair[i]['commons'], packageName(app_pair[1 - i])) or \
+                    implicit_match(implicits_pair[i], filters_pair[1 - i]):
+                intent_edges[app_pair[i]].add(app_pair[1 - i])
 
-        # check explicit comment intents
-        if explicit_match(explicits['common'], packageName(app2)):
-            explicit_edges[app1].add(app2)
-
-        # check implicit intents
-        if implicit_match(implicits, intent_filters):
-            implicit_edges[app1].add(app2)
-
-        # check explicit system intents
-        for app in explicits['system']:
-            system_edges[app1].add(app.split('.')[2])
-
-    return explicit_edges, implicit_edges, system_edges
-
-
-def draw(edges, name):
-    graph = Graph()
-    graph.add_edges(edges)
-    graph.draw(ROOT_DIR + 'test/%s.jpg' % name)
-
-
-if __name__ == '__main__':
-    apps = load_apps(NUMBER_FOR_TEST)
-    explicit_edges, implicit_edges, system_edges = get_intent_edges(apps)
-
-    draw(explicit_edges, 'explicit')
-    draw(implicit_edges, 'implicit')
-    draw(system_edges, 'system')
+    return intent_edges

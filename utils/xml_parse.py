@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from utils.db_read import *
 from utils.global_consts import *
 import xml.etree.cElementTree as ET
@@ -31,7 +33,10 @@ def xml_parer(xml):
 
 if __name__ == '__main__':
     apps = load_apps()
-    for app in apps[NUMBER_FOR_TEST:100]:
+    for app in apps:
         print '%d intent-filters extracting ---> %s.apk' % (apps.index(app), app)
-        f = open(INTENT_FILTER_PATH % app, 'w')
-        f.write(str(xml_parer(XML_PATH % app)) + '\n')
+        try:
+            f = open(INTENT_FILTER_PATH % app, 'w')
+            f.write(str(xml_parer(XML_PATH % app)) + '\n')
+        except:
+            print 'parsing error in %s' % app

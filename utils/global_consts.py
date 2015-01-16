@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 ROOT_DIR = '/Users/wind/Desktop/network/'
-APPS_TXT = '/Users/wind/Desktop/IntentAnalysis/apps.txt'  # apps to be extracted intents
 
 # Files to be used
 FILE_DIR = ROOT_DIR + 'files/'
 TAG_IO_TXT = FILE_DIR + 'tag_io.txt'
 DATA_DICT_TXT = FILE_DIR + 'data_dict.txt'
 PERM_DICT_TXT = FILE_DIR + 'perm_dict.txt'
+APPS_TXT = FILE_DIR + 'apps.txt'
+CATEGORIES_TXT = FILE_DIR + 'categories.txt'
+NETWORK_TXT = FILE_DIR + 'network.txt'
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'
@@ -15,6 +17,7 @@ APP_NETWORK_DATA_JPG = IMAGE_DIR + 'app_network_data.jpg'
 APP_NETWORK_CALL_JPG = IMAGE_DIR + 'app_network_call.jpg'
 APP_NETWORK_SIM_JPG = IMAGE_DIR + 'app_network_sim.jpg'
 APP_NETWORK_NATIVE_JPG = IMAGE_DIR + 'app_network_native.jpg'
+APP_NETWORK_INTENT_JPG = IMAGE_DIR + 'app_network_intent.jpg'
 APP_NETWORK_JPG = IMAGE_DIR + 'app_network.jpg'
 
 # APKs downloaded
@@ -39,14 +42,12 @@ D2J_CMD = '%s "%s" -o "%s" --force' % \
           (DEX_TO_JAR, APK_PATH, JAR_PATH)
 
 # Number of all app
-NUMBER_OF_APP = 1000
-# Number for test
-NUMBER_FOR_TEST = 100
+NUMBER_OF_APP = 965
 
 # URLs for wandoujia api
 DOWNLOAD_URL = 'http://apps.wandoujia.com/apps/%s/download'
-DETAIL_URL = 'http://apps.wandoujia.com/api/v1/apps?type=top&max=%d&start=%d&\
-opt_fields=packageName,title,description,editorComment,changelog,categories.*.name,tags.*,apks.permissions'
+OPT_FIELDS = 'packageName,title,description,editorComment,changelog,categories.*.name,tags.*,apks.permissions'
+TOP_INFO_URL = 'http://apps.wandoujia.com/api/v1/apps?type=top&max=%d&start=%d&opt_fields=' + OPT_FIELDS
 
 # Consts for detail getting
 START = 0
@@ -69,7 +70,8 @@ DATA_MASK = 1
 CALL_MASK = 2
 SIM_MASK = 4
 SYSTEM_MASK = 8
-ALL_MASK = 15
+INTENT_MASK = 16
+ALL_MASK = 31
 
 # Image path for each case
 IMAGE = {
@@ -77,5 +79,6 @@ IMAGE = {
     CALL_MASK: APP_NETWORK_CALL_JPG,
     SIM_MASK: APP_NETWORK_SIM_JPG,
     SYSTEM_MASK: APP_NETWORK_NATIVE_JPG,
+    INTENT_MASK: APP_NETWORK_INTENT_JPG,
     ALL_MASK: APP_NETWORK_JPG
 }

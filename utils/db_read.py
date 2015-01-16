@@ -48,9 +48,9 @@ def load_perm_dict():
 
 # load some number of apps to test
 def load_apps(number=NUMBER_OF_APP):
-    apps = []
-    for app in appDetails.find({}, {'title': True})[:number]:
-        apps.append(app['title'])
+    f = open_in_utf8(APPS_TXT)
+    apps = [line[:-1] for line in f.readlines()[:number]]
+    f.close()
     return apps
 
 
@@ -72,3 +72,15 @@ def permissions(app):
 
 def packageName(app):
     return appDetails.find_one({'title': app})['packageName']
+
+
+def explicit_intents(app):
+    return appDetails.find_one({'title': app})['explicits']
+
+
+def implicit_intents(app):
+    return appDetails.find_one({'title': app})['implicits']
+
+
+def intent_filters(app):
+    return appDetails.find_one({'title': app})['filters']

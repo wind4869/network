@@ -2,7 +2,9 @@
 
 import Levenshtein
 from utils.graph import *
+from utils.network_rs import *
 from utils.vector_funs import *
+from utils.intent_analyse import *
 from itertools import combinations
 
 
@@ -71,7 +73,7 @@ def draw_network(test=ALL_MASK):
     tag_io, tag_all = load_tag_io()
 
     # load test apps
-    apps = load_apps(NUMBER_FOR_TEST)  # <---------- Control the number of app !!!
+    apps = load_apps(100)  # <------------------------- the number of app for testing!!!
 
     # data edges
     if test & DATA_MASK:
@@ -95,8 +97,14 @@ def draw_network(test=ALL_MASK):
         system_edges = get_system_edges(apps)
         graph.add_edges(system_edges, SYSTEM_EDGE)
 
+    # intent edges
+    if test & INTENT_MASK:
+        intent_edges = get_intent_edges(apps)
+        graph.add_edges(intent_edges)
+
+    store_network(intent_edges)
     graph.draw(IMAGE[test])
 
 
 if __name__ == '__main__':
-    draw_network(15)  # 1, 2, 4, 8, 15
+    draw_network(16)  # 1, 2, 4, 8, 16, 31
