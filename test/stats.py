@@ -6,8 +6,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 
 
-def show_plot(x, y):
+def draw_plot(x, y, xlabel='', ylabel='', title=''):
     plt.plot(x, y, 'ro-')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
     plt.show()
 
 
@@ -46,7 +49,7 @@ def power_law_distribution(network):
 
     # y = c * x^-r (power function)
     x = xrange(1, max_degree)
-    show_plot(x, y)  # the curve of power fun
+    draw_plot(x, y)  # the curve of power fun
 
     # lny = -rlnx + lnc (linear correlation)
     x = np.array([np.log(i) for i in x])
@@ -69,9 +72,10 @@ def rank_degree_correlation(network):
             x.append(apps.index(app))
             y.append(degree_in)
 
-    show_plot(x, y)
+    draw_plot(x, y)
 
 
+# calculate the average degree of each category
 def cats_avg_degree(network):
     cats = load_categories()
     apps = load_apps(len(network[0]))

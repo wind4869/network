@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from utils.db_read import *
-from utils.global_consts import *
+import re
 import xml.etree.cElementTree as ET
 
 
-def xml_parer(xml):
-    tree = ET.parse(xml)
-    intent_filters = []
+def parer(xml):
+    filters = []
     ns = {'android': '{http://schemas.android.com/apk/res/android}'}
     keys = ['mimeType', 'scheme', 'host', 'port', 'path', 'pathPrefix', 'pathPattern']
+
+    try:
+        tree = ET.parse(xml)
+    except ET.ParseError:
+        print 'cElementTree.ParseError in file %s' % xml
+        return [], []
 
     for f in tree.iter('intent-filter'):
         action, category, data = [], [], []
@@ -26,17 +30,13 @@ def xml_parer(xml):
 
         piece = {'actions': action, 'categories': category, 'datas': data}
         [piece.pop(key) for key in piece.copy() if not piece[key]]
-        intent_filters.append(piece)
+        filters.append(piece)
 
-    return intent_filters
+    perms = set([])
+    perm_pattern = re.compile(r'^android.permission')
+    for p in tree.iter('uses-permission'):
+        perm_str = p.attrib[ns['android'] + 'name']
+        if perm_pattern.match(perm_str):
+            perms.add(perm_str.split('.')[2])
 
-
-if __name__ == '__main__':
-    apps = load_apps()
-    for app in apps:
-        print '%d intent-filters extracting ---> %s.apk' % (apps.index(app), app)
-        try:
-            f = open(INTENT_FILTER_PATH % app, 'w')
-            f.write(str(xml_parer(XML_PATH % app)) + '\n')
-        except:
-            print 'parsing error in %s' % app
+    return filters, list(perms)

@@ -5,6 +5,7 @@ import json
 from utils.db_read import *
 from utils.global_consts import *
 from urllib2 import urlopen
+from utils.xml_parse import parer
 
 # get db object
 appDetails = getAppDetails()
@@ -84,23 +85,20 @@ def get_intents(app):
     return commons, systems, implicits
 
 
-# get intent-filters: [{...}, {...}, ..., {...}]
-def get_intent_filters(app):
-    return content(INTENT_FILTER_PATH % app)
-
-
-# store intents and intent-filters to mongodb
-def store_intents():
+# store intents, intent-filters and permissions to mongodb
+def store_intents_filters_perms():
     for app in load_apps():
         commons, systems, implicits = get_intents(app)
         explicits = {'commons': commons, 'systems': systems}
+        filters, perms = parer(XML_PATH % app)
 
         appDetails.update(
             {'title': app},
             {'$set': {
                 'explicits': explicits,
                 'implicits': implicits,
-                'filters': get_intent_filters(app)}})
+                'filters': filters,
+                'perms.txt': perms}})
 
 
 # store personal usage records to mongodb
@@ -124,6 +122,7 @@ def store_usage_records(uid):
 
 if __name__ == '__main__':
     pass
+    # store_intents_filters_perms()
     # store_usage_records('F07')
     # usageRecords.remove({'userID': 'F07'})
     # for r in usageRecords.find({'userID': 'F07'}):
