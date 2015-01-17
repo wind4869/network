@@ -80,6 +80,7 @@ def get_intents(app):
                             intent.pop('explicit')  # implicit intents
                             if intent:
                                 implicits.append(intent)
+
     return commons, systems, implicits
 
 
@@ -122,7 +123,8 @@ def store_usage_records(uid):
 
 
 if __name__ == '__main__':
+    pass
     # store_usage_records('F07')
-    # usageRecords.remove({'userID': 'F05'})
-    for r in usageRecords.find({'userID': 'F05'}):
-        print r
+    # usageRecords.remove({'userID': 'F07'})
+    # for r in usageRecords.find({'userID': 'F07'}):
+    #     print r

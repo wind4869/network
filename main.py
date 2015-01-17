@@ -8,6 +8,12 @@ from utils.intent_match import *
 from itertools import combinations
 
 
+# merge different kinds of edges
+def merge_edges(edges, another):
+    for app in edges:
+        edges[app] |= another[app]
+
+
 # get data edges
 def get_data_edge(apps, vectors):
     data_edges = get_edges(apps)
@@ -64,7 +70,7 @@ def get_system_edges(apps):
 
 
 # draw network by input parameter
-def draw_network(test=ALL_MASK):
+def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
     # graph object to draw
     graph = Graph()
 
@@ -73,7 +79,8 @@ def draw_network(test=ALL_MASK):
     tag_io, tag_all = load_tag_io()
 
     # load test apps
-    apps = load_apps(100)  # <------------------------- the number of app for testing!!!
+    apps = load_apps(number)
+    edges = get_edges(apps)
 
     # data edges
     if test & DATA_MASK:
@@ -81,30 +88,35 @@ def draw_network(test=ALL_MASK):
         vectors = get_vectors(apps, tag_all, len(data_dict), v_fill)
         data_edges = get_data_edge(apps, vectors)
         graph.add_edges(data_edges, DATA_EDGE)
+        merge_edges(edges, data_edges)
 
     # call edges
     if test & CALL_MASK:
         call_edges = get_call_edges(apps)
         graph.add_edges(call_edges, CAll_EDGE)
+        merge_edges(edges, call_edges)
 
     # sim edges
     if test & SIM_MASK:
         sim_edges = get_sim_edges(apps)
         graph.add_edges(sim_edges, SIM_EDGE)
+        merge_edges(edges, sim_edges)
 
     # system edges
     if test & SYSTEM_MASK:
         system_edges = get_system_edges(apps)
         graph.add_edges(system_edges, SYSTEM_EDGE)
+        merge_edges(edges, system_edges)
 
     # intent edges
     if test & INTENT_MASK:
         intent_edges = get_intent_edges(apps)
         graph.add_edges(intent_edges)
+        merge_edges(edges, intent_edges)
 
-    store_network(intent_edges, NETWORK_TXT)
-    graph.draw(IMAGE[test])
+    store_network(edges, NETWORK_TXT)
+    # graph.draw(IMAGE[test])
 
 
 if __name__ == '__main__':
-    draw_network(16)  # 1, 2, 4, 8, 16, 31
+    draw_network(23, 100)  # 1, 2, 4, 8, 16, 31

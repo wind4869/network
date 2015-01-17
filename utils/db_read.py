@@ -46,12 +46,21 @@ def load_perm_dict():
     return perm_dict
 
 
+def load_content(path):
+    f = open_in_utf8(path)
+    content = [line[:-1] for line in f.readlines()]
+    f.close()
+    return content
+
+
 # load some number of apps to test
 def load_apps(number=NUMBER_OF_APP):
-    f = open_in_utf8(APPS_TXT)
-    apps = [line[:-1] for line in f.readlines()[:number]]
-    f.close()
-    return apps
+    return load_content(APPS_TXT)[:number]
+
+
+# load all 14 categories
+def load_categories():
+    return load_content(CATEGORIES_TXT)
 
 
 def description(app):

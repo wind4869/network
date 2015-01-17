@@ -10,7 +10,7 @@ PERM_DICT_TXT = FILE_DIR + 'perm_dict.txt'
 APPS_TXT = FILE_DIR + 'apps.txt'
 CATEGORIES_TXT = FILE_DIR + 'categories.txt'
 
-# Test
+# Something about test
 TEST_DIR = ROOT_DIR + 'test/'
 
 OUTPUT_DIR = TEST_DIR + 'output/'
@@ -19,6 +19,7 @@ PICKLE_PATH = OUTPUT_DIR + '%s.txt'
 GRAPH_PATH = OUTPUT_DIR + '%s.jpg'
 
 DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
+USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06']
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'

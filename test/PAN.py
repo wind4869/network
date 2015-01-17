@@ -7,7 +7,7 @@ def makeTime(strTime):
     return time.mktime(time.strptime(strTime, DATE_PATTERN))
 
 
-def create_PAN(uid):
+def create_pan(uid):
     graph = Graph()
     records = []
     edges = {}
@@ -30,10 +30,12 @@ def create_PAN(uid):
             except:
                 continue
 
-    # store_network(edges, PICKLE_PATH % uid)
+    store_network(edges, PICKLE_PATH % uid)
     graph.add_edges(edges)
     graph.draw(GRAPH_PATH % uid)
 
 
 if __name__ == '__main__':
-    create_PAN('F02')
+    for uid in USER_IDS:
+        if uid != 'F02':
+            create_pan(uid)
