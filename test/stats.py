@@ -106,5 +106,5 @@ def cats_avg_degree(network):
 if __name__ == '__main__':
     network = load_network(NETWORK_TXT)
     # power_law_distribution(network)
-    # rank_degree_correlation(network)
-    cats_avg_degree(network)
+    rank_degree_correlation(network)
+    # cats_avg_degree(network)

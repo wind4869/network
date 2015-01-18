@@ -90,11 +90,15 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
         graph.add_edges(data_edges, DATA_EDGE)
         merge_edges(edges, data_edges)
 
+        print '> data edges finished'
+
     # call edges
     if test & CALL_MASK:
         call_edges = get_call_edges(apps)
         graph.add_edges(call_edges, CAll_EDGE)
         merge_edges(edges, call_edges)
+
+        print '> call edges finished'
 
     # sim edges
     if test & SIM_MASK:
@@ -102,11 +106,15 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
         graph.add_edges(sim_edges, SIM_EDGE)
         merge_edges(edges, sim_edges)
 
+        print '> sim edges finished'
+
     # system edges
     if test & SYSTEM_MASK:
         system_edges = get_system_edges(apps)
         graph.add_edges(system_edges, SYSTEM_EDGE)
         merge_edges(edges, system_edges)
+
+        print '> system edges finished'
 
     # intent edges
     if test & INTENT_MASK:
@@ -114,9 +122,15 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
         graph.add_edges(intent_edges)
         merge_edges(edges, intent_edges)
 
+        print '> intent edges finished'
+
     store_network(edges, NETWORK_TXT)
     # graph.draw(IMAGE[test])
 
 
 if __name__ == '__main__':
-    draw_network(23, 100)  # 1, 2, 4, 8, 16, 31
+    # 1, 2, 4, 8, 16 for single
+    # 7 without system and intent edges
+    # 23 without system edges
+    # 31 for all
+    draw_network(7)

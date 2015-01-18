@@ -14,7 +14,7 @@ CATEGORIES_TXT = FILE_DIR + 'categories.txt'
 TEST_DIR = ROOT_DIR + 'test/'
 
 OUTPUT_DIR = TEST_DIR + 'output/'
-NETWORK_TXT = OUTPUT_DIR + 'network.txt'
+NETWORK_TXT = OUTPUT_DIR + 'network_7_965_0118.txt'
 PICKLE_PATH = OUTPUT_DIR + '%s.txt'
 GRAPH_PATH = OUTPUT_DIR + '%s.jpg'
 
