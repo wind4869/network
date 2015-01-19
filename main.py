@@ -141,4 +141,4 @@ if __name__ == '__main__':
     # 7 without native and intent edges
     # 23 without native edges
     # 31 for all
-    draw_network(NATIVE_MASK)
+    draw_network(ALL_MASK)

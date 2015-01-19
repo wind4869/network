@@ -103,3 +103,18 @@ Superuser->Superuser.apk
 contacts->Contacts.apk
 geniewidget->GenieWidget.apk
 日历->Calendar.apk
+优酷->优酷视频
+三国杀传奇->三国杀
+驾考宝典-考驾照->车轮考驾照
+Chrome Beta->Chrome
+Google Play 商店->Google Play
+激流快艇2->激流快艇2-极速狂飙
+百度输入法->百度手机输入法
+电子邮件->Email.apk
+人脉->Contacts.apk
+图库->Photo.apk
+支付宝快捷支付服务->支付宝钱包
+Skitch->滑雪大冒险
+手机营业厅->中国移动手机营业厅
+搜索->Browser.apk
+短信->Mms.apk

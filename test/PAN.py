@@ -55,16 +55,49 @@ def create_pan(uid):
     graph.draw(PAN_JPG % uid)
 
 
+# get the apps in the network
+def app_in_network(network):
+    apps = set([])
+    for app_from, app_tos in network.iteritems():
+        apps.add(app_from)
+        for app_to in app_tos:
+            apps.add(app_to)
+    return apps
+
+
+# filter the network to get the common part between pan and gan
+def filter_network(network, apps_in_common):
+    new_network = {}
+    for app_from, app_tos in network.iteritems():
+        if app_from in apps_in_common:
+            new_network[app_from] = set([])
+            for app_to in app_tos:
+                if app_to in apps_in_common:
+                    new_network[app_from].add(app_to)
+    return new_network
+
+
+def draw(edges, path):
+    graph = Graph()
+    graph.add_edges(edges)
+    graph.draw(path)
+
+
 # test how many app in PAN covered by GAN
 def cover_test(uid):
-    gan = load_gan()[0]
-    pan = load_pan(uid)[0]
+    gan = load_gan()
+    pan = load_pan(uid)
 
-    print len(pan)
+    print '\n'.join([app for app in app_in_network(pan) if app not in app_in_network(gan)])
+    # apps_in_common = app_in_network(gan) & app_in_network(pan)
+    # gan = filter_network(gan, apps_in_common)
+    # pan = filter_network(pan, apps_in_common)
+
+    # draw(gan, 'gan.jpg')
+    # draw(pan, 'pan.jpg')
+
 
 if __name__ == '__main__':
-    for uid in USER_IDS:
-        create_pan(uid)
-    # cover_test('F01')
-    # for app in load_apps():
-    #     if u'美团团购' == app: print app
+    # for uid in USER_IDS:
+    create_pan('F02')
+    # cover_test('F02')

@@ -141,10 +141,15 @@ def load_network(path):
 
 
 # get Global App Network(GAN) by test mask, number of app, test date
-def load_gan(test=23, number=NUMBER_OF_APP, date='0118'):
-    return load_network(GAN_TXT % (test, number, date))
+def load_gan(test=31, number=NUMBER_OF_APP, date='0118'):
+    return pickle.load(open(GAN_TXT % (test, number, date)))
 
 
 # get Personal App Network(PAN) by uid
 def load_pan(uid):
-    return load_network(PAN_TXT % uid)
+    return pickle.load(open(PAN_TXT % uid))
+
+
+if __name__ == '__main__':
+    gan = load_gan(ALL_MASK)
+    print gan[u'微信']
