@@ -79,6 +79,11 @@ def load_natives():
     return [n.split('->')[0] for n in load_content(NATIVES_TXT)]
 
 
+# load all apps
+def loaa_all_apps():
+    return load_apps() + load_natives()
+
+
 def description(app):
     return appDetails.find_one({'title': app})['description']
 

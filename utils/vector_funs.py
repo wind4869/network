@@ -6,7 +6,7 @@ def vector(length):
     return [0 for i in xrange(length)]
 
 
-# fill the input or output vector of one app
+# fill the input or tmp vector of one app
 def get_v_fill(tag_io, data_dict):
     def v_fill(v, tag, type, desc):
         for index in tag_io[tag][type]:

@@ -77,27 +77,80 @@ def filter_network(network, apps_in_common):
     return new_network
 
 
+# get edges in set a but not in set b
+def edges_diff(a, b):
+    result = {}
+    diff_keys = [k for k in a.keys() if k not in b.keys()]
+    for k in a:
+        tmp = set([]) if k in diff_keys else b[k]
+        result[k] = a[k] - tmp
+    return result
+
+
+# get edges both in set a and set b
+def edges_common(a, b):
+    result = {}
+    common_keys = [k for k in a.keys() if k in b.keys()]
+    for k in common_keys:
+        result[k] = a[k] & b[k]
+    return result
+
+
+# count the number of edges in set a
+def edges_count(a):
+    result = 0
+    for key in a:
+        result += len(a[key])
+    return result
+
+
 def draw(edges, path):
     graph = Graph()
     graph.add_edges(edges)
     graph.draw(path)
 
 
-# test how many app in PAN covered by GAN
+# test PAN and GAN
 def cover_test(uid):
+    print ' - Test of user <%s> - ' % uid
+
     gan = load_gan()
     pan = load_pan(uid)
 
-    print '\n'.join([app for app in app_in_network(pan) if app not in app_in_network(gan)])
-    # apps_in_common = app_in_network(gan) & app_in_network(pan)
-    # gan = filter_network(gan, apps_in_common)
-    # pan = filter_network(pan, apps_in_common)
+    all_apps = loaa_all_apps()
+    app_in_pan = app_in_network(pan)
+    apps_ingored = app_in_pan - set(all_apps)
+    apps_in_common = app_in_pan & set(all_apps)
 
-    # draw(gan, 'gan.jpg')
-    # draw(pan, 'pan.jpg')
+    new_gan = filter_network(gan, apps_in_common)
+    new_pan = filter_network(pan, apps_in_common)
+
+    # the ingored ratio:
+    # (apps in pan but not in all_apps) / (apps in pan)
+    ingored_ratio = len(apps_ingored) * 1.0 / len(app_in_pan)
+    print '<1> Ignored Ration is: %.2f' % ingored_ratio
+
+    gan_diff_pan = edges_diff(new_gan, new_pan)
+    pan_diff_gan = edges_diff(new_pan, new_gan)
+    edges_in_common = edges_common(new_pan, new_gan)
+
+    # gan common ratio
+    print '<2> GAN Common Ratio: %.2f' % \
+          (edges_count(edges_in_common) * 1.0 / edges_count(new_gan))
+    # pan common ratio
+    print '<3> PAN Common Ratio: %.2f' % \
+          (edges_count(edges_in_common) * 1.0 / edges_count(new_pan))
+
+    # draw, draw, draw ...
+    draw(new_gan, GAN % uid)
+    draw(new_pan, PAN % uid)
+    draw(edges_in_common, COMMON % uid)
+    draw(gan_diff_pan, GAN_DIFF_PAN % uid)
+    draw(pan_diff_gan, PAN_DIFF_GAN % uid)
 
 
 if __name__ == '__main__':
+    pass
     # for uid in USER_IDS:
-    create_pan('F02')
-    # cover_test('F02')
+    # create_pan(uid)
+    # cover_test(uid)

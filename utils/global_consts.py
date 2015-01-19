@@ -16,12 +16,21 @@ MAP_DICT_TXT = FILE_DIR + 'map_dict.txt'
 # Something about test
 TEST_DIR = ROOT_DIR + 'test/'
 
-OUTPUT_DIR = TEST_DIR + 'output/'
-GAN_TXT = OUTPUT_DIR + 'gan_%d_%d_%s.txt'
-PAN_TXT = OUTPUT_DIR + 'pan_%s.txt'
-PAN_JPG = OUTPUT_DIR + 'pan_%s.jpg'
+TMP_DIR = TEST_DIR + 'tmp/'
+GAN_TXT = TMP_DIR + 'gan_%d_%d_%s.txt'
+PAN_TXT = TMP_DIR + 'pan_%s.txt'
+PAN_JPG = TMP_DIR + 'pan_%s.jpg'
 
-FILTERS_MATCHED = OUTPUT_DIR + 'filters_matched.txt'
+# for pan ang gan test
+OUPUT_DIR = TEST_DIR + 'output/'
+USER_DIR = OUPUT_DIR + '%s/'
+GAN_DIFF_PAN = USER_DIR + 'gan_pan.jpg'
+PAN_DIFF_GAN = USER_DIR + 'pan_gan.jpg'
+COMMON = USER_DIR + 'common.jpg'
+GAN = USER_DIR + 'gan.jpg'
+PAN = USER_DIR + 'pan.jpg'
+
+FILTERS_MATCHED = TMP_DIR + 'filters_matched.txt'
 
 DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
 USER_IDS = ['F01', 'F03', 'F04', 'F05', 'F06']
