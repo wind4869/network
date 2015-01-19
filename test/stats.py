@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from utils.network_rs import *
 import matplotlib.pyplot as plt
+from utils.data_read_store import *
 from scipy.stats import linregress
 
 
@@ -103,8 +103,25 @@ def cats_avg_degree(network):
     plt.show()
 
 
+# get the filters rank list to see which is hot
+def filters_rank():
+    count = {}
+    f = open(FILTERS_MATCHED)
+    for line in f.readlines():
+        filter = line.strip()
+        if filter in count:
+            count[filter] += 1
+        else:
+            count[filter] = 1
+    f.close
+    rank = list(count.iteritems())
+    rank.sort(lambda a, b: a[1] - b[1])
+    return rank
+
+
 if __name__ == '__main__':
-    network = load_network(NETWORK_TXT)
+    # network = get_network(2)
     # power_law_distribution(network)
-    rank_degree_correlation(network)
+    # rank_degree_correlation(network)
     # cats_avg_degree(network)
+    print filters_rank()[-10:]

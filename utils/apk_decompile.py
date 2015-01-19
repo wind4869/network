@@ -1,5 +1,5 @@
 import os
-from utils.db_read import *
+from utils.data_read_store import *
 from utils.global_consts import *
 
 run = lambda cmd: os.popen(cmd.encode('utf-8'))

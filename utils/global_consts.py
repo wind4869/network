@@ -6,20 +6,25 @@ ROOT_DIR = '/Users/wind/Desktop/network/'
 FILE_DIR = ROOT_DIR + 'files/'
 TAG_IO_TXT = FILE_DIR + 'tag_io.txt'
 DATA_DICT_TXT = FILE_DIR + 'data_dict.txt'
-PERM_DICT_TXT = FILE_DIR + 'perm_dict.txt'
+PERMISSION_NATIVES_TXT = FILE_DIR + 'permission_natives.txt'
+PERM_NATIVES_TXT = FILE_DIR + 'perm_natives.txt'
 APPS_TXT = FILE_DIR + 'apps.txt'
+NATIVES_TXT = FILE_DIR + 'natives.txt'
 CATEGORIES_TXT = FILE_DIR + 'categories.txt'
+MAP_DICT_TXT = FILE_DIR + 'map_dict.txt'
 
 # Something about test
 TEST_DIR = ROOT_DIR + 'test/'
 
 OUTPUT_DIR = TEST_DIR + 'output/'
-NETWORK_TXT = OUTPUT_DIR + 'network_7_965_0118.txt'
-PICKLE_PATH = OUTPUT_DIR + '%s.txt'
-GRAPH_PATH = OUTPUT_DIR + '%s.jpg'
+GAN_TXT = OUTPUT_DIR + 'gan_%d_%d_%s.txt'
+PAN_TXT = OUTPUT_DIR + 'pan_%s.txt'
+PAN_JPG = OUTPUT_DIR + 'pan_%s.jpg'
+
+FILTERS_MATCHED = OUTPUT_DIR + 'filters_matched.txt'
 
 DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
-USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06']
+USER_IDS = ['F01', 'F03', 'F04', 'F05', 'F06']
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'
@@ -72,14 +77,14 @@ APP_FILTER = [u'一个']
 DATA_EDGE = 'red'
 CAll_EDGE = 'blue'
 SIM_EDGE = 'green'
-SYSTEM_EDGE = 'orange'
+NATIVE_EDGE = 'orange'
 DEFAULT = 'black'
 
 # Test case mask
 DATA_MASK = 1
 CALL_MASK = 2
 SIM_MASK = 4
-SYSTEM_MASK = 8
+NATIVE_MASK = 8
 INTENT_MASK = 16
 ALL_MASK = 31
 
@@ -88,7 +93,7 @@ IMAGE = {
     DATA_MASK: APP_NETWORK_DATA_JPG,
     CALL_MASK: APP_NETWORK_CALL_JPG,
     SIM_MASK: APP_NETWORK_SIM_JPG,
-    SYSTEM_MASK: APP_NETWORK_NATIVE_JPG,
+    NATIVE_MASK: APP_NETWORK_NATIVE_JPG,
     INTENT_MASK: APP_NETWORK_INTENT_JPG,
     ALL_MASK: APP_NETWORK_JPG
 }

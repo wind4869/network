@@ -2,7 +2,6 @@
 
 import Levenshtein
 from utils.graph import *
-from utils.network_rs import *
 from utils.vector_funs import *
 from utils.intent_match import *
 from itertools import combinations
@@ -58,14 +57,23 @@ def get_sim_edges(apps):
     return sim_edges
 
 
-# get system edges
-def get_system_edges(apps):
+# get native edges
+def get_native_edges(apps):
     system_edges = get_edges(apps)
-    perm_dict = load_perm_dict()
+    perms_natives = load_perms_natives()
+    map_dict = load_map_dict()
+
     for app in apps:
-        for permission in permissions(app):
-            sys_apps = perm_dict[permission]
-            [system_edges[app].add(sys_app) for sys_app in sys_apps]
+        for p in perms(app):
+            if p in perms_natives:
+                [system_edges[app].add(s) for s in perms_natives[p]]
+
+        for s in explicit_intents(app)['natives']:
+            key = s.split('.')[2]
+            value = map_dict.get(key)
+            if value:
+                system_edges[app].add(value)
+
     return system_edges
 
 
@@ -108,13 +116,13 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
 
         print '> sim edges finished'
 
-    # system edges
-    if test & SYSTEM_MASK:
-        system_edges = get_system_edges(apps)
-        graph.add_edges(system_edges, SYSTEM_EDGE)
-        merge_edges(edges, system_edges)
+    # native edges
+    if test & NATIVE_MASK:
+        native_edges = get_native_edges(apps)
+        graph.add_edges(native_edges, NATIVE_EDGE)
+        merge_edges(edges, native_edges)
 
-        print '> system edges finished'
+        print '> native edges finished'
 
     # intent edges
     if test & INTENT_MASK:
@@ -124,13 +132,13 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
 
         print '> intent edges finished'
 
-    store_network(edges, NETWORK_TXT)
+    store_network(edges, GAN_TXT % (test, number, '0118'))
     # graph.draw(IMAGE[test])
 
 
 if __name__ == '__main__':
     # 1, 2, 4, 8, 16 for single
-    # 7 without system and intent edges
-    # 23 without system edges
+    # 7 without native and intent edges
+    # 23 without native edges
     # 31 for all
-    draw_network(7)
+    draw_network(NATIVE_MASK)

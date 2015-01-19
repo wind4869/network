@@ -2,7 +2,7 @@
 
 import re
 import json
-from utils.db_read import *
+from utils.data_read_store import *
 from utils.global_consts import *
 from urllib2 import urlopen
 from utils.xml_parse import parer
@@ -51,15 +51,15 @@ def content(path):
 
 # get raw intents, process, return (explicits, implicits)
 def get_intents(app):
-    commons, systems = [], []  # two kinds of explict intents
+    commons, natives = [], []  # two kinds of explict intents
     implicits = []  # implicit intents
 
     # raw string of intents
     raw_intents = content(INTENT_PATH % app)
     # pattern for removing self-calling intents
     self_pattern = re.compile(packageName(app))
-    # pattern for recognizing system-app-calling intents
-    sys_pattern = re.compile('com.android')
+    # pattern for recognizing native-app-calling intents
+    native_pattern = re.compile('com.android')
 
     if raw_intents:
         for typed_intents in [raw_intents.get(i) for i in ['called', 'queried']]:
@@ -73,8 +73,8 @@ def get_intents(app):
                             if class_name:
                                 class_name = class_name.replace(r'/', r'.')  # remove self-calling intents
                                 if not self_pattern.match(class_name):
-                                    if sys_pattern.match(class_name):  # system-app-calling intents
-                                        systems.append(class_name)
+                                    if native_pattern.match(class_name):  # native-app-calling intents
+                                        natives.append(class_name)
                                     else:
                                         commons.append(class_name)
                         else:
@@ -82,23 +82,28 @@ def get_intents(app):
                             if intent:
                                 implicits.append(intent)
 
-    return commons, systems, implicits
+    return commons, natives, implicits
 
 
 # store intents, intent-filters and permissions to mongodb
 def store_intents_filters_perms():
     for app in load_apps():
-        commons, systems, implicits = get_intents(app)
-        explicits = {'commons': commons, 'systems': systems}
-        filters, perms = parer(XML_PATH % app)
+        commons, natives, implicits = get_intents(app)
+        explicits = {'commons': commons, 'natives': natives}
+        # filters, perms = parer(XML_PATH % app)
 
         appDetails.update(
-            {'title': app},
-            {'$set': {
-                'explicits': explicits,
-                'implicits': implicits,
-                'filters': filters,
-                'perms.txt': perms}})
+            {
+                'title': app
+            },
+            {
+                '$set': {
+                        'explicits': explicits,
+                        # 'implicits': implicits,
+                        # 'filters': filters,
+                        # 'perms': perms
+                }
+            })
 
 
 # store personal usage records to mongodb
@@ -109,7 +114,7 @@ def store_usage_records(uid):
     attrs = ['startTime', 'endTime', 'appName', 'appID', 'userID']
     for line in f.readlines():
         record = {}
-        parts = line.strip().replace(u'\x00', '').\
+        parts = line.strip().replace(u'\x00', ''). \
             replace(u'\x02', '').split(',')
         parts.append(uid)
         for i in xrange(len(attrs)):

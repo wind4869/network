@@ -1,11 +1,4 @@
-from utils.db_read import *
-
-
-# edges = {app1: set([]), app2: set([]), ...}
-def get_edges(apps):
-    edges = {}
-    [edges.setdefault(app, set([])) for app in apps]
-    return edges
+from utils.data_read_store import *
 
 
 # vector = [0, 0, ... , 0]

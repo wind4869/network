@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import re
-from utils.db_read import *
-from utils.vector_funs import get_edges
+from utils.data_read_store import *
 from itertools import combinations
+
+# f_filters = open(FILTERS_MATCHED, 'a')
 
 
 def check_action(action, actions):
@@ -97,6 +98,7 @@ def implicit_match(implicits, intent_filters):
             continue
         for intent_filter in intent_filters:
             if implicit_match_one(implicit, intent_filter):
+                # f_filters.write(str(intent_filter) + '\n')
                 return True
     return False
 
