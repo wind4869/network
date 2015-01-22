@@ -135,18 +135,17 @@ def store_network(edges_out, path):
 # load out edges and form in edges
 def load_network(path):
     edges_out = pickle.load(open(path))
-    edges_in = {}
+    edges_in = get_edges(edges_out.keys() + load_natives())
 
     for app_from, app_tos in edges_out.iteritems():
         for app_to in app_tos:
-            edges_in.setdefault(app_to, set([]))
             edges_in[app_to].add(app_from)
 
     return edges_out, edges_in
 
 
 # get Global App Network(GAN) by test mask, number of app, test date
-def load_gan(test=31, number=NUMBER_OF_APP, date='0118'):
+def load_gan(test=ALL_MASK, number=NUMBER_OF_APP, date='0118'):
     return pickle.load(open(GAN_TXT % (test, number, date)))
 
 

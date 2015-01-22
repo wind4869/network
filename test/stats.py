@@ -16,7 +16,7 @@ def draw_plot(x, y, xlabel='', ylabel='', title=''):
 
 # get the in and out degree of each app
 def get_degrees(network):
-    apps = network[0].iterkeys()
+    apps = network[0].keys()
     degrees = {}
 
     for app in apps:
@@ -49,7 +49,10 @@ def power_law_distribution(network):
 
     # y = c * x^-r (power function)
     x = xrange(1, max_degree)
-    draw_plot(x, y)  # the curve of power fun
+    # the curve of power fun
+    draw_plot(x, y, 'Degrees',
+              'The Number of App',
+              'The Power Law Distribution Test')
 
     # lny = -rlnx + lnc (linear correlation)
     x = np.array([np.log(i) for i in x])
@@ -72,7 +75,7 @@ def rank_degree_correlation(network):
             x.append(apps.index(app))
             y.append(degree_in)
 
-    draw_plot(x, y)
+    draw_plot(x, y, 'Rank', 'In Degree', 'In Degree-Rank Correlation Test')
 
 
 # calculate the average degree of each category
@@ -87,7 +90,7 @@ def cats_avg_degree(network):
     for app in apps:
         for i in xrange(len(cats)):
             if cats[i] in categories(app):
-                avg_degrees[i] += (degrees[app]['in'] + degrees[app]['out'])
+                avg_degrees[i] += (degrees[app]['in'])  # + degrees[app]['out'])
             counts[i] += 1
 
     for i in xrange(len(cats)):
@@ -98,8 +101,8 @@ def cats_avg_degree(network):
     y_pos = np.arange(len(cats))
     plt.barh(y_pos, avg_degrees, align='center', alpha=0.4)
     plt.yticks(y_pos, cats)
-    plt.xlabel('Average degree')
-    plt.title('The average degrees of each category')
+    plt.xlabel('Average In Degree')
+    plt.title('The Average In Degree of Each Category')
     plt.show()
 
 
@@ -120,8 +123,9 @@ def filters_rank():
 
 
 if __name__ == '__main__':
-    # network = get_network(2)
+    network = load_network('tmp/gan_31_965_0118.txt')
     # power_law_distribution(network)
     # rank_degree_correlation(network)
     # cats_avg_degree(network)
-    print filters_rank()[-10:]
+    # print filters_rank()[-10:]
+    print intent_filters(u'微信')

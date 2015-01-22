@@ -33,7 +33,7 @@ PAN = USER_DIR + 'pan.jpg'
 FILTERS_MATCHED = TMP_DIR + 'filters_matched.txt'
 
 DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
-USER_IDS = ['F01', 'F03', 'F04', 'F05', 'F06']
+USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07']
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'

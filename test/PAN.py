@@ -142,15 +142,14 @@ def cover_test(uid):
           (edges_count(edges_in_common) * 1.0 / edges_count(new_pan))
 
     # draw, draw, draw ...
-    draw(new_gan, GAN % uid)
-    draw(new_pan, PAN % uid)
-    draw(edges_in_common, COMMON % uid)
-    draw(gan_diff_pan, GAN_DIFF_PAN % uid)
-    draw(pan_diff_gan, PAN_DIFF_GAN % uid)
+    # draw(new_gan, GAN % uid)
+    # draw(new_pan, PAN % uid)
+    # draw(edges_in_common, COMMON % uid)
+    # draw(gan_diff_pan, GAN_DIFF_PAN % uid)
+    # draw(pan_diff_gan, PAN_DIFF_GAN % uid)
 
 
 if __name__ == '__main__':
-    pass
-    # for uid in USER_IDS:
+    for uid in USER_IDS:
     # create_pan(uid)
-    # cover_test(uid)
+        cover_test(uid)

@@ -118,3 +118,6 @@ Skitch->滑雪大冒险
 手机营业厅->中国移动手机营业厅
 搜索->Browser.apk
 短信->Mms.apk
+QQi->QQ国际版
+音乐+->Music.apk
+安全卫士->360手机卫士 MTK6573双卡版
