@@ -16,24 +16,24 @@ MAP_DICT_TXT = FILE_DIR + 'map_dict.txt'
 # Something about test
 TEST_DIR = ROOT_DIR + 'test/'
 
-TMP_DIR = TEST_DIR + 'tmp/'
-GAN_TXT = TMP_DIR + 'gan_%d_%d_%s.txt'
-PAN_TXT = TMP_DIR + 'pan_%s.txt'
-PAN_JPG = TMP_DIR + 'pan_%s.jpg'
+FILTER_DIR = TEST_DIR + 'filter/'
+FILTERS_MATCHED = FILTER_DIR + 'filters_matched.txt'
+CODE_DICT = FILTER_DIR + 'code_dict.txt'
+CODED_LIST = FILTER_DIR + 'coded_list.txt'
+APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
 
-# for pan ang gan test
-OUPUT_DIR = TEST_DIR + 'output/'
-USER_DIR = OUPUT_DIR + '%s/'
-GAN_DIFF_PAN = USER_DIR + 'gan_pan.jpg'
-PAN_DIFF_GAN = USER_DIR + 'pan_gan.jpg'
-COMMON = USER_DIR + 'common.jpg'
-GAN = USER_DIR + 'gan.jpg'
-PAN = USER_DIR + 'pan.jpg'
+GAN_DIR = TEST_DIR + 'gan/'
+GAN_TXT = GAN_DIR + 'gan_%d_%d_%s.txt'
 
-FILTERS_MATCHED = TMP_DIR + 'filters_matched.txt'
+PAN_DIR = TEST_DIR + 'pan/'
+PAN_TXT = PAN_DIR + 'pan_%s.txt'
+
+USAGE_DIR = TEST_DIR + 'usage/'
+USAGE_TXT = USAGE_DIR + 'usage_%s.txt'
+USAGE_JPG = USAGE_DIR + 'usage_%s.jpg'
 
 DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
-USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07']
+USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F06', 'F07']
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'
@@ -72,6 +72,7 @@ NUMBER_OF_APP = 965
 DOWNLOAD_URL = 'http://apps.wandoujia.com/apps/%s/download'
 OPT_FIELDS = 'packageName,title,description,editorComment,changelog,categories.*.name,tags.*,apks.permissions'
 TOP_INFO_URL = 'http://apps.wandoujia.com/api/v1/apps?type=top&max=%d&start=%d&opt_fields=' + OPT_FIELDS
+INFO_BY_PACKAGE_NAME = 'http://apps.wandoujia.com/api/v1/apps/%s?opt_fields=%s'
 
 # Consts for detail getting
 START = 0

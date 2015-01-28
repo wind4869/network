@@ -120,6 +120,14 @@ def intent_filters(app):
     return appDetails.find_one({'title': app})['filters']
 
 
+def likesCount(app):
+    return appDetails.find_one({'title': app})['likesCount']
+
+
+def downloadCount(app):
+    return appDetails.find_one({'title': app})['downloadCount']
+
+
 # edges = {app1: set([]), app2: set([]), ...}
 def get_edges(apps):
     edges = {}
@@ -127,33 +135,27 @@ def get_edges(apps):
     return edges
 
 
-# use pickle to store the out edges of app network
-def store_network(edges_out, path):
-    pickle.dump(edges_out, open(path, 'w'))
+def pickle_dump(obj, path):
+    pickle.dump(obj, open(path, 'w'))
 
 
-# load out edges and form in edges
+def pickle_load(path):
+    return pickle.load(open(path))
+
+
+def dump_network(network, path):
+    pickle_dump(network, path)
+
+
 def load_network(path):
-    edges_out = pickle.load(open(path))
-    edges_in = get_edges(edges_out.keys() + load_natives())
-
-    for app_from, app_tos in edges_out.iteritems():
-        for app_to in app_tos:
-            edges_in[app_to].add(app_from)
-
-    return edges_out, edges_in
+    return pickle_load(path)
 
 
 # get Global App Network(GAN) by test mask, number of app, test date
 def load_gan(test=ALL_MASK, number=NUMBER_OF_APP, date='0118'):
-    return pickle.load(open(GAN_TXT % (test, number, date)))
+    return load_network(GAN_TXT % (test, number, date))
 
 
-# get Personal App Network(PAN) by uid
-def load_pan(uid):
-    return pickle.load(open(PAN_TXT % uid))
-
-
-if __name__ == '__main__':
-    gan = load_gan(ALL_MASK)
-    print gan[u'微信']
+# get usage edges by uid
+def load_usage_edges(uid):
+    return pickle_load(USAGE_TXT % uid)

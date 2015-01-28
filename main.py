@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import Levenshtein
+from utils.gan_stats import *
 from utils.graph import *
-from utils.vector_funs import *
+from utils.vector_funcs import *
 from utils.intent_match import *
 from itertools import combinations
 
@@ -94,9 +95,37 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
     if test & DATA_MASK:
         v_fill = get_v_fill(tag_io, data_dict)
         vectors = get_vectors(apps, tag_all, len(data_dict), v_fill)
-        data_edges = get_data_edge(apps, vectors)
-        graph.add_edges(data_edges, DATA_EDGE)
-        merge_edges(edges, data_edges)
+
+        inputs, outputs = [], []
+        for app in vectors:
+            inputs.append(vectors[app]['I'])
+            outputs.append(vectors[app]['O'])
+        sum_inputs = reduce(lambda a, b: [i + j for i, j in zip(a, b)], inputs)
+        sum_outputs = reduce(lambda a, b: [i + j for i, j in zip(a, b)], outputs)
+        sum_all = reduce(lambda a, b: [i + j for i, j in zip(a, b)], [sum_inputs, sum_outputs])
+
+        x, y = [], []
+        apps = load_apps()
+        for app in vectors:
+            score = 0
+            for i in xrange(11):
+                if vectors[app]['I'][i]:
+                    score += sum_all[i]
+                if vectors[app]['O'][i]:
+                    score += sum_all[i]
+            if score:
+                x.append(likesCount(app))
+                y.append(score)
+
+        print len(x)
+        print linregress(x, y)
+        draw_plot(x, y, 'Rank', 'Score', 'Rank-Score Test')
+
+
+
+        # data_edges = get_data_edge(apps, vectors)
+        # graph.add_edges(data_edges, DATA_EDGE)
+        # merge_edges(edges, data_edges)
 
         print '> data edges finished'
 
@@ -132,7 +161,7 @@ def draw_network(test=ALL_MASK, number=NUMBER_OF_APP):
 
         print '> intent edges finished'
 
-    store_network(edges, GAN_TXT % (test, number, '0118'))
+    dump_network(edges, GAN_TXT % (test, number, '0118'))
     # graph.draw(IMAGE[test])
 
 
@@ -141,4 +170,4 @@ if __name__ == '__main__':
     # 7 without native and intent edges
     # 23 without native edges
     # 31 for all
-    draw_network(ALL_MASK)
+    draw_network(DATA_MASK)

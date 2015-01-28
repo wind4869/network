@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import re
 import json
+import urllib2
 from utils.data_read_store import *
 from utils.global_consts import *
+from utils.xml_parse import *
 from urllib2 import urlopen
-from utils.xml_parse import parer
 
 # get db object
 appDetails = getAppDetails()
@@ -39,6 +39,22 @@ def store_top_info():
 
     # store to mongodb
     appDetails.insert(app_details)
+
+
+# e.g. ['likesCount', 'likesRate', 'dislikesCount', 'downloadCount', 'installedCount', 'commentsCount'])
+def get_other_info(attrs):
+    for app in load_apps():
+        other_dict = {}
+        for attr in attrs:
+            other_dict[attr] = 0
+        try:
+            info = json.loads(urlopen(INFO_BY_PACKAGE_NAME % (packageName(app), ','.join(attrs))).read())
+            for attr in attrs:
+                other_dict[attr] = int(info[attr])
+            print other_dict
+        except urllib2.HTTPError:
+            print 'error in getting info of <%s>' % app
+        appDetails.update({'title': app}, {'$set': other_dict})
 
 
 # get content from file
@@ -90,7 +106,7 @@ def store_intents_filters_perms():
     for app in load_apps():
         commons, natives, implicits = get_intents(app)
         explicits = {'commons': commons, 'natives': natives}
-        # filters, perms = parer(XML_PATH % app)
+        filters, perms = parer(XML_PATH % app)
 
         appDetails.update(
             {
@@ -99,9 +115,9 @@ def store_intents_filters_perms():
             {
                 '$set': {
                         'explicits': explicits,
-                        # 'implicits': implicits,
-                        # 'filters': filters,
-                        # 'perms': perms
+                        'implicits': implicits,
+                        'filters': filters,
+                        'perms': perms
                 }
             })
 
@@ -127,7 +143,6 @@ def store_usage_records(uid):
 
 if __name__ == '__main__':
     pass
-    # store_intents_filters_perms()
     # store_usage_records('F07')
     # usageRecords.remove({'userID': 'F07'})
     # for r in usageRecords.find({'userID': 'F07'}):
