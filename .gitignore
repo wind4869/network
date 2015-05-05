@@ -1,5 +1,6 @@
 apks/
 apps/
+.idea/
 *.pyc
 *.jpg
 .DS_Store
