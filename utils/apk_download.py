@@ -1,5 +1,5 @@
-from utils.data_read_store import *
-from utils.global_consts import *
+from utils.rw_funcs import *
+from utils.consts_global import *
 from urllib import urlretrieve
 
 apps = load_apps()

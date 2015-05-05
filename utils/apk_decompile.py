@@ -1,6 +1,6 @@
 import os
-from utils.data_read_store import *
-from utils.global_consts import *
+from utils.rw_funcs import *
+from utils.consts_global import *
 
 run = lambda cmd: os.popen(cmd.encode('utf-8'))
 

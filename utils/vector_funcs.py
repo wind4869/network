@@ -1,4 +1,4 @@
-from utils.data_read_store import *
+from utils.rw_funcs import *
 
 
 # vector = [0, 0, ... , 0]

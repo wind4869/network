@@ -1,5 +1,5 @@
 import cPickle as pickle
-from utils.global_consts import *
+from utils.consts_global import *
 
 
 # create 1-itemset candidate

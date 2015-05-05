@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-ROOT_DIR = '/Users/wind/Desktop/network/'
+ROOT_DIR = '/Users/wind/network/'
 
 # Files to be used
 FILE_DIR = ROOT_DIR + 'files/'
@@ -22,6 +22,9 @@ CODE_DICT = FILTER_DIR + 'code_dict.txt'
 CODED_LIST = FILTER_DIR + 'coded_list.txt'
 APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
 
+CLUSTERS_DIR = TEST_DIR + 'clusters/'
+CLUSTERS_TXT = CLUSTERS_DIR + 'clusters_%s.txt'
+
 GAN_DIR = TEST_DIR + 'gan/'
 GAN_TXT = GAN_DIR + 'gan_%d_%d_%s.txt'
 
@@ -33,7 +36,7 @@ USAGE_TXT = USAGE_DIR + 'usage_%s.txt'
 USAGE_JPG = USAGE_DIR + 'usage_%s.jpg'
 
 DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
-USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F06', 'F07']
+USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07']
 
 # Imaged generated
 IMAGE_DIR = ROOT_DIR + 'images/'

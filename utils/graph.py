@@ -1,5 +1,5 @@
 import pygraphviz as pyv
-from utils.global_consts import *
+from utils.consts_global import *
 
 
 class Graph:

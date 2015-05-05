@@ -1,0 +1,5 @@
+apks/
+apps/
+*.pyc
+*.jpg
+.DS_Store

@@ -3,7 +3,8 @@
 import codecs
 import cPickle as pickle
 from utils.db_connect import *
-from utils.global_consts import *
+from utils.consts_global import *
+from igraph import *
 
 # get db object
 appDetails = getAppDetails()
@@ -80,7 +81,7 @@ def load_natives():
 
 
 # load all apps
-def loaa_all_apps():
+def load_all_apps():
     return load_apps() + load_natives()
 
 
@@ -143,6 +144,17 @@ def pickle_load(path):
     return pickle.load(open(path))
 
 
+def dump_clusters(graph, clusters, uid):
+    result = []
+    for c in clusters:
+        result.append([graph.vs[i]['name'] for i in c])
+    pickle_dump(result, CLUSTERS_TXT % uid)
+
+
+def load_clusters(uid):
+    return pickle_load(CLUSTERS_TXT % uid)
+
+
 def dump_network(network, path):
     pickle_dump(network, path)
 
@@ -156,6 +168,11 @@ def load_gan(test=ALL_MASK, number=NUMBER_OF_APP, date='0118'):
     return load_network(GAN_TXT % (test, number, date))
 
 
+# get Personal App Network(PAN) by uid
+def load_pan(uid):
+    return load_network(PAN_TXT % uid)
+
+
 # get usage edges by uid
 def load_usage_edges(uid):
-    return pickle_load(USAGE_TXT % uid)
+    return load_network(USAGE_TXT % uid)

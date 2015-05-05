@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
-from utils.data_read_store import *
+from utils.rw_funcs import *
 
 
 # get r-value(Pearson correlation coefficient)

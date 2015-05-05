@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from apriori import *
-from utils.stat_funcs import *
+from filter_fp import *
+from utils.stats_funcs import *
+from utils.vector_funcs import *
 
 
 # test the network to see whether it
@@ -98,6 +99,42 @@ def rank_score_correlation_test(scores):
               'Rank',
               'Score',
               'Rank-Score Correlation Test', 'ro')
+
+
+# what the fuck ... -_-
+def another_rank_score_test():
+    apps = load_apps()
+
+    # load data dictionary and tag I/O
+    data_dict = load_data_dict()
+    tag_io, tag_all = load_tag_io()
+
+    v_fill = get_v_fill(tag_io, data_dict)
+    vectors = get_vectors(apps, tag_all, len(data_dict), v_fill)
+
+    inputs, outputs = [], []
+    for app in vectors:
+        inputs.append(vectors[app]['I'])
+        outputs.append(vectors[app]['O'])
+    sum_inputs = reduce(lambda a, b: [i + j for i, j in zip(a, b)], inputs)
+    sum_outputs = reduce(lambda a, b: [i + j for i, j in zip(a, b)], outputs)
+    sum_all = reduce(lambda a, b: [i + j for i, j in zip(a, b)], [sum_inputs, sum_outputs])
+
+    x, y = [], []
+    for app in vectors:
+        score = 0
+        for i in xrange(11):
+            if vectors[app]['I'][i]:
+                score += sum_all[i]
+            if vectors[app]['O'][i]:
+                score += sum_all[i]
+        if score:
+            x.append(likesCount(app))
+            y.append(score)
+
+    print len(x)
+    print linregress(x, y)
+    draw_plot(x, y, 'Rank', 'Score', 'Rank-Score Test')
 
 
 if __name__ == '__main__':
