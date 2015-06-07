@@ -13,9 +13,9 @@ def count_connections(apps_to_count, app_set):
     for app1 in apps_to_count:
         temp = [app1, 0, 0, 0]  # [app, in_count, out_count, all_count]
         for app2 in app_set:
-            if app2 in gan[app1]:
+            if app1 in gan and app2 in gan[app1]:
                 temp[1] += 1
-            if app1 in gan[app2]:
+            if app2 in gan and app1 in gan[app2]:
                 temp[2] += 1
         temp[3] = temp[1] + temp[2]
         count.append(temp)
@@ -76,7 +76,8 @@ def create_community_test(uid, pan):
 # and GAN's community) * (app's connection in community range)
 def recommend_community_match(uid):
     app_score = {}
-    [app_score.setdefault(app, 0) for app in load_apps()]
+    apps = load_all_apps()
+    [app_score.setdefault(app, 0) for app in apps]
 
     pan_clusters = load_clusters(uid)
     gan_clusters = load_clusters('gan')
@@ -85,14 +86,16 @@ def recommend_community_match(uid):
         for ganc in gan_clusters:
             common = set(panc) & set(ganc)
             ratio = len(common) * 1.0 / len(ganc)
-            count = count_connections(set(ganc) - set(panc), panc)
+            apps_to_count = [apps[i] for i in set(ganc) - set(panc)]
+            app_set = [apps[i] for i in panc]
+            count = count_connections(apps_to_count, app_set)
             for item in count:
                 app_score[item[0]] += item[3] * ratio
 
     temp = []
     for app, score in app_score.iteritems():
         temp.append([app, score])
-    temp.sort(lambda a, b: b[1] - a[1])
+    temp = sorted(temp, key=lambda x: x[1], reverse=True)
 
     result = [item[0] for item in temp]
     return result
@@ -123,20 +126,25 @@ def get_dataset(uid):
 
 # get precision and recall
 def evaluate(uid, topk):
-    # training_set, test_set = get_app_dataset(uid)
-    # result = recommend_all_connection(training_set)[:topk]
-
     training_set, test_set, pan = get_dataset(uid)
-    create_community_test(uid, pan)
-    result = recommend_community_match(uid)[:topk]
+    create_community_test(uid, pan)  # create community using training set
 
+    def display(num_hit, result):
+        print '(1) Training: %s, Test: %s' % (len(training_set), len(test_set))
+        print '(2) Top: %s, Hit: %s' % (topk, num_hit)
+        print '(3) Precision: %s, Recall: %s' \
+            % (num_hit * 1.0 / len(result), num_hit * 1.0 / len(test_set))
+
+    print '> Method 1st: Recommend by all connection'
+    result = recommend_all_connection(training_set)[:topk]
     num_hit = len(test_set & set(result))
+    display(num_hit, result)
 
-    print '(1) Training: %s, Test: %s' % (len(training_set), len(test_set))
-    print '(2) Top: %s, Hit: %s' % (topk, num_hit)
-    print '(3) Precision: %s, Recall: %s' \
-          % (num_hit * 1.0 / len(result), num_hit * 1.0 / len(test_set))
+    print '> Method 2nd: Recommend by community match'
+    result = recommend_community_match(uid)[:topk]
+    num_hit = len(test_set & set(result))
+    display(num_hit, result)
 
 
 if __name__ == '__main__':
-    evaluate('F01', 30)
+    evaluate('F02', 30)
