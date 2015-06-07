@@ -1,5 +1,6 @@
 apks/
 apps/
+test/clusters
 .idea/
 *.pyc
 *.jpg

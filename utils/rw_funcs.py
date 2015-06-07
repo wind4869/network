@@ -144,10 +144,7 @@ def pickle_load(path):
     return pickle.load(open(path))
 
 
-def dump_clusters(graph, clusters, uid):
-    result = []
-    for c in clusters:
-        result.append([graph.vs[i]['name'] for i in c])
+def dump_clusters(uid, result):
     pickle_dump(result, CLUSTERS_TXT % uid)
 
 
