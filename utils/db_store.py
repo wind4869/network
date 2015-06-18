@@ -2,9 +2,9 @@
 
 import json
 import urllib2
-from utils.rw_funcs import *
+from utils.funcs_rw import *
 from utils.consts_global import *
-from utils.xml_parse import *
+from utils.filter_extract import *
 from urllib2 import urlopen
 
 # get db object
@@ -122,7 +122,7 @@ def store_intents_filters_perms():
             })
 
 
-# store personal usage records to mongodb
+# store personal usages records to mongodb
 def store_usage_records(uid):
     usage_records = []
 

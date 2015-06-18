@@ -1,8 +1,7 @@
-import os
-from utils.rw_funcs import *
-from utils.consts_global import *
+# -*- coding: utf-8 -*-
 
-run = lambda cmd: os.popen(cmd.encode('utf-8'))
+from utils.funcs_rw import *
+from utils.consts_global import *
 
 
 def dex_decompile(app):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from utils.rw_funcs import *
+from utils.funcs_rw import *
 from itertools import combinations
 
 # f_filters = open(FILTERS_MATCHED, 'a')

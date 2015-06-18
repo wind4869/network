@@ -2,9 +2,9 @@
 
 import Levenshtein
 from utils.gan_stats import *
-from utils.graph import *
-from utils.vector_funcs import *
-from utils.intent_match import *
+from utils.class_graph import *
+from utils.funcs_vector import *
+from utils.gan_edt_intent import *
 from itertools import combinations
 
 

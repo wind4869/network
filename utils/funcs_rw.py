@@ -13,6 +13,9 @@ appDetails = getAppDetails()
 open_in_utf8 = lambda filename: \
     codecs.open(filename, encoding='utf-8')
 
+# run a shell command
+run = lambda cmd: os.popen(cmd.encode('utf-8'))
+
 
 # data_dict = [set([]), set([...]), ... , set([...])]
 def load_data_dict():
@@ -48,7 +51,7 @@ def load_perms_natives():
     return perm_dict
 
 
-# load the dict for mapping the app name in pan
+# load the dict for mapping the app name in pans
 def load_map_dict():
     map_dict = {}
     f = open_in_utf8(MAP_DICT_TXT)
@@ -170,6 +173,6 @@ def load_pan(uid):
     return load_network(PAN_TXT % uid)
 
 
-# get usage edges by uid
+# get usages edges by uid
 def load_usage_edges(uid):
     return load_network(USAGE_TXT % uid)

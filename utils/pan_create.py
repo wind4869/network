@@ -1,7 +1,7 @@
 import time
-from utils.graph import *
-from utils.stats_funcs import *
-from utils.rw_funcs import *
+from utils.class_graph import *
+from utils.funcs_stats import *
+from utils.funcs_rw import *
 
 apps = load_apps()
 map_dict = load_map_dict()
@@ -25,7 +25,7 @@ def makeTime(strTime):
     return time.mktime(time.strptime(strTime, DATE_PATTERN))
 
 
-# get usage edges for each user by uid
+# get usages edges for each user by uid
 def get_usage_edges(uid):
     graph = Graph()
     records = []
@@ -54,7 +54,7 @@ def get_usage_edges(uid):
     # graph.draw(USAGE_JPG % uid)
 
 
-# create pan by uid
+# create pans by uid
 def create_pan(uid):
     gan = load_gan()
     usage_edges = load_usage_edges(uid)

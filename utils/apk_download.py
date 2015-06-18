@@ -1,8 +1,9 @@
-from utils.rw_funcs import *
+# -*- coding: utf-8 -*-
+
+from utils.funcs_rw import *
 from utils.consts_global import *
-from urllib import urlretrieve
 
 apps = load_apps()
 for app in apps:
     print '%d downloading ---> %s.apk' % (apps.index(app), app)
-    urlretrieve(DOWNLOAD_URL % packageName(app), APK_PATH % app)
+    run(DOWNLOAD_CMD % (app, packageName(app)))

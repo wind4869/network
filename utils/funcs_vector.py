@@ -1,4 +1,6 @@
-from utils.rw_funcs import *
+# -*- coding: utf-8 -*-
+
+from utils.funcs_rw import *
 
 
 # vector = [0, 0, ... , 0]
@@ -6,7 +8,7 @@ def vector(length):
     return [0 for i in xrange(length)]
 
 
-# fill the input or usage vector of one app
+# fill the input or usages vector of one app
 def get_v_fill(tag_io, data_dict):
     def v_fill(v, tag, type, desc):
         for index in tag_io[tag][type]:

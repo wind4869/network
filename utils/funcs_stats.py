@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
-from utils.rw_funcs import *
+from utils.funcs_rw import *
 
 
 # get r-value(Pearson correlation coefficient)
@@ -65,7 +65,7 @@ def merge_edges(edges, another):
         edges[app] |= another[app]
 
 
-# filter to get the sub network contains apps in apps_in_common
+# filters to get the sub network contains apps in apps_in_common
 def filter_network(network, apps_in_common):
     new_network = {}
     for app_from, app_tos in network.iteritems():

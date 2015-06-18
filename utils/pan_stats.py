@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from utils.stats_funcs import *
-from utils.rw_funcs import *
+
+from utils.funcs_stats import *
+from utils.funcs_rw import *
 
 
 # I even wonder what the func do ...
@@ -43,7 +44,7 @@ def cover_test(uid):
     apps_ingored = app_in_usage - set(all_apps)
 
     # the ingored ratio:
-    # (apps in pan but not in all_apps) / (apps in pan)
+    # (apps in pans but not in all_apps) / (apps in pans)
     n_igored, n_usage = len(apps_ingored), len(app_in_usage)
     print '<1> Ignored Ratio is: %.3f (%d / %d)' % (n_igored * 1.0 / n_usage, n_igored, n_usage)
 
@@ -53,11 +54,11 @@ def cover_test(uid):
 
     pan_gan_test(edges_diff(pan, gan))
 
-    # gan common ratio
+    # gans common ratio
     a, b, c = edges_count(edges_in_common), edges_count(gan), edges_count(pan)
     print '<2> GAN Common Ratio: %.3f (%d / %d)' % \
           (a * 1.0 / b, a, b)
-    # pan common ratio
+    # pans common ratio
     print '<3> PAN Common Ratio: %.3f (%d / %d)' % \
           (a * 1.0 / c, a, c)
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from filter_fp import *
-from utils.stats_funcs import *
-from utils.vector_funcs import *
+from filter_stats import *
+from utils.funcs_stats import *
+from utils.funcs_vector import *
 
 
 # test the network to see whether it

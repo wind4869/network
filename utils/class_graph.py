@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pygraphviz as pyv
 from utils.consts_global import *
 

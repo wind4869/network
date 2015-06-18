@@ -1,5 +1,7 @@
-from utils.stats_funcs import *
-from utils.rw_funcs import *
+# -*- coding: utf-8 -*-
+
+from utils.funcs_stats import *
+from utils.funcs_rw import *
 from igraph import *
 from math import ceil
 from random import choice
@@ -61,7 +63,7 @@ def detect_community(network):
     return result
 
 
-# create and store communities by uid (uid='gan' for GAN)
+# create and store communities by uid (uid='gans' for GAN)
 def create_community(uid):
     network = load_gan() if uid == 'gan' else load_pan(uid)
     dump_clusters(uid, detect_community(network))
@@ -80,7 +82,7 @@ def recommend_community_match(uid):
     [app_score.setdefault(app, 0) for app in apps]
 
     pan_clusters = load_clusters(uid)
-    gan_clusters = load_clusters('gan')
+    gan_clusters = load_clusters('gans')
 
     for panc in pan_clusters:
         for ganc in gan_clusters:
@@ -115,7 +117,7 @@ def get_app_dataset(uid):
 
 
 # get dataset for community match method,
-# use app test set to filter PAN
+# use app test set to filters PAN
 def get_dataset(uid):
     training_set, test_set = get_app_dataset(uid)
     pan = load_pan(uid)
