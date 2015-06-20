@@ -5,42 +5,87 @@ from utils.funcs_rw import *
 from itertools import combinations
 
 
-# create time object from string
-def maketime(s):
-    return time.mktime(time.strptime(s, DATE_PATTERN_DT))
+# get the func which creates time object from string
+def get_mktime(pattern):
+    return lambda s: time.mktime(time.strptime(s, pattern))
 
 
-# create uan from usages records
-def create_uan(uid):
-    records, sessions = [], []
+# get the func which maps pan' appname to gan' appname
+def get_mapfunc():
+    apps = load_capps()
+    appmap = load_appmap()
+
+    def mapname(app):
+        if app in apps:
+            return app
+        if app.strip() in apps:
+            return app.strip()
+        if app in appmap:
+            return appmap[app]
+        if app.strip() in appmap:
+            return appmap[app.strip()]
+        return '[%s]' % app.strip()
+
+    return mapname
+
+
+# get usage records from mongodb
+def get_records_us(uid):
+    records = []
+    maketime = get_mktime(DATE_PATTERN_US)
+    for r in getUsageRecords().find({'userID': uid}):
+        try:
+            r['startTime'] = maketime(r['startTime'])
+            records.append(r)
+        except:
+            print '[get_records_us][ValueError]: %s' % r['startTime']
+    return sorted(records, key=lambda x: x['startTime'])
+
+
+# get usage records from csv file
+def get_records_dt(uid):
+    records = []
+    maketime = get_mktime(DATE_PATTERN_DT)
     f = open_in_utf8('/Users/wind/Desktop/usages.csv')
     for line in f.readlines():
         temp = line.split(',')
         if temp[7].strip() == uid:
-            records.append([maketime(temp[0]), temp[1]])
-    records = sorted(records, key=lambda x: x[0])
+            records.append(
+                {
+                    'startTime': maketime(temp[0]),
+                    'appName': temp[1]
+                })
+    return sorted(records, key=lambda x: x['startTime'])
+
+
+# create uan from usages records
+def create_uan(uid):
+    sessions = []
+    mapname = get_mapfunc()
+    records = get_records_us(uid)
 
     apps = set([])
     session = []
-    prev = records[0][0]
+    prev = records[0]['startTime']
     for record in records:
-        if record[0] - prev < INTERVAL_DT:
-            session.append(record[1])
+        if record['startTime'] - prev < INTERVAL_DT:
+            session.append(record['appName'])
         else:
             sessions.append(session)
-            session = [record[1]]
-        prev = record[0]
-        apps.add(record[1])
+            session = [record['appName']]
+        prev = record['startTime']
+        apps.add(record['appName'])
 
     if session:
         sessions.append(session)
 
     uan = nx.Graph()
-    uan.add_nodes_from(apps)
+    uan.add_nodes_from([mapname(app) for app in apps])
 
     for session in sessions:
         temp = set(session)
         for app_from, app_to in combinations(temp, 2):
+            app_from, app_to = [mapname(app) for app in app_from, app_to]
             if not uan.has_edge(app_from, app_to):
                 uan.add_edge(app_from, app_to,
                              weights=[0 for i in xrange(NUM_EDGETYPE)])
@@ -67,7 +112,7 @@ def recommend(u1, u2):
     result = {}
 
     # should use pan!!! use uan for tests!!!
-    pan1, pan2 = [load_uan(UAN_PICKLE % u) for u in u1, u2]
+    pan1, pan2 = [load_uan(u) for u in u1, u2]
     apps1, apps2 = [pan.nodes() for pan in pan1, pan2]
     apps = set(apps1) & set(apps2)
     if not apps:
@@ -96,7 +141,7 @@ def topk(result, k):
 
 
 if __name__ == '__main__':
-    for uid in ['1001', '1002']:
+    for uid in USER_IDS_US:
         create_uan(uid)
-    for app, fitness in topk(recommend('1001', '1002'), 10):
-        print app, fitness
+    # for app, fitness in topk(recommend('1001', '1002'), 10):
+    #     print app, fitness

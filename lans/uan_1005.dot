@@ -1,0 +1,15 @@
+strict graph  {
+	QQ -- ColorOS桌面	 [weights="[0, 0, 0, 0, 0, 0, 11]"];
+	QQ -- 天气	 [weights="[0, 0, 0, 0, 0, 0, 4]"];
+	QQ -- 文件管理	 [weights="[0, 0, 0, 0, 0, 0, 2]"];
+	QQ -- OppoPreventMode	 [weights="[0, 0, 0, 0, 0, 0, 2]"];
+	音乐 -- ColorOS桌面	 [weights="[0, 0, 0, 0, 0, 0, 2]"];
+	音乐 -- 天气	 [weights="[0, 0, 0, 0, 0, 0, 1]"];
+	ColorOS桌面 -- 天气	 [weights="[0, 0, 0, 0, 0, 0, 8]"];
+	ColorOS桌面 -- 语音助手	 [weights="[0, 0, 0, 0, 0, 0, 3]"];
+	ColorOS桌面 -- 文件管理	 [weights="[0, 0, 0, 0, 0, 0, 1]"];
+	ColorOS桌面 -- OppoPreventMode	 [weights="[0, 0, 0, 0, 0, 0, 2]"];
+	天气 -- 语音助手	 [weights="[0, 0, 0, 0, 0, 0, 2]"];
+	天气 -- OppoPreventMode	 [weights="[0, 0, 0, 0, 0, 0, 1]"];
+	语音助手 -- OppoPreventMode	 [weights="[0, 0, 0, 0, 0, 0, 1]"];
+}

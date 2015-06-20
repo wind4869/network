@@ -10,7 +10,7 @@ def create_edges(gan, apps):
     count = 0
     for app_pair in combinations(apps, 2):
         count += 1
-        print '> %d ...' % count
+        print '> %d ...' % count  # display progress
         for i in xrange(2):
             app_from, app_to = app_pair[i], app_pair[1 - i]
             exp = explicit_match(app_from, app_to)
@@ -54,4 +54,5 @@ def create_gan():
 
 
 if __name__ == '__main__':
-    create_gan()
+    pass
+    # create_gan()

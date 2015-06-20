@@ -77,4 +77,5 @@ def filter_frequent_pattern(dataSet):
 
 
 if __name__ == '__main__':
-    filter_frequent_pattern()
+    pass
+    # filter_frequent_pattern()

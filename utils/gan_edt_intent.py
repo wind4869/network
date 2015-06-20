@@ -122,5 +122,4 @@ def explicit_match(app_from, app_to):
 
 
 if __name__ == '__main__':
-    for app in load_capps():
-        print explicits(app)['natives']
+    pass

@@ -12,3 +12,7 @@ def getAppDetails():
 
 def getUsageRecords():
     return appInfo['usageRecords']
+
+
+if __name__ == '__main__':
+    pass
