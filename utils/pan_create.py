@@ -3,8 +3,8 @@ from utils.class_graph import *
 from utils.funcs_stats import *
 from utils.funcs_rw import *
 
-apps = load_apps()
-map_dict = load_map_dict()
+apps = load_capps()
+map_dict = load_appmap()
 
 
 # carry out the mapping
@@ -59,7 +59,7 @@ def create_pan(uid):
     gan = load_gan()
     usage_edges = load_usage_edges(uid)
 
-    all_apps = load_all_apps()
+    all_apps = load_apps()
     app_in_usage = apps_in_network(usage_edges)
     apps_in_common = app_in_usage & set(all_apps)
 

@@ -2,9 +2,6 @@
 
 import re
 from utils.funcs_rw import *
-from itertools import combinations
-
-# f_filters = open(FILTERS_MATCHED, 'a')
 
 
 def check_action(action, actions):
@@ -82,45 +79,48 @@ def check_data(uri, mineType, datas):
     return False
 
 
-def implicit_match_one(implicit, intent_filter):
-    if not check_action(implicit.get('action'), intent_filter.get('actions')):
+# simulate the process of intent matching
+def implicit_match_one(implicit, filter):
+    if not check_action(implicit.get('action'), filter.get('actions')):
         return False
-    if not check_category(implicit.get('categories'), intent_filter.get('categories')):
+    if not check_category(implicit.get('categories'), filter.get('categories')):
         return False
-    if not check_data(implicit.get('uri'), implicit.get('mimeType'), intent_filter.get('datas')):
+    if not check_data(implicit.get('uri'), implicit.get('mimeType'), filter.get('datas')):
         return False
     return True
 
 
-def implicit_match(implicits, intent_filters):
-    for implicit in implicits:
-        if not intent_filters:
-            continue
-        for intent_filter in intent_filters:
-            if implicit_match_one(implicit, intent_filter):
-                # f_filters.write(str(intent_filter) + '\n')
-                return True
-    return False
+# get implicit matching result
+def implicit_match(app_from, app_to):
+    result = 0
+    implicit_intents = implicits(app_from)
+    intent_filters = filters(app_to)
+
+    if not implicit_intents or not intent_filters:
+        return result
+
+    for i in implicit_intents:
+        for f in intent_filters:
+            if implicit_match_one(i, f):
+                result += 1
+
+    return result
 
 
-def explicit_match(commons, package_name):
-    pattern = re.compile(package_name)
+# get explicit matching result
+def explicit_match(app_from, app_to):
+    result = 0
+    commons = explicits(app_from)['commons']
+    package = packageName(app_to)
+
+    pattern = re.compile(package)
     for intent in commons:
         if pattern.match(intent):
-            return True
-    return False
+            result += 1
+
+    return result
 
 
-def get_intent_edges(apps):
-    intent_edges = get_edges(apps)
-    for app_pair in combinations(apps, 2):
-        explicits_pair = [explicit_intents(app) for app in app_pair]
-        implicits_pair = [implicit_intents(app) for app in app_pair]
-        filters_pair = [intent_filters(app) for app in app_pair]
-
-        for i in xrange(2):
-            if explicit_match(explicits_pair[i]['commons'], packageName(app_pair[1 - i])) or \
-                    implicit_match(implicits_pair[i], filters_pair[1 - i]):
-                intent_edges[app_pair[i]].add(app_pair[1 - i])
-
-    return intent_edges
+if __name__ == '__main__':
+    for app in load_capps():
+        print explicits(app)['natives']

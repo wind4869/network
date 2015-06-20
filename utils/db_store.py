@@ -2,22 +2,23 @@
 
 import json
 import urllib2
-from utils.funcs_rw import *
-from utils.consts_global import *
-from utils.filter_extract import *
-from urllib2 import urlopen
+from utils.parser_desc import *
+from utils.parser_apk import *
+
 
 # get db object
 appDetails = getAppDetails()
 usageRecords = getUsageRecords()
 
 
-def store_top_info():
+# get categories, tags, permissions of
+# top apps by a crawler using urllib2
+def store_main_info():
     # data to store
     app_details = []
 
     for i in xrange(COUNT + 1):
-        apps = urlopen(TOP_INFO_URL % (MAX_ONCE, START)).read()
+        apps = urllib2.urlopen(TOP_INFO_URL % (MAX_ONCE, START)).read()
         START += MAX_ONCE
 
         tidyApp = {}
@@ -41,72 +42,31 @@ def store_top_info():
     appDetails.insert(app_details)
 
 
-# e.g. ['likesCount', 'likesRate', 'dislikesCount', 'downloadCount', 'installedCount', 'commentsCount'])
-def get_other_info(attrs):
-    for app in load_apps():
+# get other information of all apps using urllib2
+# e.g. attrs = ['likesCount', 'likesRate', 'dislikesCount', \
+# 'downloadCount', 'installedCount', 'commentsCount'])
+def store_other_info(attrs):
+    for app in load_capps():
         other_dict = {}
         for attr in attrs:
             other_dict[attr] = 0
         try:
-            info = json.loads(urlopen(INFO_BY_PACKAGE_NAME % (packageName(app), ','.join(attrs))).read())
+            info = json.loads(urllib2.urlopen(
+                INFO_BY_PACKAGE_NAME % (packageName(app), ','.join(attrs))).read())
             for attr in attrs:
                 other_dict[attr] = int(info[attr])
             print other_dict
         except urllib2.HTTPError:
-            print 'error in getting info of <%s>' % app
+            print '[get_other_info][urllib2.HTTPError]: %s' % app
         appDetails.update({'title': app}, {'$set': other_dict})
-
-
-# get content from file
-def content(path):
-    f = open(path)
-    lines = f.readlines()
-    f.close()
-    return eval(lines[0]) if lines else None
-
-
-# get raw intents, process, return (explicits, implicits)
-def get_intents(app):
-    commons, natives = [], []  # two kinds of explict intents
-    implicits = []  # implicit intents
-
-    # raw string of intents
-    raw_intents = content(INTENT_PATH % app)
-    # pattern for removing self-calling intents
-    self_pattern = re.compile(packageName(app))
-    # pattern for recognizing native-app-calling intents
-    native_pattern = re.compile('com.android')
-
-    if raw_intents:
-        for typed_intents in [raw_intents.get(i) for i in ['called', 'queried']]:
-            if typed_intents:
-                for key in typed_intents:
-                    for intent in typed_intents[key]:
-                        if 'explicit' not in intent:
-                            continue
-                        if intent['explicit'] == 'true':  # explicit intents
-                            class_name = intent.get('class')
-                            if class_name:
-                                class_name = class_name.replace(r'/', r'.')  # remove self-calling intents
-                                if not self_pattern.match(class_name):
-                                    if native_pattern.match(class_name):  # native-app-calling intents
-                                        natives.append(class_name)
-                                    else:
-                                        commons.append(class_name)
-                        else:
-                            intent.pop('explicit')  # implicit intents
-                            if intent:
-                                implicits.append(intent)
-
-    return commons, natives, implicits
 
 
 # store intents, intent-filters and permissions to mongodb
 def store_intents_filters_perms():
-    for app in load_apps():
+    for app in load_capps():
         commons, natives, implicits = get_intents(app)
         explicits = {'commons': commons, 'natives': natives}
-        filters, perms = parer(XML_PATH % app)
+        filters, perms = get_filters(XML_PATH % app)
 
         appDetails.update(
             {
@@ -114,10 +74,27 @@ def store_intents_filters_perms():
             },
             {
                 '$set': {
-                        'explicits': explicits,
-                        'implicits': implicits,
-                        'filters': filters,
-                        'perms': perms
+                    'explicits': explicits,
+                    'implicits': implicits,
+                    'filters': filters,
+                    'perms': perms
+                }
+            })
+
+
+# store IO vectors, refs and nats of apps
+def store_vectors_refs_nats():
+    update_appdict()
+    for app in load_capps():
+        appDetails.update(
+            {
+                'title': app
+            },
+            {
+                '$set': {
+                    'vectors': get_vectors(app),
+                    'refs': get_refs(app),
+                    'nats': get_nats(app)
                 }
             })
 

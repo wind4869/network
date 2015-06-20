@@ -28,7 +28,7 @@ def count_connections(apps_to_count, app_set):
 def recommend_all_connection(apps_in_pan):
     gan = load_gan()
 
-    apps_to_count = set(load_apps()) - apps_in_pan
+    apps_to_count = set(load_capps()) - apps_in_pan
     count = count_connections(apps_to_count, apps_in_pan)
     count.sort(lambda a, b: b[3] - a[3])
 
@@ -38,7 +38,7 @@ def recommend_all_connection(apps_in_pan):
 
 # detect communities in network
 def detect_community(network):
-    apps = load_all_apps()
+    apps = load_apps()
     indexes = [apps.index(i) for i in apps_in_network(network)]
 
     graph = Graph(directed=True)
@@ -78,7 +78,7 @@ def create_community_test(uid, pan):
 # and GAN's community) * (app's connection in community range)
 def recommend_community_match(uid):
     app_score = {}
-    apps = load_all_apps()
+    apps = load_apps()
     [app_score.setdefault(app, 0) for app in apps]
 
     pan_clusters = load_clusters(uid)
@@ -106,7 +106,7 @@ def recommend_community_match(uid):
 # get training and test set (8/2)
 def get_app_dataset(uid):
     apps_in_pan = \
-        list(apps_in_network(load_pan(uid)) - set(load_natives()))
+        list(apps_in_network(load_pan(uid)) - set(load_napps()))
     num_test = int(ceil(len(apps_in_pan) / 5.0))
     apps_for_test = set([])
     for i in xrange(num_test):

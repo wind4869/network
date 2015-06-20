@@ -43,10 +43,10 @@ def power_law_distribution_test(network):
 # "the higher the rank, the bigger the in-degree"
 def rank_degree_correlation_test(network):
     x, y = [], []
-    apps = load_apps()
+    apps = load_capps()
     degrees = get_degrees(network)
 
-    for app in [app for app in degrees['in'] if app in load_apps()]:
+    for app in [app for app in degrees['in'] if app in load_capps()]:
         degree_in = degrees['in'][app]
         if degree_in > 0:
             x.append(apps.index(app))
@@ -64,7 +64,7 @@ def rank_degree_correlation_test(network):
 
 # calculate the average metric of each category
 def cats_avg_metric(metric, xlabel='', title=''):
-    apps = [app for app in metric if app in load_apps()]
+    apps = [app for app in metric if app in load_capps()]
     cats = load_categories()
 
     avg_metric = [0 for i in xrange(len(cats))]
@@ -87,7 +87,7 @@ def cats_avg_metric(metric, xlabel='', title=''):
 # has correlation with its rank
 def rank_score_correlation_test(scores):
     x, y = [], []
-    apps = load_apps()
+    apps = load_capps()
     for app in [app for app in scores if app in apps]:
         if scores[app]:
             x.append(apps.index(app))
@@ -103,19 +103,12 @@ def rank_score_correlation_test(scores):
 
 # what the fuck ... -_-
 def another_rank_score_test():
-    apps = load_apps()
-
-    # load data dictionary and tag I/O
-    data_dict = load_data_dict()
-    tag_io, tag_all = load_tag_io()
-
-    v_fill = get_v_fill(tag_io, data_dict)
-    vectors = get_vectors(apps, tag_all, len(data_dict), v_fill)
+    apps = load_capps()
 
     inputs, outputs = [], []
     for app in vectors:
-        inputs.append(vectors[app]['I'])
-        outputs.append(vectors[app]['O'])
+        inputs.append(vectors[app][0])
+        outputs.append(vectors[app][1])
     sum_inputs = reduce(lambda a, b: [i + j for i, j in zip(a, b)], inputs)
     sum_outputs = reduce(lambda a, b: [i + j for i, j in zip(a, b)], outputs)
     sum_all = reduce(lambda a, b: [i + j for i, j in zip(a, b)], [sum_inputs, sum_outputs])

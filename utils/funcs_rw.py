@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import codecs
+import networkx as nx
 import cPickle as pickle
 from utils.db_connect import *
 from utils.consts_global import *
 from igraph import *
+
 
 # get db object
 appDetails = getAppDetails()
@@ -17,50 +19,79 @@ open_in_utf8 = lambda filename: \
 run = lambda cmd: os.popen(cmd.encode('utf-8'))
 
 
-# data_dict = [set([]), set([...]), ... , set([...])]
-def load_data_dict():
-    data_dict = [set([])]
-    f = open_in_utf8(DATA_DICT_TXT)
+# verbdict = {u'发': 1, u'分享': 2, u'收发': 3, ... }
+def load_verbdict():
+    verbdict = {}
+    f = open_in_utf8(VERBDICT_TXT)
     for line in f.readlines():
-        data_dict.append(set(line.strip().split('|')))
+        temp = line.strip().split(':')
+        flag = temp[0][0]
+        verbs = temp[1].split('|')
+        [verbdict.setdefault(verb, int(flag)) for verb in verbs]
     f.close()
-    return data_dict
+    return verbdict
 
 
-# tag_io = {tag: {'I': set([1, 2, ...]), 'O': set([3, 4, ...])}, ... }
-def load_tag_io():
-    tag_io, tag_all = {}, set([])
-    f = open_in_utf8(TAG_IO_TXT)
-    parse = lambda s: set([int(i) for i in s.split(',')]) if s else set([])
+# noundict = {u'语音': [1], u'单词': [4], ... }
+# use list in case of a noun belonging to multiple categories
+def load_noundict():
+    dimension = 0
+    noundict = {}
+    f = open_in_utf8(NOUNDICT_TXT)
     for line in f.readlines():
-        tag, input_str, output_str = line.strip().split('|')
-        tag_io[tag] = {'I': parse(input_str), 'O': parse(output_str)}
-        tag_all.add(tag)
+        dimension += 1
+        temp = line.strip().split(':')
+        flag = temp[0][0]
+        nouns = temp[1].split('|')
+        for noun in nouns:
+            noundict.setdefault(noun, [])
+            noundict[noun].append(int(flag))
     f.close()
-    return tag_io, tag_all
+    return noundict, dimension
 
 
-# perm_dict = {permission: [native_app1, native_app2, ...], ... }
-def load_perms_natives():
-    perm_dict = {}
-    f = open_in_utf8(PERM_NATIVES_TXT)
+# permdict = {permission: [native1, native2, ...], ... }
+def load_permdict():
+    permdict = {}
+    f = open_in_utf8(PERMDICT_TXT)
     for line in f.readlines():
-        permission, native_apps = line.strip().split('->')
-        perm_dict[permission] = native_apps.split(',') if native_apps else []
+        permission, natives = line.strip().split('->')
+        permdict[permission] = natives.split(',') if natives else []
     f.close()
-    return perm_dict
+    return permdict
 
 
-# load the dict for mapping the app name in pans
-def load_map_dict():
-    map_dict = {}
-    f = open_in_utf8(MAP_DICT_TXT)
+# load map for mapping native's '.apk' name to chinese name
+def load_natdict():
+    natdict = {}
+    f = open_in_utf8(NATDICT_TXT)
     for line in f.readlines():
-        key, value = line[:-1].split('->')
-        map_dict[key] = value
-    return map_dict
+        key, value = line.strip().split('->')
+        natdict[key] = value
+    f.close()
+    return natdict
 
 
+# load map for mapping pan' app name to gan' app name
+def load_appmap():
+    appmap = {}
+    f = open_in_utf8(APPMAP_TXT)
+    for line in f.readlines():
+        key, value = line.strip().split('->')
+        appmap[key] = value
+    f.close()
+    return appmap
+
+
+# load raw intents from file
+def load_rintents(path):
+    f = open(path)
+    lines = f.readlines()
+    f.close()
+    return eval(lines[0]) if lines else None
+
+
+# assist for simply load content from file
 def load_content(path):
     f = open_in_utf8(path)
     content = [line[:-1] for line in f.readlines()]
@@ -68,24 +99,24 @@ def load_content(path):
     return content
 
 
-# load some number of apps to test
-def load_apps(number=NUMBER_OF_APP):
-    return load_content(APPS_TXT)[:number]
+# load native apps from natdict
+def load_napps():
+    return [n.strip().split('->')[1] for n in load_content(NATDICT_TXT)]
 
 
-# load all 14 categories
+# load common apps form applist
+def load_capps():
+    return load_content(APPLIST_TXT)
+
+
+# load all applications
+def load_apps():
+    return load_capps() + load_napps()
+
+
+# load all categories
 def load_categories():
-    return load_content(CATEGORIES_TXT)
-
-
-# load all native apps
-def load_natives():
-    return [n.split('->')[0] for n in load_content(NATIVES_TXT)]
-
-
-# load all apps
-def load_all_apps():
-    return load_apps() + load_natives()
+    return load_content(CATELIST_TXT)
 
 
 def description(app):
@@ -100,6 +131,14 @@ def tags(app):
     return appDetails.find_one({'title': app})['tags']
 
 
+def likesCount(app):
+    return appDetails.find_one({'title': app})['likesCount']
+
+
+def downloadCount(app):
+    return appDetails.find_one({'title': app})['downloadCount']
+
+
 def permissions(app):  # gotten from wandoujia website
     return appDetails.find_one({'title': app})['permissions']
 
@@ -112,31 +151,38 @@ def packageName(app):
     return appDetails.find_one({'title': app})['packageName']
 
 
-def explicit_intents(app):
+def explicits(app):
     return appDetails.find_one({'title': app})['explicits']
 
 
-def implicit_intents(app):
+def implicits(app):
     return appDetails.find_one({'title': app})['implicits']
 
 
-def intent_filters(app):
+def filters(app):
     return appDetails.find_one({'title': app})['filters']
 
 
-def likesCount(app):
-    return appDetails.find_one({'title': app})['likesCount']
+def vectors(app):
+    return appDetails.find_one({'title': app})['vectors']
 
 
-def downloadCount(app):
-    return appDetails.find_one({'title': app})['downloadCount']
+def refs(app):
+    return appDetails.find_one({'title': app})['refs']
 
 
-# edges = {app1: set([]), app2: set([]), ...}
-def get_edges(apps):
-    edges = {}
-    [edges.setdefault(app, set([])) for app in apps]
-    return edges
+def nats(app):
+    return appDetails.find_one({'title': app})['nats']
+
+
+# dump network to dot file
+def dump_network(network, path):
+    nx.write_dot(network, GAN_DOT)
+
+
+# load network from dot file
+def load_network(path):
+    return nx.read_dot(path)
 
 
 def pickle_dump(obj, path):
@@ -155,16 +201,8 @@ def load_clusters(uid):
     return pickle_load(CLUSTERS_TXT % uid)
 
 
-def dump_network(network, path):
-    pickle_dump(network, path)
-
-
-def load_network(path):
-    return pickle_load(path)
-
-
 # get Global App Network(GAN) by test mask, number of app, test date
-def load_gan(test=ALL_MASK, number=NUMBER_OF_APP, date='0118'):
+def load_gan(test=0, number=NUMBER_OF_APP, date='0118'):
     return load_network(GAN_TXT % (test, number, date))
 
 
@@ -176,3 +214,7 @@ def load_pan(uid):
 # get usages edges by uid
 def load_usage_edges(uid):
     return load_network(USAGE_TXT % uid)
+
+
+if __name__ == '__main__':
+    pass

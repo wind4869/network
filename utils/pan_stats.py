@@ -6,7 +6,7 @@ from utils.funcs_rw import *
 
 # I even wonder what the func do ...
 def pan_gan_test(pan_diff_gan):
-    natives = load_natives()
+    natives = load_napps()
     a = edges_count(pan_diff_gan)
     count_from_native = 0
     for app in pan_diff_gan:
@@ -39,7 +39,7 @@ def cover_test(uid):
     pan = load_pan(uid)
     usage_edges = load_usage_edges(uid)
 
-    all_apps = load_all_apps()
+    all_apps = load_apps()
     app_in_usage = apps_in_network(usage_edges)
     apps_ingored = app_in_usage - set(all_apps)
 
@@ -78,8 +78,8 @@ def component_test(network):
 
 # contrast among all users' PAN
 def pan_contrast():
-    apps = load_apps()
-    natives = set(load_natives())
+    apps = load_capps()
+    natives = set(load_napps())
     pans = [pickle.load(open(PAN_TXT % uid)) for uid in USER_IDS]
 
     apps_in_pans = [apps_in_network(pan) for pan in pans]

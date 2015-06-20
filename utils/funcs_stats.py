@@ -127,9 +127,9 @@ def get_filters_rank():
 def app_filters_score():
     rank_f = get_filters_rank()
     scores = {}
-    for app in load_apps():
+    for app in load_capps():
         scores[app] = 0
-        fs = intent_filters(app)
+        fs = filters(app)
         if fs:
             for f in fs:
                 for pair in rank_f:
@@ -143,8 +143,8 @@ def filters_code():
     code = 0
     code_dict = {}
     coded_list = []
-    for app in load_apps():
-        fs = intent_filters(app)
+    for app in load_capps():
+        fs = filters(app)
         coded = []
         if fs:
             for f in fs:
