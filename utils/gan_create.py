@@ -5,9 +5,12 @@ from utils.gan_links_else import *
 from itertools import combinations
 
 
-# create each type edge of gan
+# create each type of edge
 def create_edges(gan, apps):
+    count = 0
     for app_pair in combinations(apps, 2):
+        count += 1
+        print '> %d ...' % count
         for i in xrange(2):
             app_from, app_to = app_pair[i], app_pair[1 - i]
             exp = explicit_match(app_from, app_to)
@@ -17,7 +20,7 @@ def create_edges(gan, apps):
             if exp or imp or iotag or sim:
                 if not gan.has_edge(app_from, app_to):
                     gan.add_edge(app_from, app_to,
-                                 weights=[0 for i in xrange(NUM_EDGE_TYPE)])
+                                 weights=[0 for i in xrange(NUM_EDGETYPE)])
 
                 weights = gan[app_from][app_to]['weights']
                 weights[INDEX.EDT_EXP] = exp
@@ -29,16 +32,16 @@ def create_edges(gan, apps):
         for app_to, num in refs(app_from).iteritems():
             if not gan.has_edge(app_from, app_to):
                 gan.add_edge(app_from, app_to,
-                             weights=[0 for i in xrange(NUM_EDGE_TYPE)])
+                             weights=[0 for i in xrange(NUM_EDGETYPE)])
 
-            weights = gan[app_from][app_to]['weights'][INDEX.IDT_REF] = num
+            gan[app_from][app_to]['weights'][INDEX.IDT_REF] = num
 
         for nat, num in nats(app_from).iteritems():
             if not gan.has_edge(app_from, nat):
                 gan.add_edge(app_from, nat,
-                             weights=[0 for i in xrange(NUM_EDGE_TYPE)])
+                             weights=[0 for i in xrange(NUM_EDGETYPE)])
 
-            weights = gan[app_from][nat]['weights'][INDEX.NAT] = num
+            gan[app_from][nat]['weights'][INDEX.NAT] = num
 
 
 # create gan
@@ -47,7 +50,7 @@ def create_gan():
     gan = nx.DiGraph()
     gan.add_nodes_from(apps)
     create_edges(gan, apps)
-    dump_network(gan, GAN_DOT)
+    dump_gan(gan)
 
 
 if __name__ == '__main__':

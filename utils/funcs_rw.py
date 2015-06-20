@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import os
 import codecs
 import networkx as nx
 import cPickle as pickle
 from utils.db_connect import *
 from utils.consts_global import *
-from igraph import *
 
 
 # get db object
@@ -175,22 +175,20 @@ def nats(app):
     return appDetails.find_one({'title': app})['nats']
 
 
-# dump network to dot file
-def dump_network(network, path):
-    nx.write_dot(network, GAN_DOT)
-
-
-# load network from dot file
-def load_network(path):
-    return nx.read_dot(path)
-
-
 def pickle_dump(obj, path):
     pickle.dump(obj, open(path, 'w'))
 
 
 def pickle_load(path):
     return pickle.load(open(path))
+
+
+def dump_network(network, path):
+    pickle_dump(network, path)
+
+
+def load_network(path):
+    return pickle_load(path)
 
 
 def dump_clusters(uid, result):
@@ -201,19 +199,32 @@ def load_clusters(uid):
     return pickle_load(CLUSTERS_TXT % uid)
 
 
-# get Global App Network(GAN) by test mask, number of app, test date
-def load_gan(test=0, number=NUMBER_OF_APP, date='0118'):
-    return load_network(GAN_TXT % (test, number, date))
+# dump and load gan
+def dump_gan(gan):
+    dump_network(gan, GAN_PICKLE)
 
 
-# get Personal App Network(PAN) by uid
+def load_gan():
+    return load_network(GAN_PICKLE)
+
+
+# dump and load pan
+def dump_pan(uid, pan):
+    dump_network(pan, PAN_PICKLE % uid)
+
+
 def load_pan(uid):
-    return load_network(PAN_TXT % uid)
+    return load_network(PAN_PICKLE % uid)
 
 
-# get usages edges by uid
-def load_usage_edges(uid):
-    return load_network(USAGE_TXT % uid)
+# dump and load uan
+def dump_uan(uid, uan):
+    nx.write_dot(uan, UAN_DOT % uid)
+    dump_network(uan, UAN_PICKLE % uid)
+
+
+def load_uan(uid):
+    return load_network(UAN_PICKLE % uid)
 
 
 if __name__ == '__main__':

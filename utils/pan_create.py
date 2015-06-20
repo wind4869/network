@@ -71,5 +71,5 @@ def create_pan(uid):
 
 
 if __name__ == '__main__':
-    for uid in USER_IDS:
+    for uid in USER_IDS_US:
         create_pan(uid)

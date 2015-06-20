@@ -1,21 +1,19 @@
+# -*- coding: utf-8 -*-
+
 import time
-from igraph import *
+from utils.funcs_rw import *
 from itertools import combinations
 
 
-DATE_PATTERN = r'%Y/%m/%d %H:%M'
-GRAPH_PATH = '%s.pickle'
-INTERVAL = 30 * 60
-
-
+# create time object from string
 def maketime(s):
-    return time.mktime(time.strptime(s, DATE_PATTERN))
+    return time.mktime(time.strptime(s, DATE_PATTERN_DT))
 
 
-# create graph from usages records
-def create(uid):
+# create uan from usages records
+def create_uan(uid):
     records, sessions = [], []
-    f = file('usages.csv')
+    f = open_in_utf8('/Users/wind/Desktop/usages.csv')
     for line in f.readlines():
         temp = line.split(',')
         if temp[7].strip() == uid:
@@ -26,7 +24,7 @@ def create(uid):
     session = []
     prev = records[0][0]
     for record in records:
-        if record[0] - prev < INTERVAL:
+        if record[0] - prev < INTERVAL_DT:
             session.append(record[1])
         else:
             sessions.append(session)
@@ -37,46 +35,29 @@ def create(uid):
     if session:
         sessions.append(session)
 
-    g = Graph()
-    g.add_vertices(list(apps))
-    g.vs['weight'] = [0 for i in xrange(len(g.vs))]
+    uan = nx.Graph()
+    uan.add_nodes_from(apps)
 
     for session in sessions:
         temp = set(session)
+        for app_from, app_to in combinations(temp, 2):
+            if not uan.has_edge(app_from, app_to):
+                uan.add_edge(app_from, app_to,
+                             weights=[0 for i in xrange(NUM_EDGETYPE)])
+            uan[app_from][app_to]['weights'][INDEX.USG] += 1
 
-        for app in temp:
-            g.vs.find(name=app)['weight'] += 1
-
-        for f, t in combinations(temp, 2):
-            try:
-                g.es[g.get_eid(f, t)]['weight'] += 1
-            except:
-                g.add_edge(f, t)
-                g.es[g.get_eid(f, t)]['weight'] = 1
-
-    g.vs['label'] = g.vs['name']
-    g.vs['size'] = g.vs['weight']
-    g.es['label'] = g.es['weight']
-    g.es['width'] = g.es['weight']
-
-    g.save(GRAPH_PATH % uid)
+    dump_uan(uid, uan)
 
 
-# plot(g, bbox=(1000, 1000))
-
-
-# compute similarity of g1 and g2
-def sim(g1, g2):
-    mnodes = max(len(g1.vs), len(g2.vs))
+# compute similarity of two graphs
+def g_sim(pan1, pan2):
+    mnodes = max(len(pan1.nodes()), len(pan2.nodes()))
     mcs = 0
 
-    for edge in g1.get_edgelist():
-        fn, tn = [g1.vs[i]['name'] for i in edge]
-        try:
-            eid1, eid2 = [g.get_eid(fn, tn) for g in g1, g2]
-            mcs += g1.es[eid1]['weight'] + g2.es[eid2]['weight']
-        except:
-            pass
+    for app_from, app_to in pan1.edges():
+        if pan2.has_edge(app_from, app_to):
+            mcs += pan1[app_from][app_to]['weights'][INDEX.USG] + \
+                pan2[app_from][app_to]['weights'][INDEX.USG]
 
     return mcs * 1.0 / mnodes
 
@@ -85,22 +66,22 @@ def sim(g1, g2):
 def recommend(u1, u2):
     result = {}
 
-    g1, g2 = [load(GRAPH_PATH % u) for u in u1, u2]
-    apps1, apps2 = [g.vs['name'] for g in g1, g2]
+    # should use pan!!! use uan for tests!!!
+    pan1, pan2 = [load_uan(UAN_PICKLE % u) for u in u1, u2]
+    apps1, apps2 = [pan.nodes() for pan in pan1, pan2]
     apps = set(apps1) & set(apps2)
     if not apps:
-        return []
+        return {}
 
-    s = sim(g1, g2)
-    if not s:
-        return []
+    sim = g_sim(pan1, pan2)
+    if not sim:
+        return {}
 
     for app in apps:
-        for neighbor in g2.neighbors(app):
-            nname = g2.vs[neighbor]['name']
-            if nname not in apps1:
-                result.setdefault(nname, 0)
-                result[nname] += s * g2.es[g2.get_eid(app, nname)]['weight']
+        for neighbor in pan2.neighbors(app):
+            if neighbor not in apps1:
+                result.setdefault(neighbor, 0)
+                result[neighbor] += sim * pan2[app][neighbor]['weights'][INDEX.USG]
 
     return result
 
@@ -115,5 +96,7 @@ def topk(result, k):
 
 
 if __name__ == '__main__':
+    for uid in ['1001', '1002']:
+        create_uan(uid)
     for app, fitness in topk(recommend('1001', '1002'), 10):
         print app, fitness

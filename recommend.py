@@ -69,7 +69,7 @@ def create_community(uid):
     dump_clusters(uid, detect_community(network))
 
 
-# version for test
+# version for tests
 def create_community_test(uid, pan):
     dump_clusters(uid, detect_community(pan))
 
@@ -103,7 +103,7 @@ def recommend_community_match(uid):
     return result
 
 
-# get training and test set (8/2)
+# get training and tests set (8/2)
 def get_app_dataset(uid):
     apps_in_pan = \
         list(apps_in_network(load_pan(uid)) - set(load_napps()))
@@ -117,7 +117,7 @@ def get_app_dataset(uid):
 
 
 # get dataset for community match method,
-# use app test set to filters PAN
+# use app tests set to filters PAN
 def get_dataset(uid):
     training_set, test_set = get_app_dataset(uid)
     pan = load_pan(uid)

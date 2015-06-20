@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import cPickle as pickle
-from utils.consts_global import *
+from utils.funcs_rw import *
 
 
 # create 1-itemset candidate
@@ -65,7 +64,7 @@ def apriori(dataSet, minSupport=0.1):
 
 def filter_frequent_pattern(dataSet):
     k = 1
-    code_dict = pickle.load(open(CODE_DICT))
+    code_dict = pickle_load(CODE_DICT)
     L, supportData = apriori(dataSet)
     for itemset in L:
         if itemset:

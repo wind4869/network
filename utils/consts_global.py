@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# Root directory of whole project
 ROOT_DIR = '/Users/wind/workspace/network/'
 
 # ================== FOR APKs & APPs & TOOLs ====================
@@ -28,7 +29,7 @@ DIRECT_ATTR = [
     'changelog'
 ]
 
-# Jar, xml, intents and filters path
+# Path of Jar, xml, intent and filter files
 APP_DIR = ROOT_DIR + 'apps/%s/'
 JAR_PATH = APP_DIR + 'classes.jar'
 XML_PATH = APP_DIR + 'AndroidManifest.xml'
@@ -64,48 +65,16 @@ PERMDICT_TXT = FILE_DIR + 'permdict.txt'
 NATDICT_TXT = FILE_DIR + 'natdict.txt'
 APPMAP_TXT = FILE_DIR + 'appmap.txt'
 
-# app and category lists
+# App and category lists
 APPLIST_TXT = FILE_DIR + 'applist.txt'
 CATELIST_TXT = FILE_DIR + 'catelist.txt'
 
 # ==================== FOR LANS ================================
 
-# Dot file of gan and pans
-LAN_DIR = ROOT_DIR + 'lans/'
-GAN_DOT = LAN_DIR + 'gan.dot'
-PAN_DOT = LAN_DIR + 'lan_%s.dot'
-
-# ==================== FOR TESTS ===============================
-
-# Something about test
-TEST_DIR = ROOT_DIR + 'test/'
-
-FILTER_DIR = TEST_DIR + 'filters/'
-FILTERS_MATCHED = FILTER_DIR + 'filters_matched.txt'
-CODE_DICT = FILTER_DIR + 'code_dict.txt'
-CODED_LIST = FILTER_DIR + 'coded_list.txt'
-APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
-
-CLUSTERS_DIR = TEST_DIR + 'clusters/'
-CLUSTERS_TXT = CLUSTERS_DIR + 'clusters_%s.txt'
-
-GAN_DIR = TEST_DIR + 'gans/'
-GAN_TXT = GAN_DIR + 'gan_%d_%d_%s.txt'
-
-PAN_DIR = TEST_DIR + 'pans/'
-PAN_TXT = PAN_DIR + 'pan_%s.txt'
-
-USAGE_DIR = TEST_DIR + 'usages/'
-USAGE_TXT = USAGE_DIR + 'usage_%s.txt'
-USAGE_JPG = USAGE_DIR + 'usage_%s.jpg'
-
-DATE_PATTERN = '%Y-%m-%d %H:%M:%S'
-USER_IDS = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07']
-
-# ==================== FOR CONSTS ==============================
-
-# Number of all common app
-NUMBER_OF_APP = 965
+# Number of apps
+NUM_NAPP = 965  # number of native apps
+NUM_CAPP = 25   # number of common apps
+NUM_APP = 990   # number of all apps
 
 
 # Generate enumeration type
@@ -114,7 +83,49 @@ def enum(*sequential, **named):
     return type('Enum', (), enums)
 
 # Number of edge types
-NUM_EDGE_TYPE = 7
+NUM_EDGETYPE = 7
 
-# Index of each edge type in weights
-INDEX = enum('EDT_EXP', 'EDT_IMP', 'IDT_TAG', 'IDT_REF', 'SIM', 'NAT', 'USG')
+# Index of each type of edge in weights
+INDEX = enum(
+    'EDT_EXP',
+    'EDT_IMP',
+    'IDT_TAG',
+    'IDT_REF',
+    'SIM',
+    'NAT',
+    'USG')
+
+# For uan creation: data from us
+INTERVAL_US = 30 * 60  # 30min
+DATE_PATTERN_US = '%Y-%m-%d %H:%M:%S'
+USER_IDS_US = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07']
+
+# For uan creation: data from datatang
+INTERVAL_DT = 30 * 60  # 30min
+DATE_PATTERN_DT = r'%Y/%m/%d %H:%M'
+USER_IDS_DT = ['1001', '1002', '1003', '1004', '1005']
+
+# Pickle and dot file of lans
+LAN_DIR = ROOT_DIR + 'lans/'
+GAN_PICKLE = LAN_DIR + 'gan.pickle'
+PAN_PICKLE = LAN_DIR + 'lan_%s.pickle'
+UAN_PICKLE = LAN_DIR + 'uan_%s.pickle'
+UAN_DOT = LAN_DIR + 'uan_%s.dot'
+
+# ==================== FOR TESTS ===============================
+
+# Something about tests
+TEST_DIR = ROOT_DIR + 'tests/'
+
+# For stats: frequent pattern analysis of filers
+FILTER_DIR = TEST_DIR + 'filters/'
+FILTERS_MATCHED = FILTER_DIR + 'filters_matched.txt'
+CODE_DICT = FILTER_DIR + 'code_dict.txt'
+CODED_LIST = FILTER_DIR + 'coded_list.txt'
+APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
+
+# For recommendation: community detection
+CLUSTERS_DIR = TEST_DIR + 'clusters/'
+CLUSTERS_TXT = CLUSTERS_DIR + 'clusters_%s.txt'
+
+# ==================== THE END =================================

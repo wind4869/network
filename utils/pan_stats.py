@@ -31,7 +31,7 @@ def pan_gan_test(pan_diff_gan):
         print app, in_degree
 
 
-# test how much PAN and GAN cover each other
+# tests how much PAN and GAN cover each other
 def cover_test(uid):
     print ' - Test of user <%s> - ' % uid
 
@@ -80,7 +80,7 @@ def component_test(network):
 def pan_contrast():
     apps = load_capps()
     natives = set(load_napps())
-    pans = [pickle.load(open(PAN_TXT % uid)) for uid in USER_IDS]
+    pans = [pickle.load(open(PAN_TXT % uid)) for uid in USER_IDS_US]
 
     apps_in_pans = [apps_in_network(pan) for pan in pans]
     natives_in_pans = [natives & i for i in apps_in_pans]

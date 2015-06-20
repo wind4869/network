@@ -5,7 +5,7 @@ from utils.funcs_stats import *
 from utils.funcs_vector import *
 
 
-# test the network to see whether it
+# tests the network to see whether it
 # meets the power law distribution
 def power_law_distribution_test(network):
     degrees = get_degrees(network)
@@ -39,7 +39,7 @@ def power_law_distribution_test(network):
     print 'r-value: ', pearson(x, y)
 
 
-# test to see weather it meets the law of
+# tests to see weather it meets the law of
 # "the higher the rank, the bigger the in-degree"
 def rank_degree_correlation_test(network):
     x, y = [], []
@@ -83,7 +83,7 @@ def cats_avg_metric(metric, xlabel='', title=''):
     draw_bar_chart(avg_metric, cats, xlabel, title)
 
 
-# test to see weather some score of each app
+# tests to see weather some score of each app
 # has correlation with its rank
 def rank_score_correlation_test(scores):
     x, y = [], []
