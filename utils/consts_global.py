@@ -108,15 +108,14 @@ USER_IDS_DT = ['1001', '1002', '1003', '1004', '1005']
 # Remove edges whose score less than 10
 USG_THRESHOLD = 1
 
-# Pickle file of lans(gan and pans)
+# Pickle and fot files of lans
 LAN_DIR = ROOT_DIR + 'lans/'
 GAN_PICKLE = LAN_DIR + 'gan.pickle'
+GAN_DOT = LAN_DIR + 'gan.dot'
 PAN_PICKLE = LAN_DIR + 'pan_%s.pickle'
-
-# Pickle and dot file of uans
-UAN_DIR = ROOT_DIR + 'uans/'
-UAN_PICKLE = UAN_DIR + 'uan_%s.pickle'
-UAN_DOT = UAN_DIR + 'uan_%s.dot'
+PAN_DOT = LAN_DIR + 'pan_%s.dot'
+UAN_PICKLE = LAN_DIR + 'uan_%s.pickle'
+UAN_DOT = LAN_DIR + 'uan_%s.dot'
 
 # ==================== FOR TESTS ===============================
 

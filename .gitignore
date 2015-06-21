@@ -1,6 +1,6 @@
 .idea/
 apks/
 apps/
-uans/
 *.pyc
+*.dot
 .DS_Store

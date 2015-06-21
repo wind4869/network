@@ -123,7 +123,7 @@ def create_uan(uid):
 
 # compute similarity of two graphs
 def g_sim(pan1, pan2):
-    mnodes = max(len(pan1.nodes()), len(pan2.nodes()))
+    mnodes = max(pan1.number_of_nodes(), pan2.number_of_nodes())
     mcs = 0
 
     for app_from, app_to in pan1.edges():

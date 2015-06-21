@@ -203,6 +203,7 @@ def load_clusters(uid):
 
 # dump and load gan
 def dump_gan(gan):
+    nx.write_dot(gan, GAN_DOT)
     dump_network(gan, GAN_PICKLE)
 
 
@@ -212,6 +213,7 @@ def load_gan():
 
 # dump and load pan
 def dump_pan(uid, pan):
+    nx.write_dot(pan, PAN_DOT % uid)
     dump_network(pan, PAN_PICKLE % uid)
 
 
