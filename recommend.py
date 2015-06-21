@@ -7,29 +7,29 @@ from math import ceil
 from random import choice
 
 
-# count the connections of each app in
-# apps_to_count (in GAN) with all apps in app_set (in PAN)
-def count_connections(apps_to_count, app_set):
-    count = []
+# count the degrees of each app in
+# apps_gan with all apps in apps_pan
+def count_degrees(apps_gan, apps_pan):
+    result = []
     gan = load_gan()
-    for app1 in apps_to_count:
-        temp = [app1, 0, 0, 0]  # [app, in_count, out_count, all_count]
-        for app2 in app_set:
-            if app1 in gan and app2 in gan[app1]:
+    for app1 in apps_gan:
+        temp = [app1, 0, 0, 0]  # [app, in_degree, out_degree, degree]
+        for app2 in apps_pan:
+            if gan.has_edge(app2, app1):
                 temp[1] += 1
-            if app2 in gan and app1 in gan[app2]:
+            if gan.has_edge(app1, app2):
                 temp[2] += 1
         temp[3] = temp[1] + temp[2]
-        count.append(temp)
-    return count
+        result.append(temp)
+    return result
 
 
-# recommend by the app's connection with all apps in PAN
-def recommend_all_connection(apps_in_pan):
+# recommend by the app's degree with all apps in PAN
+def recommend_degree_sum(apps_in_pan):
     gan = load_gan()
 
-    apps_to_count = set(load_capps()) - apps_in_pan
-    count = count_connections(apps_to_count, apps_in_pan)
+    apps_gan = set(load_capps()) - apps_in_pan
+    count = count_degrees(apps_gan, apps_in_pan)
     count.sort(lambda a, b: b[3] - a[3])
 
     result = [item[0] for item in count]
@@ -37,18 +37,18 @@ def recommend_all_connection(apps_in_pan):
 
 
 # detect communities in network
-def detect_community(network):
+def detect_community(lan):
     apps = load_apps()
-    indexes = [apps.index(i) for i in apps_in_network(network)]
+    indexes = [apps.index(i) for i in apps_in_network(lan)]
 
     graph = Graph(directed=True)
     graph.add_vertices(indexes)
     graph.vs['label'] = graph.vs['name']
     graph.vs['size'] = [30 for i in xrange(len(graph.vs))]
 
-    for from_app in network:
+    for from_app in lan:
         from_index = indexes.index(apps.index(from_app))
-        for to_app in network[from_app]:
+        for to_app in lan[from_app]:
             to_index = indexes.index(apps.index(to_app))
             graph.add_edge(from_index, to_index)
 
@@ -74,7 +74,7 @@ def create_community_test(uid, pan):
     dump_clusters(uid, detect_community(pan))
 
 
-# recommend by the score = (the ratio between PAN's community
+# recommend by the score: (the ratio between PAN's community
 # and GAN's community) * (app's connection in community range)
 def recommend_community_match(uid):
     app_score = {}
@@ -90,7 +90,7 @@ def recommend_community_match(uid):
             ratio = len(common) * 1.0 / len(ganc)
             apps_to_count = [apps[i] for i in set(ganc) - set(panc)]
             app_set = [apps[i] for i in panc]
-            count = count_connections(apps_to_count, app_set)
+            count = count_degrees(apps_to_count, app_set)
             for item in count:
                 app_score[item[0]] += item[3] * ratio
 
@@ -103,33 +103,32 @@ def recommend_community_match(uid):
     return result
 
 
-# get training and tests set (8/2)
-def get_app_dataset(uid):
-    apps_in_pan = \
-        list(apps_in_network(load_pan(uid)) - set(load_napps()))
-    num_test = int(ceil(len(apps_in_pan) / 5.0))
-    apps_for_test = set([])
-    for i in xrange(num_test):
-        app = choice(apps_in_pan)
-        apps_in_pan.remove(app)
-        apps_for_test.add(app)
-    return set(apps_in_pan), apps_for_test
-
-
-# get dataset for community match method,
-# use app tests set to filters PAN
+# get training and test set (8/2)
 def get_dataset(uid):
-    training_set, test_set = get_app_dataset(uid)
     pan = load_pan(uid)
-    [pan.pop(app) for app in test_set]
-    for app in pan: pan[app] -= test_set
-    return training_set, test_set, pan
+
+    # remove native apps
+    training_set = set(pan.nodes()) - set(load_napps())
+    test_set = set([])
+
+    # the number of apps should in test set
+    num_test = int(ceil(len(training_set) / 5.0))
+
+    # randomly create two sets
+    for i in xrange(num_test):
+        app = choice(list(training_set))
+        training_set.remove(app)
+        test_set.add(app)
+
+    return training_set, \
+        test_set, \
+        nx.subgraph(pan, training_set)
 
 
 # get precision and recall
 def evaluate(uid, topk):
     training_set, test_set, pan = get_dataset(uid)
-    create_community_test(uid, pan)  # create community using training set
+    # create_community_test(uid, pan)  # create community using training set
 
     def display(num_hit, result):
         print '(1) Training: %s, Test: %s' % (len(training_set), len(test_set))
@@ -137,15 +136,15 @@ def evaluate(uid, topk):
         print '(3) Precision: %s, Recall: %s' \
             % (num_hit * 1.0 / len(result), num_hit * 1.0 / len(test_set))
 
-    print '> Method 1st: Recommend by all connection'
-    result = recommend_all_connection(training_set)[:topk]
+    print '> Method 1st: Recommend by degree sum'
+    result = recommend_degree_sum(training_set)[:topk]
     num_hit = len(test_set & set(result))
     display(num_hit, result)
 
-    print '> Method 2nd: Recommend by community match'
-    result = recommend_community_match(uid)[:topk]
-    num_hit = len(test_set & set(result))
-    display(num_hit, result)
+    # print '> Method 2nd: Recommend by community match'
+    # result = recommend_community_match(uid)[:topk]
+    # num_hit = len(test_set & set(result))
+    # display(num_hit, result)
 
 
 if __name__ == '__main__':

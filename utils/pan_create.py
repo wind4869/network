@@ -15,7 +15,6 @@ def create_pan(uid):
 
     uan_only = set(uan.edges()) - set(subgan.edges())
     pan = subgan  # create pan on the basis of subgan
-    # print uan_only
 
     # add nodes' weight from uan
     for node in pan.nodes():
@@ -35,5 +34,5 @@ def create_pan(uid):
 
 
 if __name__ == '__main__':
-    for uid in ['F01']:
+    for uid in ['F02']:
         create_pan(uid)
