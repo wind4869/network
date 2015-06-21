@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from itertools import combinations
+
 from utils.gan_edt_intent import *
 from utils.gan_links_else import *
-from itertools import combinations
 
 
 # create each type of edge

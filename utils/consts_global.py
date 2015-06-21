@@ -73,8 +73,8 @@ CATELIST_TXT = FILE_DIR + 'catelist.txt'
 
 # Number of apps
 NUM_NAPP = 965  # number of native apps
-NUM_CAPP = 25   # number of common apps
-NUM_APP = 990   # number of all apps
+NUM_CAPP = 25  # number of common apps
+NUM_APP = 990  # number of all apps
 
 
 # Generate enumeration type
@@ -95,7 +95,7 @@ INDEX = enum(
     'NAT',
     'USG')
 
-# For uan creation: data from us
+# For uan creation: data from us(mongodb)
 INTERVAL_US = 30 * 60  # 30min
 DATE_PATTERN_US = '%Y-%m-%d %H:%M:%S'
 USER_IDS_US = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07']
@@ -105,19 +105,25 @@ INTERVAL_DT = 30 * 60  # 30min
 DATE_PATTERN_DT = r'%Y/%m/%d %H:%M'
 USER_IDS_DT = ['1001', '1002', '1003', '1004', '1005']
 
-# Pickle and dot file of lans
+# Remove edges whose score less than 10
+USG_THRESHOLD = 1
+
+# Pickle file of lans(gan and pans)
 LAN_DIR = ROOT_DIR + 'lans/'
 GAN_PICKLE = LAN_DIR + 'gan.pickle'
-PAN_PICKLE = LAN_DIR + 'lan_%s.pickle'
-UAN_PICKLE = LAN_DIR + 'uan_%s.pickle'
-UAN_DOT = LAN_DIR + 'uan_%s.dot'
+PAN_PICKLE = LAN_DIR + 'pan_%s.pickle'
+
+# Pickle and dot file of uans
+UAN_DIR = ROOT_DIR + 'uans/'
+UAN_PICKLE = UAN_DIR + 'uan_%s.pickle'
+UAN_DOT = UAN_DIR + 'uan_%s.dot'
 
 # ==================== FOR TESTS ===============================
 
 # Something about tests
 TEST_DIR = ROOT_DIR + 'tests/'
 
-# For stats: frequent pattern analysis of filers
+# For stats: frequent pattern analysis of filters
 FILTER_DIR = TEST_DIR + 'filters/'
 FILTERS_MATCHED = FILTER_DIR + 'filters_matched.txt'
 CODE_DICT = FILTER_DIR + 'code_dict.txt'

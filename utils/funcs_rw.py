@@ -2,8 +2,10 @@
 
 import os
 import codecs
-import networkx as nx
 import cPickle as pickle
+
+import networkx as nx
+
 from utils.db_connect import *
 from utils.consts_global import *
 

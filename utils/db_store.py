@@ -2,6 +2,7 @@
 
 import json
 import urllib2
+
 from utils.parser_desc import *
 from utils.parser_apk import *
 
@@ -123,4 +124,4 @@ if __name__ == '__main__':
     # store_usage_records('F07')
     # usageRecords.remove({'userID': 'F07'})
     # for r in usageRecords.find({'userID': 'F07'}):
-    #     print r
+    # print r
