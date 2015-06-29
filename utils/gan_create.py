@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import time
+from math import sqrt
 from itertools import combinations
 
 from utils.gan_edt_intent import *
 from utils.gan_rels_else import *
-
-
-# add new edge if not exists and get weights
-def get_weights(gan, app_from, app_to):
-    if not gan.has_edge(app_from, app_to):
-        gan.add_edge(app_from, app_to,
-                     weights=[0 for i in xrange(NUM_EDGETYPE)])
-
-    return gan[app_from][app_to]['weights']
 
 
 # create each type of edge
@@ -67,13 +59,16 @@ def create_gan():
 
 
 if __name__ == '__main__':
-    start = time.clock()
-    create_gan()  # create gan
-    print 'finished in (%.2f) minutes' %\
-          ((time.clock() - start) / float(60))
-    # gan = load_gan()
-    # for app_from, app_to in gan.edges():
-    #     weights = gan[app_from][app_to]['weights']
-    #     result = weights[INDEX.IDT_REF]
-    #     if result:
-    #         print result
+    # start = time.clock()
+    # create_gan()  # create gan
+    # print 'finished in (%.2f) minutes' %\
+    #       ((time.clock() - start) / float(60))
+    gan = load_gan()
+    m = 0
+    for app_from, app_to in gan.edges():
+        weights = gan[app_from][app_to]['weights']
+        result = sqrt(weights[INDEX.EDT_IMP])
+        if result:
+            if result > m:
+                m = result
+            print result

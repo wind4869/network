@@ -16,15 +16,15 @@ def count_degrees(apps_gan, apps_pan):
         temp = [app1, 0, 0, 0]  # [app, in_degree, out_degree, degree]
         for app2 in apps_pan:
             if gan.has_edge(app2, app1):
-                temp[1] += 1
+                temp[1] += gan[app2][app1]['weight']
             if gan.has_edge(app1, app2):
-                temp[2] += 1
+                temp[2] += gan[app1][app2]['weight']
         temp[3] = temp[1] + temp[2]
         result.append(temp)
     return result
 
 
-# recommend by the app's degree with all apps in PAN
+# Method 1st: recommend by the app's degree with all apps in PAN
 def recommend_degree_sum(apps_in_pan):
     gan = load_gan()
 
@@ -74,8 +74,9 @@ def create_community_test(uid, pan):
     dump_clusters(uid, detect_community(pan))
 
 
-# recommend by the score: (the ratio between PAN's community
-# and GAN's community) * (app's connection in community range)
+# Method 2nd: recommend by the community matching score:
+# (the ratio between PAN's community and GAN's community) *
+# (app's connection in community range)
 def recommend_community_match(uid):
     app_score = {}
     apps = load_apps()
@@ -101,6 +102,56 @@ def recommend_community_match(uid):
 
     result = [item[0] for item in temp]
     return result
+
+
+# compute similarity of two graphs
+def g_sim(pan1, pan2):
+    mnodes = max(pan1.number_of_nodes(), pan2.number_of_nodes())
+    mcs = 0
+
+    for app_from, app_to in pan1.edges():
+        if pan2.has_edge(app_from, app_to):
+            mcs += pan1[app_from][app_to]['weights'][INDEX.USG] + \
+                   pan2[app_from][app_to]['weights'][INDEX.USG]
+
+    return mcs * 1.0 / mnodes
+
+
+# get neighbors of node in directed graph
+def neighbors(g, node):
+    return g.successors(node) + g.predecessors(node)
+
+
+# Method 3rd: use u2 to recommend for u1
+def recommend_pan_compare(u1, u2):
+    result = {}
+
+    # SHOULD USE PAN, USE UAN FOR TEST NOW!!!
+    pan1, pan2 = [load_uan(u) for u in u1, u2]
+    apps1, apps2 = [pan.nodes() for pan in pan1, pan2]
+    apps = set(apps1) & set(apps2)
+    if not apps:
+        return {}
+
+    sim = g_sim(pan1, pan2)
+    if not sim:
+        return {}
+
+    # the score is: Σ(sim * weight)
+    for app in apps:
+        for neighbor in neighbors(pan2, app):
+            if neighbor not in apps1:
+                result.setdefault(neighbor, 0)
+                if pan2.has_edge(app, neighbor):
+                    result[neighbor] += sim * pan2[app][neighbor]['weights'][INDEX.USG]
+                if pan2.has_edge(neighbor, app):
+                    result[neighbor] += sim * pan2[neighbor][app]['weights'][INDEX.USG]
+
+    temp = []
+    for app, score in result.iteritems():
+        temp.append([app, round(score, 2)])
+
+    return sorted(temp, key=lambda x: x[1], reverse=True)
 
 
 # get training and test set (8/2)

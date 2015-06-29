@@ -231,5 +231,14 @@ def load_uan(uid):
     return load_network(UAN_PICKLE % uid)
 
 
+# add new edge if not exists and get weights
+def get_weights(gan, app_from, app_to):
+    if not gan.has_edge(app_from, app_to):
+        gan.add_edge(app_from, app_to,
+                     weights=[0 for i in xrange(NUM_EDGETYPE)])
+
+    return gan[app_from][app_to]['weights']
+
+
 if __name__ == '__main__':
     pass
