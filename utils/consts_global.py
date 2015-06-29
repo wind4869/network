@@ -95,6 +95,10 @@ INDEX = enum(
     'NAT',
     'USG')
 
+# Weight of each type of relation in GAN
+WEIGHTS = [30, 20, 15, 15, 20]
+WEIGHT_GAN = reduce(lambda a, b: a + b, WEIGHTS)
+
 # For uan creation: data from us(mongodb)
 INTERVAL_US = 30 * 60  # 30min
 DATE_PATTERN_US = '%Y-%m-%d %H:%M:%S'
@@ -110,8 +114,11 @@ USG_THRESHOLD = 1
 
 # Pickle and fot files of lans
 LAN_DIR = ROOT_DIR + 'lans/'
+GAN_RAW_PICKLE = LAN_DIR + 'gan_raw.pickle'
+GAN_RAW_DOT = LAN_DIR + 'gan_raw.dot'
 GAN_PICKLE = LAN_DIR + 'gan.pickle'
 GAN_DOT = LAN_DIR + 'gan.dot'
+
 PAN_PICKLE = LAN_DIR + 'pan_%s.pickle'
 PAN_DOT = LAN_DIR + 'pan_%s.dot'
 UAN_PICKLE = LAN_DIR + 'uan_%s.pickle'

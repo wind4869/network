@@ -30,7 +30,7 @@ def recommend_degree_sum(apps_in_pan):
 
     apps_gan = set(load_capps()) - apps_in_pan
     count = count_degrees(apps_gan, apps_in_pan)
-    count.sort(lambda a, b: b[3] - a[3])
+    count = sorted(count, key=lambda x: x[3], reverse=True)
 
     result = [item[0] for item in count]
     return result
@@ -126,8 +126,7 @@ def neighbors(g, node):
 def recommend_pan_compare(u1, u2):
     result = {}
 
-    # SHOULD USE PAN, USE UAN FOR TEST NOW!!!
-    pan1, pan2 = [load_uan(u) for u in u1, u2]
+    pan1, pan2 = [load_pan(u) for u in u1, u2]
     apps1, apps2 = [pan.nodes() for pan in pan1, pan2]
     apps = set(apps1) & set(apps2)
     if not apps:

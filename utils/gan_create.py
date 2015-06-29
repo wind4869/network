@@ -8,7 +8,7 @@ from utils.gan_edt_intent import *
 from utils.gan_rels_else import *
 
 
-# create each type of edge
+# create each type of edge with weight
 def create_edges(gan, apps):
     count = 0
     for app_pair in combinations(apps, 2):
@@ -49,26 +49,69 @@ def create_edges(gan, apps):
             weights[INDEX.NAT] = float(num) / nat_count
 
 
-# create gan
-def create_gan():
+# use sqrt to "smooth" and
+# divide max weight to normalize
+def fix_edt_emp(gan):
+    mw = 0
+    for u, v in gan.edges():
+        ws = gan[u][v]['weights']
+        w = sqrt(ws[INDEX.EDT_IMP])
+        if w > mw:
+            mw = w
+        ws[INDEX.EDT_IMP] = w
+
+    for u, v in gan.edges():
+        ws = gan[u][v]['weights']
+        ws[INDEX.EDT_IMP] /= mw
+
+
+# add global weight of gan
+def add_global_weight(gan):
+    fix_edt_emp(gan)
+    mw = 0
+    for u, v in gan.edges():
+        weights = get_weights(gan, u, v)
+        nat = weights[INDEX.NAT]
+        if nat:
+            gan[u][v]['weight'] = nat
+        else:
+            temp = reduce(
+                lambda a, b: a + b,
+                [WEIGHTS[i] * weights[i] for i in xrange(NUM_EDGETYPE - 2)]) / WEIGHT_GAN
+            gan[u][v]['weight'] = sqrt(temp)  # use sqrt to "smooth"
+            if temp > mw:
+                mw = temp
+
+    # divide max weight to normalize
+    for u, v in gan.edges():
+        if not get_weights(gan, u, v)[INDEX.NAT]:
+            w = gan[u][v]['weight']
+            w /= mw
+
+
+# create raw gan
+def create_rgan():
     apps = load_capps()
     gan = nx.DiGraph()
     gan.add_nodes_from(apps)
     create_edges(gan, apps)
+    dump_rgan(gan)
+
+
+# create the final gan
+def create_gan():
+    # create_rgan()
+    gan = load_rgan()
+    add_global_weight(gan)
     dump_gan(gan)
 
 
 if __name__ == '__main__':
     # start = time.clock()
-    # create_gan()  # create gan
+    # create_rgan()  # create raw gan
     # print 'finished in (%.2f) minutes' %\
     #       ((time.clock() - start) / float(60))
+
     gan = load_gan()
-    m = 0
-    for app_from, app_to in gan.edges():
-        weights = gan[app_from][app_to]['weights']
-        result = sqrt(weights[INDEX.EDT_IMP])
-        if result:
-            if result > m:
-                m = result
-            print result
+    for u, v in gan.edges():
+        print gan[u][v]['weight']

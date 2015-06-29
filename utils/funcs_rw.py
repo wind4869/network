@@ -201,6 +201,16 @@ def load_clusters(uid):
     return pickle_load(CLUSTERS_TXT % uid)
 
 
+# dump and load raw gan
+def dump_rgan(rgan):
+    nx.write_dot(rgan, GAN_RAW_DOT)
+    dump_network(rgan, GAN_RAW_PICKLE)
+
+
+def load_rgan():
+    return load_network(GAN_RAW_PICKLE)
+
+
 # dump and load gan
 def dump_gan(gan):
     nx.write_dot(gan, GAN_DOT)

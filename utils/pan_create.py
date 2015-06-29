@@ -23,11 +23,25 @@ def create_pan(uid):
     # add edges only in uan
     for u, v in uan_only:
         pan.add_edge(u, v, weights=uan[u][v]['weights'])
+        pan[u][v]['weight'] = 0
 
     # add usg weight from uan
     for u, v in subgan.edges():
         if uan.has_edge(u, v):
             pan[u][v]['weights'][INDEX.USG] = uan[u][v]['weights'][INDEX.USG]
+
+    # adjust global weight of pan
+    mw = 0
+    for u, v in pan.edges():
+        gan_part = pan[u][v]['weight']
+        usg_part = get_weights(pan, u, v)[INDEX.USG]
+        pan[u][v]['weight'] = temp = sqrt(gan_part + usg_part) / 2
+        if temp > mw:
+            mw = temp
+
+    # divide max weight to normalize
+    for u, v in pan.edges():
+        pan[u][v]['weight'] /= mw
 
     # dump pan to pickle file
     dump_pan(uid, pan)
