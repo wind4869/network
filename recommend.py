@@ -37,18 +37,18 @@ def recommend_degree_sum(apps_in_pan):
 
 
 # detect communities in network
-def detect_community(lan):
+def detect_community(network):
     apps = load_apps()
-    indexes = [apps.index(i) for i in apps_in_network(lan)]
+    indexes = [apps.index(i) for i in apps_in_network(network)]
 
     graph = Graph(directed=True)
     graph.add_vertices(indexes)
     graph.vs['label'] = graph.vs['name']
     graph.vs['size'] = [30 for i in xrange(len(graph.vs))]
 
-    for from_app in lan:
+    for from_app in network:
         from_index = indexes.index(apps.index(from_app))
-        for to_app in lan[from_app]:
+        for to_app in network[from_app]:
             to_index = indexes.index(apps.index(to_app))
             graph.add_edge(from_index, to_index)
 

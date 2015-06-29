@@ -75,8 +75,8 @@ def store_intents_filters_perms():
             },
             {
                 '$set': {
-                    'explicits': explicits,
-                    'implicits': implicits,
+                    # 'explicits': explicits,
+                    # 'implicits': implicits,
                     'filters': filters,
                     'perms': perms
                 }

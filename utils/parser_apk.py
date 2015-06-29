@@ -44,7 +44,7 @@ def get_filters(xml):
         print '[parser_xml][cElementTree.ParseError]: %s' % xml
         return [], []
 
-    for f in tree.iter('intent-filters'):
+    for f in tree.iter('intent-filter'):
         action, category, data = [], [], []
         for a in f.iter('action'):
             action.append(a.attrib[ns['android'] + 'name'])

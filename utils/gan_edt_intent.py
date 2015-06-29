@@ -105,7 +105,7 @@ def implicit_match(app_from, app_to):
             if implicit_match_one(i, f):
                 result += 1
 
-    return result
+    return float(result) / (len(implicit_intents) + len(intent_filters))
 
 
 # get explicit matching result
@@ -113,14 +113,22 @@ def explicit_match(app_from, app_to):
     result = 0
     commons = explicits(app_from)['commons']
     package = packageName(app_to)
+    if not commons:
+        return result
 
-    pattern = re.compile(package)
+    pattern = re.compile('^' + package.replace('.', '\.'))
     for intent in commons:
         if pattern.match(intent):
             result += 1
 
-    return result
+    return float(result) / len(commons)
 
 
 if __name__ == '__main__':
     pass
+    # from itertools import combinations
+    #
+    # for app_from, app_to in combinations(load_capps(), 2):
+    #     result = explicit_match(app_from, app_to)
+    #     if result > 0:
+    #         print result
