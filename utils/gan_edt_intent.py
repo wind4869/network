@@ -88,6 +88,7 @@ def implicit_match_one(implicit, filter):
         return False
     if not check_data(implicit.get('uri'), implicit.get('mimeType'), filter.get('datas')):
         return False
+    print implicit, filter
     return True
 
 
@@ -126,9 +127,9 @@ def explicit_match(app_from, app_to):
 
 if __name__ == '__main__':
     pass
-    # from itertools import combinations
-    #
-    # for app_from, app_to in combinations(load_capps(), 2):
-    #     result = explicit_match(app_from, app_to)
-    #     if result > 0:
-    #         print result
+    from itertools import combinations
+
+    for app_from, app_to in combinations(load_capps(), 2):
+        result = implicit_match(app_from, app_to)
+        if result > 0:
+            print result

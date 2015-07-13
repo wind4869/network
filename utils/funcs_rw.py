@@ -12,6 +12,7 @@ from utils.consts_global import *
 
 # get db object
 appDetails = getAppDetails()
+usageRecords = getUsageRecords()
 
 # open file use utf-8 encoding
 open_in_utf8 = lambda filename: \
@@ -86,7 +87,12 @@ def load_appmap():
 
 
 # load raw intents from file
-def load_rintents(path):
+def load_rintents(app):
+    path = INTENT_PATH % app
+    if not os.path.exists(path):
+        print '[load_rintents][File not exists]: %s' % path
+        return None
+
     f = open(path)
     lines = f.readlines()
     f.close()

@@ -22,10 +22,13 @@ def get_vectors(app):
     vectors = []
     [vectors.append([0 for i in xrange(demension)]) for j in xrange(2)]
 
+    if not desc:
+        return vectors
+
     jieba.load_userdict(MENDDICT_TXT)
     words = pseg.cut(desc)
 
-    verb, inout = None, None
+    inout = 0
     for w in words:
         if w.flag in ['v', 'vn']:
             inout = verbdict.get(w.word)
@@ -57,10 +60,14 @@ def update_appdict():
 
 # refs = { u'微信': 3, u'微博': 1, ... }
 def get_refs(app):
-    jieba.load_userdict(APPDICT_TXT)
-    word = pseg.cut(description(app))
-
     refs = {}
+    desc = description(app)
+    if not desc:
+        return refs
+
+    jieba.load_userdict(APPDICT_TXT)
+    word = pseg.cut(desc)
+
     apps = load_capps()
     for w in word:
         if w.flag == 'app' and w.word != app:

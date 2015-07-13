@@ -8,40 +8,51 @@ from utils.consts_global import *
 
 
 # use curl to download app
-def apk_download(app):
-    print '> downloading %s.apk ... ' % app
-    run(DOWNLOAD_CMD % (app, packageName(app)))
+def apk_download(pkg):
+    print '> downloading %s.apk ... ' % pkg
+    run(DOWNLOAD_CMD % (pkg, pkg))
 
 
 # use dex2jar to get jar by decompiling apk
-def dex_decompile(app):
-    print '-> decompiling classes.dex for %s.jar ... ' % app
-    run(D2J_CMD % (app, app))
+def dex_decompile(pkg):
+    print '-> decompiling classes.dex for %s.jar ... ' % pkg
+    run(D2J_CMD % (pkg, pkg))
 
 
 # use APKParser to extract AndroidManifest.xml from apk
-def xml_extract(app):
+def xml_extract(pkg):
     print '--> extracting AndroidManifest.xml ... '
-    run(XML_CMD % (app, app))
+    run(XML_CMD % (pkg, pkg))
 
 
 # get jar and AndroidManifest.xml
-def apk_decompile(app):
-    print '> decompiling %s.apk ... ' % app
-    dex_decompile(app)
-    xml_extract(app)
+def apk_decompile(pkg):
+    print '> %d. decompiling %s.apk ... ' % pkg
+
+    path = APK_PATH % pkg
+    if os.path.exists(path):
+        dex_decompile(pkg)
+        xml_extract(pkg)
+    else:
+        print '[parser_xml][File not exists]: %s' % path
+        return
 
 
 # parse xml to extract intent-filters and permissions(perms)
-def get_filters(xml):
+def get_filters(app):
     filters = []
     ns = {'android': '{http://schemas.android.com/apk/res/android}'}
     keys = ['mimeType', 'scheme', 'host', 'port', 'path', 'pathPrefix', 'pathPattern']
 
+    path = XML_PATH % packageName(app)
+    if not os.path.exists(path):
+        print '[parser_xml][File not exists]: %s' % path
+        return [], []
+
     try:
-        tree = et.parse(xml)
+        tree = et.parse(path)
     except et.ParseError:
-        print '[parser_xml][cElementTree.ParseError]: %s' % xml
+        print '[parser_xml][cElementTree.ParseError]: %s' % path
         return [], []
 
     for f in tree.iter('intent-filter'):
@@ -79,7 +90,7 @@ def get_intents(app):
     implicits = []  # implicit intents
 
     # raw string of intents
-    raw_intents = load_rintents(INTENT_PATH % app)
+    raw_intents = load_rintents(packageName(app))
     # pattern for removing self-calling intents
     self_pattern = re.compile('^' + packageName(app).replace('.', '\.'))
     # pattern for recognizing native-app-calling intents
