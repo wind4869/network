@@ -126,9 +126,57 @@ def create_uan(uid):
     dump_uan(uid, uan)
 
 
+def record_filter(record):
+    record = record.copy()
+    del record['_id'], record['cnt'], record['item']
+    return record
+
+
 if __name__ == '__main__':
     # pass
-    for uid in USER_IDS_US:
-        create_uan(uid)
-    # for uid in USER_IDS_DT:
-    #     create_uan(uid)
+    # num = 0
+    # for i in xrange(139):
+    #     print '> %d ...' % i
+    #     items = set([])
+    #     records = list(usageRecords.find({'user': i}))
+    #
+    #     uan = nx.Graph()
+    #     for r in records:
+    #         item, cnt = r['item'], r['cnt']
+    #         if uan.has_node(item):
+    #             uan.node[item]['weight'] += cnt
+    #         else:
+    #             uan.add_node(item, weight=cnt)
+    #
+    #     from itertools import combinations
+    #     for r1, r2 in combinations(records, 2):
+    #         item1, item2 = [r['item'] for r in r1, r2]
+    #         cnt1, cnt2 = [r['cnt'] for r in r1, r2]
+    #         if item1 != item2 and record_filter(r1) == record_filter(r2):
+    #             weights = get_weights(uan, item1, item2)
+    #             weights[INDEX.USG] += (float(cnt1) / uan.node[item1]['weight'] + float(cnt2) / uan.node[item2]['weight']) / 2
+    #             # if r1['homework'] == 'unknown':
+    #             #     weights[INDEX.USG] /= 2
+    #
+    #     for u, v in uan.edges():
+    #         # print get_weights(uan, u, v)[INDEX.USG]
+    #         if get_weights(uan, u, v)[INDEX.USG] < 0.1:
+    #             uan.remove_edge(u, v)
+    #     dump_uan(i, uan)
+    #
+    # edges = {}
+    # for i in xrange(NUM_USER):
+    #     uan = load_uan(i)
+    #     for u, v in uan.edges():
+    #         edges.setdefault((u, v), 0)
+    #         edges[(u, v)] += 1
+    #
+    # print len(edges)
+    # num = 0
+    # for key in edges:
+    #     if edges[key] > 139 * 1 / 10:
+    #         num += 1
+    # print num
+    for app in load_capps():
+        print packageName(app)
+

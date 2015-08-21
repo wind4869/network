@@ -4,6 +4,9 @@ import json
 import pandas
 import urllib2
 
+from time import strftime, localtime
+from BeautifulSoup import BeautifulSoup
+
 from utils.parser_desc import *
 from utils.parser_apk import *
 
@@ -13,95 +16,139 @@ appDetails = getAppDetails()
 usageRecords = getUsageRecords()
 
 
+# judge whether information of app exists
+def exists(url):
+    try:
+        if urllib2.urlopen(url).geturl() == url:
+            return True
+    except urllib2.HTTPError:
+        pass
+
+    return False
+
+
+# download detail and home page of app
+def download_details_htmls(app):
+
+    if exists(DETAIL_URL % app) and \
+            exists(HTML_URL % app):
+        [run(cmd) for cmd in DETAIL_CMD % app, HTML_CMD % app]
+    else:
+        print 'information not exists: %s' % app
+
+
+# get similar apps from home page of app
+def get_sims(app):
+    sims = []
+    soup = BeautifulSoup(open(HTML_PATH % app))
+    for ul in soup.findAll(attrs={'class': 'side-list'}):
+        for li in ul.findAll('li'):
+            sims.append(li.a['href'].split('/')[2])
+    return sims
+
+
 # store app details from wandoujia to mongodb
 def store_app_details(app):
-    try:
-        details = json.loads(urllib2.urlopen(DETAILS_URL % app).read())
-    except urllib2.HTTPError:
-        print '[store_app_details][urllib2.HTTPError]: %s' % app
-        return
+    raw_details = json.loads(open(DETAIL_PATH % app).read())
 
-    record = {}
+    details = {}  # processed details for app
 
-    for attr in STRING_ATTRS:
-        record[attr] = details[attr]
-    for attr in INTEGER_ATTRS:
-        record[attr] = int(details[attr])
+    # get common string and integer attributes
+    [details.setdefault(attr, raw_details[attr]) for attr in STRING_ATTRS]
+    [details.setdefault(attr, int(raw_details[attr])) for attr in INTEGER_ATTRS]
 
-    cats = []
-    for c in details['categories']:
-        cats.append(c['name'])
-    record['categories'] = cats
+    # get categories
+    categories = []
+    for c in raw_details['categories']:
+        categories.append(c['name'])
+    details['categories'] = categories
 
+    # get tags
     tags = []
-    for t in details['tags']:
+    for t in raw_details['tags']:
         tags.append(t['tag'])
-    record['tag'] = tags
+    details['tags'] = tags
 
-    # the desc of permissions
-    record['permissions'] = details['apks'][0]['permissions']
+    # get updatedDate
+    details['updatedDate'] = strftime(
+        TIME_FORMAT, localtime(int(str(raw_details['updatedDate'])[:10]))) \
+        if raw_details['updatedDate'] else ''
 
-    # store to mongodb
-    appDetails.insert(record)
+    # get version
+    details['version'] = {
+        'versionCode': raw_details['latestApk']['versionCode'],
+        'versionName': raw_details['latestApk']['versionName'],
+    }
+
+    # get developer
+    details['developer'] = {
+        'id': raw_details['developer']['id'],
+        'name': raw_details['developer']['name'],
+        'email': raw_details['developer']['email'],
+    }
+
+    # get sims
+    details['sims'] = get_sims(app)
+
+    # update or add details for app
+    if appDetails.find_one({'packageName': app}):
+        appDetails.update(
+            {
+                'packageName': app
+            },
+            {
+                '$set': details
+            })
+    else:
+        appDetails.insert(details)
 
 
 # store intents, intent-filters and permissions to mongodb
-def store_intents_filters_perms(app):
-    commons, natives, implicits = get_intents(app)
-    explicits = {'commons': commons, 'natives': natives}
-    filters, perms = get_filters(app)
+def store_intents_filters_permissions(app):
+    explicits, implicits = get_intents(app)
+    filters, permissions = get_filters(app)
 
     appDetails.update(
         {
-            'title': app
+            'packageName': app
         },
         {
             '$set': {
                 'explicits': explicits,
                 'implicits': implicits,
                 'filters': filters,
-                'perms': perms
+                'permissions': permissions,
             }
         })
 
 
-# store IO vectors, refs and nats of apps
-# use update_appdict() to update appdict.txt
-def store_vectors_refs_nats(app):
-    # update_appdict()
+# store inputs, outputs and refs to mongodb
+def store_inputs_outputs_refs(app):
+    # update_appdict()  # update appdict.txt
+    # inputs, outputs = get_inputs_outputs(app)
 
     appDetails.update(
         {
-            'title': app
+            'packageName': app
         },
         {
             '$set': {
-                'vectors': get_vectors(app),
+                # 'inputs': inputs,
+                # 'outputs': outputs,
                 'refs': get_refs(app),
-                'nats': get_nats(app)
             }
         })
 
 
-# store user usages to mongodb
-def store_usage_records():
-    f1 = pandas.read_csv(USAGES_CSV, sep="\t")
-    f2 = pandas.read_csv(APPMETA_CSV, sep="\t")
-    f = f1.merge(f2, on='item')
+# store all attributes of all apps
+def store():
+    # for app in load_capps():
+    #     store_app_details(app)
+    #     store_intents_filters_permissions(app)
 
-    records = []
-    for i in xrange(NUM_RECORDS):
-        record = {}
-        raw = dict(f.iloc[i])
-        if int(raw['user']) in USG_USRS and int(raw['item']) in USG_APPS:
-            raw['item'] = raw['package']
-            raw['user'] = USG_USRS.index(raw['user'])  # fix the index of users
-            [record.setdefault(attr, raw[attr]) for attr in USG_ATTRS]
-            records.append(record)
-
-    # store to mongodb
-    usageRecords.insert(records)
+    for app in load_capps():
+        store_inputs_outputs_refs(app)
 
 
 if __name__ == '__main__':
-    pass
+    store()

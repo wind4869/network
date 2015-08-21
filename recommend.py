@@ -197,5 +197,55 @@ def evaluate(uid, topk):
     # display(num_hit, result)
 
 
+def get_rating():
+    userapps = load_userapps()
+    ratings = [[0 for i in xrange(len(userapps))] for j in xrange(NUM_USER)]
+    cnts = [0 for i in xrange(NUM_USER)]
+
+    for r in usageRecords.find():
+        user, item, cnt = [r[k] for k in 'user', 'item', 'cnt']
+        ratings[user][userapps.index(item)] += cnt
+        cnts[user] += cnt
+
+    f_train = open(TRAIN_SET, 'w')
+    f_test = open(TEST_SET, 'w')
+
+    for i in xrange(NUM_USER):
+        for j in xrange(len(userapps)):
+            ratings[i][j] /= float(cnts[i])
+            f_target = f_train if ratings[i][j] else f_test
+            f_target.write('%d %d %f\n' % (i, j, ratings[i][j]))
+
+    f_train.close()
+    f_test.close()
+
+
+def model_training():
+    run(TRAIN_CMD)
+
+
+def recmommend_matrix_factorize():
+    model_training()
+    run(PREDICT_CMD)
+
 if __name__ == '__main__':
-    evaluate('F02', 30)
+    # evaluate('F02', 30)
+    pass
+    # get_rating()
+    # recmommend_matrix_factorize()
+
+    userapps = load_userapps()
+    ratings = [[0 for i in xrange(len(userapps))] for j in xrange(NUM_USER)]
+
+    f = open_in_utf8(OUTPUT)
+    for line in f.readlines():
+        temp = line.strip().split()
+        user = int(temp[0])
+        item = int(temp[1])
+        rating = float(temp[2])
+        ratings[user][item] = rating
+    f.close()
+
+    for i in xrange(NUM_USER):
+        pass
+

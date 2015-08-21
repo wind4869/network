@@ -53,18 +53,7 @@ def load_noundict():
     return noundict, dimension
 
 
-# permdict = {permission: [native1, native2, ...], ... }
-def load_permdict():
-    permdict = {}
-    f = open_in_utf8(PERMDICT_TXT)
-    for line in f.readlines():
-        permission, natives = line.strip().split('->')
-        permdict[permission] = natives.split(',') if natives else []
-    f.close()
-    return permdict
-
-
-# load map for mapping native's '.apk' name to chinese name
+# load map for packageName to chinese name
 def load_natdict():
     natdict = {}
     f = open_in_utf8(NATDICT_TXT)
@@ -73,17 +62,6 @@ def load_natdict():
         natdict[key] = value
     f.close()
     return natdict
-
-
-# load map for mapping pan' app name to gan' app name
-def load_appmap():
-    appmap = {}
-    f = open_in_utf8(APPMAP_TXT)
-    for line in f.readlines():
-        key, value = line.strip().split('->')
-        appmap[key] = value
-    f.close()
-    return appmap
 
 
 # load raw intents from file
@@ -99,17 +77,17 @@ def load_rintents(app):
     return eval(lines[0]) if lines else None
 
 
-# assist for simply load content from file
+# load content from file line by line
 def load_content(path):
     f = open_in_utf8(path)
-    content = [line[:-1] for line in f.readlines()]
+    content = [line.strip() for line in f.readlines()]
     f.close()
     return content
 
 
 # load native apps from natdict
 def load_napps():
-    return [n.strip().split('->')[1] for n in load_content(NATDICT_TXT)]
+    return load_natdict().keys()
 
 
 # load common apps form applist
@@ -122,65 +100,102 @@ def load_apps():
     return load_capps() + load_napps()
 
 
-# load all categories
-def load_categories():
-    return load_content(CATELIST_TXT)
+def packageName(title):
+    return appDetails.find_one({'title': title})['packageName']
+
+
+def title(app):
+    title = appDetails.find_one({'packageName': app})['title']
+    return title if title else load_natdict()[app]
 
 
 def description(app):
-    return appDetails.find_one({'title': app})['description']
+    return appDetails.find_one({'packageName': app})['description']
 
 
-def categories(app):
-    return appDetails.find_one({'title': app})['categories']
-
-
-def tags(app):
-    return appDetails.find_one({'title': app})['tags']
+def likesRate(app):
+    return appDetails.find_one({'packageName': app})['likesRate']
 
 
 def likesCount(app):
-    return appDetails.find_one({'title': app})['likesCount']
+    return appDetails.find_one({'packageName': app})['likesCount']
+
+
+def dislikesCount(app):
+    return appDetails.find_one({'packageName': app})['dislikesCount']
 
 
 def downloadCount(app):
-    return appDetails.find_one({'title': app})['downloadCount']
+    return appDetails.find_one({'packageName': app})['downloadCount']
 
 
-def permissions(app):  # gotten from wandoujia website
-    return appDetails.find_one({'title': app})['permissions']
+def installedCount(app):
+    return appDetails.find_one({'packageName': app})['installedCount']
 
 
-def perms(app):  # extracted form xml file
-    return appDetails.find_one({'title': app})['perms']
+def commentsCount(app):
+    return appDetails.find_one({'packageName': app})['commentsCount']
 
 
-def packageName(app):
-    return appDetails.find_one({'title': app})['packageName']
+def categories(app):
+    return appDetails.find_one({'packageName': app})['categories']
+
+
+def tags(app):
+    return appDetails.find_one({'packageName': app})['tags']
+
+
+def updatedDate(app):
+    return appDetails.find_one({'packageName': app})['updatedDate']
+
+
+def version(app):
+    return appDetails.find_one({'packageName': app})['version']
+
+
+def developer(app):
+    return appDetails.find_one({'packageName': app})['developer']
+
+
+def sims(app):
+    return appDetails.find_one({'packageName': app})['sims']
 
 
 def explicits(app):
-    return appDetails.find_one({'title': app})['explicits']
+    return appDetails.find_one({'packageName': app})['explicits']
 
 
 def implicits(app):
-    return appDetails.find_one({'title': app})['implicits']
+    return appDetails.find_one({'packageName': app})['implicits']
 
 
 def filters(app):
-    return appDetails.find_one({'title': app})['filters']
+    return appDetails.find_one({'packageName': app})['filters']
 
 
-def vectors(app):
-    return appDetails.find_one({'title': app})['vectors']
+def permissions(app):
+    return appDetails.find_one({'packageName': app})['permissions']
+
+
+def inputs(app):
+    return appDetails.find_one({'packageName': app})['inputs']
+
+
+def outputs(app):
+    return appDetails.find_one({'packageName': app})['outputs']
 
 
 def refs(app):
-    return appDetails.find_one({'title': app})['refs']
+    return appDetails.find_one({'packageName': app})['refs']
 
 
-def nats(app):
-    return appDetails.find_one({'title': app})['nats']
+# add new edge if not exists and get weights
+def get_weights(gan, app_from, app_to):
+    if not gan.has_edge(app_from, app_to):
+        gan.add_edge(app_from, app_to,
+                     weights=[0 for i in xrange(NUM_EDGETYPE)])
+
+    return gan[app_from][app_to]['weights']
 
 
 def pickle_dump(obj, path):
@@ -191,69 +206,24 @@ def pickle_load(path):
     return pickle.load(open(path))
 
 
-def dump_network(network, path):
-    pickle_dump(network, path)
-
-
-def load_network(path):
-    return pickle_load(path)
-
-
-def dump_clusters(uid, result):
-    pickle_dump(result, CLUSTERS_TXT % uid)
-
-
-def load_clusters(uid):
-    return pickle_load(CLUSTERS_TXT % uid)
-
-
-# dump and load raw gan
-def dump_rgan(rgan):
-    nx.write_dot(rgan, GAN_RAW_DOT)
-    dump_network(rgan, GAN_RAW_PICKLE)
-
-
-def load_rgan():
-    return load_network(GAN_RAW_PICKLE)
-
-
 # dump and load gan
 def dump_gan(gan):
     nx.write_dot(gan, GAN_DOT)
-    dump_network(gan, GAN_PICKLE)
+    pickle_dump(gan, GAN_PICKLE)
 
 
 def load_gan():
-    return load_network(GAN_PICKLE)
+    return pickle_load(GAN_PICKLE)
 
 
 # dump and load pan
 def dump_pan(uid, pan):
     nx.write_dot(pan, PAN_DOT % uid)
-    dump_network(pan, PAN_PICKLE % uid)
+    pickle_dump(pan, PAN_PICKLE % uid)
 
 
 def load_pan(uid):
-    return load_network(PAN_PICKLE % uid)
-
-
-# dump and load uan
-def dump_uan(uid, uan):
-    nx.write_dot(uan, UAN_DOT % uid)
-    dump_network(uan, UAN_PICKLE % uid)
-
-
-def load_uan(uid):
-    return load_network(UAN_PICKLE % uid)
-
-
-# add new edge if not exists and get weights
-def get_weights(gan, app_from, app_to):
-    if not gan.has_edge(app_from, app_to):
-        gan.add_edge(app_from, app_to,
-                     weights=[0 for i in xrange(NUM_EDGETYPE)])
-
-    return gan[app_from][app_to]['weights']
+    return pickle_load(PAN_PICKLE % uid)
 
 
 if __name__ == '__main__':

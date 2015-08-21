@@ -1,6 +1,8 @@
 .idea/
 apks/
 apps/
+details/
+htmls/
 *.pyc
 *.dot
 .DS_Store

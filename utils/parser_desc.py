@@ -12,18 +12,17 @@ from utils.consts_global import *
 # print(", ".join(seg_list))
 
 
-# get the IO vectors of app:
-# [[x, x, ..., x], [x, x, ..., x]]
-def get_vectors(app):
+# get inputs and outputs of app: [x, x, ..., x], [x, x, ..., x]
+def get_inputs_outputs(app):
     verbdict = load_verbdict()
     noundict, demension = load_noundict()
     desc = description(app)
 
-    vectors = []
-    [vectors.append([0 for i in xrange(demension)]) for j in xrange(2)]
+    inputs = [0 for i in xrange(demension)]
+    outputs = [0 for i in xrange(demension)]
 
     if not desc:
-        return vectors
+        return inputs, outputs
 
     jieba.load_userdict(MENDDICT_TXT)
     words = pseg.cut(desc)
@@ -40,41 +39,41 @@ def get_vectors(app):
             # regard as output if lacking verb
             for index in indexs:
                 if inout and inout & 1:
-                    vectors[0][index - 1] += 1
+                    inputs[index - 1] += 1
                 if not inout or (inout >> 1) & 1:
-                    vectors[1][index - 1] += 1
+                    outputs[index - 1] += 1
 
-    return vectors
+    return inputs, outputs
 
 
-# update appdict using app names
+# update appdict using app titles
 def update_appdict():
-    apps = load_capps()
+    titles = [title(app) for app in load_capps()]
     f = open(APPDICT_TXT, 'w')
-    for app in apps:
-        name = app.split(' ')[0]
-        if name and name in apps:
-            f.write(' '.join([name, '100', 'app']).encode('utf-8') + '\n')
+    for t in titles:
+        if t.split(' ')[0] == t:
+            f.write(' '.join([t, '100', 'app']).encode('utf-8') + '\n')
     f.close()
 
 
-# refs = { u'微信': 3, u'微博': 1, ... }
-def get_refs(app):
+# refs = { u'com.tencent.mm': 3, u'com.sina.weibo': 1, ... }
+def get_refs(app_from):
     refs = {}
-    desc = description(app)
+    desc = description(app_from)
     if not desc:
         return refs
 
     jieba.load_userdict(APPDICT_TXT)
     word = pseg.cut(desc)
 
-    apps = load_capps()
     for w in word:
-        if w.flag == 'app' and w.word != app:
-            refs.setdefault(w.word, 0)
-            refs[w.word] += 1
+        if w.flag == 'app':
+            app_to = packageName(w.word)
+            if app_to != app_from:
+                refs.setdefault(app_to, 0)
+                refs[app_to] += 1
 
-    return refs
+    return refs.keys()
 
 
 if __name__ == '__main__':
