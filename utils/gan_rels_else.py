@@ -72,13 +72,10 @@ def sim_match(app_from, app_to):
 
     # calculate the contribution of similar apps
     sims_from, sims_to = [sims(app) for app in app_from, app_to]
-    if app_to in sims_from or app_from in sims_to: sim += 0.5
+    if app_to in sims_from or app_from in sims_to: sim = sim / 2 + 0.5
 
     return sim if sim > 0.6 else 0
 
 
 if __name__ == '__main__':
-    from itertools import combinations
-
-    for app_from, app_to in combinations(load_capps()[:100], 2):
-        sim_match(app_from, app_to)
+    pass

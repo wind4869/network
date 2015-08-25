@@ -105,8 +105,8 @@ def packageName(title):
 
 
 def title(app):
-    title = appDetails.find_one({'packageName': app})['title']
-    return title if title else load_natdict()[app]
+    record = appDetails.find_one({'packageName': app})
+    return title['title'] if record else load_natdict()[app]
 
 
 def description(app):

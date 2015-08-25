@@ -112,7 +112,7 @@ INDEX = enum(
     'SIMILAR',
     'NATIVE')
 
-# Pickle and fot files of lans
+# Pickle and dot files of lans
 LAN_DIR = ROOT_DIR + 'lans/'
 GAN_RAW_PICKLE = LAN_DIR + 'gan_raw.pickle'
 GAN_RAW_DOT = LAN_DIR + 'gan_raw.dot'

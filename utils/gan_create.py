@@ -51,9 +51,10 @@ def create_edges(gan, apps):
 def create_gan():
     # create a directed graph
     gan = nx.DiGraph()
+    gan.add_nodes_from(load_apps())
 
     # create each type of edge and weight
-    create_edges(gan, load_capps()[:50])
+    create_edges(gan, load_capps())
 
     # calculate total weight
     for app_from, app_to in gan.edges():
@@ -62,10 +63,10 @@ def create_gan():
             gan[app_from][app_to]['weight'] = \
                 weights[INDEX.E_INTENT] + \
                 weights[INDEX.I_INTENT]
-        elif weights[INDEX.E_IO]:
-            gan[app_from][app_to]['weight'] = weights[INDEX.E_IO]
         else:
-            gan[app_from][app_to]['weight'] = weights[INDEX.I_IO]
+            gan[app_from][app_to]['weight'] = \
+                weights[INDEX.E_IO] + \
+                weights[INDEX.I_IO]
 
         # consider SIMILAR weight anyway
         gan[app_from][app_to]['weight'] += weights[INDEX.SIMILAR]
@@ -75,12 +76,12 @@ def create_gan():
 
 
 if __name__ == '__main__':
-    import time
-    start = time.clock()
-    create_gan()  # create gan
-    print 'finished in (%.2f) minutes' %\
-          ((time.clock() - start) / float(60))
-
     gan = load_gan()
-    for u, v in gan.edges():
-        print gan[u][v]['weight']
+    # for u, v in gan.edges():
+    #     print '%s -> %s (%.2f), %r' % \
+    #           (title(u), title(v), gan[u][v]['weight'], gan[u][v]['weights'])
+    cats = set([])
+    for app in load_capps():
+        if categories(app):
+            cats.add(categories(app)[0])
+    print '\n'.join(cats)
