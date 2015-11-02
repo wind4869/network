@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from utils.funcs_stats import *
 from utils.funcs_rw import *
 from igraph import *
 from math import ceil

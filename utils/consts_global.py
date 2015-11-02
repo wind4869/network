@@ -114,15 +114,17 @@ INDEX = enum(
 
 # Pickle and dot files of lans
 LAN_DIR = ROOT_DIR + 'lans/'
-GAN_RAW_PICKLE = LAN_DIR + 'gan_raw.pickle'
-GAN_RAW_DOT = LAN_DIR + 'gan_raw.dot'
 GAN_PICKLE = LAN_DIR + 'gan.pickle'
 GAN_DOT = LAN_DIR + 'gan.dot'
-
 PAN_PICKLE = LAN_DIR + 'pan_%s.pickle'
 PAN_DOT = LAN_DIR + 'pan_%s.dot'
-UAN_PICKLE = LAN_DIR + 'uan_%s.pickle'
-UAN_DOT = LAN_DIR + 'uan_%s.dot'
+
+# Usage logs of users
+LOG_DIR = ROOT_DIR + 'logs/'
+LOG_PATH = LOG_DIR + 'applog_%s.txt'
+
+# Correlation of apps in a session
+CORRELATION = [1, 0.9, 0.7, 0.4]
 
 # ==================== FOR TESTS ===============================
 
@@ -137,3 +139,6 @@ CODED_LIST = FILTER_DIR + 'coded_list.txt'
 APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
 
 # ==================== THE END =================================
+
+if __name__ == '__main__':
+    pass

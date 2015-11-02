@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from utils.funcs_stats import *
+import numpy as np
+import matplotlib.pyplot as plt
+from utils.funcs_rw import *
+from scipy.stats import linregress
+
+
+# get r-value(Pearson correlation coefficient)
+# linregress[0] = slope(斜率)
+# linregress[1] = intercept(截距)
+def pearson(x, y):
+    return linregress(x, y)[2]
 
 
 def scale_and_density(network):
@@ -73,8 +83,9 @@ def strongly_connected_components(network):
 
 
 if __name__ == '__main__':
-    gan = load_gan()
+    # gan = load_gan()
     # scale_and_density(gan)
     # power_law_distribution(gan)
     # degree_distribution(gan)
     # strongly_connected_components(gan)
+    pass
