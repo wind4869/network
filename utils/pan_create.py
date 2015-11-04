@@ -6,7 +6,7 @@ from utils.funcs_rw import *
 
 # creates time object from string
 def maketime(s):
-    return time.mktime(time.strptime(s, '%Y-%m-%d %H:%M:%S'))
+    return time.mktime(time.strptime(s, TIME_FORMAT))
 
 
 # create pan
@@ -14,7 +14,7 @@ def create_pan(uid):
     # create a directed graph
     pan = nx.DiGraph()
     # total usage time of apps
-    app_time = {}
+    times = {}
     # separate by the screen
     session = []
     # load applog.txt
@@ -26,8 +26,8 @@ def create_pan(uid):
             record = line.strip().split(',')
             # usage time
             app = record[2]
-            app_time.setdefault(app, 0)
-            app_time[app] += maketime(record[1]) - maketime(record[0])
+            times.setdefault(app, 0)
+            times[app] += maketime(record[1]) - maketime(record[0])
             # add to session
             session.append(app)
         elif len(session) > 1:
@@ -40,17 +40,15 @@ def create_pan(uid):
                         app_to = session[nextIndex]
                         if pan.has_edge(app_from, app_to):
                             pan[app_from][app_to]['weight'] += weight
-                            print '> %s -> %s: %f' % (app_from, app_to, weight)
                         elif app_from != app_to:
                             pan.add_edge(app_from, app_to, weight=weight)
-                            print 'ADD > %s -> %s: %f' % (app_from, app_to, weight)
             session = []
     f.close()
 
     # set the weight of each node
-    total_time = sum(app_time.values())
-    for app, t in app_time.iteritems():
-        weight = t / total_time
+    total = sum(times.values())
+    for app, t in times.iteritems():
+        weight = t / total
         if pan.has_node(app):
             pan.node[app]['weight'] = weight
         else:
@@ -61,5 +59,15 @@ def create_pan(uid):
 
 
 if __name__ == '__main__':
-    create_pan('a1')
-    pass
+    # create_pan('a1')
+    # apps_used = set([])
+    # for filename in os.listdir(LOG_DIR):
+    #     f = open_in_utf8(LOG_DIR + filename)
+    #     for line in f.readlines():
+    #         if line[0] not in ['[', ']']:
+    #             record = line.strip().split(',')
+    #             apps_used.add(record[2])
+    # print len(apps_used)
+    # print '\n'.join(apps_used - set(load_apps()))
+    pan = load_pan('a1')
+    print pan.get_nodes()

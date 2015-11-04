@@ -39,7 +39,7 @@ INTEGER_ATTRS = [
     'commentsCount',
 ]
 
-# Format for updatedTime
+# Format for updatedTime and so on
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 # Path of Jar, xml, intent and filter files

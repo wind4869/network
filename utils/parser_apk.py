@@ -116,4 +116,23 @@ def get_intents(app):
 
 
 if __name__ == '__main__':
-    pass
+    f_to_download = open(APK_PATH[:-6] + 'apps_to_download.txt')
+    f_not_exist = open(APK_PATH[:-6] + 'apps_not_exist.txt', 'a')
+
+    apps_to_download = []
+    for line in f_to_download.readlines():
+        apps_to_download.append(line.strip())
+
+    count = 1
+    for app in apps_to_download:
+        print '-> %d' % count
+        count += 1
+
+        apk_download(app)
+
+        if file(APK_PATH % app).readlines()[0][0] == '<':
+            run('rm %s' % (APK_PATH % app))
+            f_not_exist.write(app + '\n')
+
+    f_not_exist.close()
+    f_to_download.close()

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import codecs
 import cPickle as pickle
 
@@ -98,6 +99,12 @@ def load_capps():
 # load all applications
 def load_apps():
     return load_capps() + load_napps()
+
+
+# load all users
+def load_users():
+    return [re.findall(r'[a-z]\d+', name)[0]
+            for name in os.listdir(LOG_DIR) if name != '.DS_Store']
 
 
 def packageName(title):
