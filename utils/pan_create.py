@@ -59,15 +59,6 @@ def create_pan(uid):
 
 
 if __name__ == '__main__':
-    # create_pan('a1')
-    # apps_used = set([])
-    # for filename in os.listdir(LOG_DIR):
-    #     f = open_in_utf8(LOG_DIR + filename)
-    #     for line in f.readlines():
-    #         if line[0] not in ['[', ']']:
-    #             record = line.strip().split(',')
-    #             apps_used.add(record[2])
-    # print len(apps_used)
-    # print '\n'.join(apps_used - set(load_apps()))
-    pan = load_pan('a1')
-    print pan.get_nodes()
+    for uid in load_uids():
+        pan = load_pan(uid)
+        print pan.number_of_nodes(), pan.number_of_edges(), uid

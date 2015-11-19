@@ -71,7 +71,7 @@ def recommend_by_pan(pan_base, pan_other):
 # Method 2nd: use "pans->pan" pattern to recommend
 def recommend_pan_based(uid):
     pan_base = load_pan(uid)
-    pans_other = [load_pan(u) for u in load_users() if u != uid]
+    pans_other = [load_pan(u) for u in load_uids() if u != uid]
 
     result = {}  # record score of each app candidate
     for pan_other in pans_other:
@@ -91,7 +91,7 @@ def recommend_pan_based(uid):
 
 # get "user-app-rating" matrix from pan
 def get_ratings(capps, users):
-    capps, users = load_capps(), load_users()
+    capps, users = load_capps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
 
@@ -125,7 +125,7 @@ def get_output():
 # Method 3rd: MF(matrix factorization) method on usage records
 def recommend_mf_based(uid):
     get_output()
-    capps, users = load_capps(), load_users()
+    capps, users = load_capps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
 

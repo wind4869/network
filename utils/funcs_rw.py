@@ -101,8 +101,8 @@ def load_apps():
     return load_capps() + load_napps()
 
 
-# load all users
-def load_users():
+# load all uids
+def load_uids():
     return [re.findall(r'[a-z]\d+', name)[0]
             for name in os.listdir(LOG_DIR) if name != '.DS_Store']
 
