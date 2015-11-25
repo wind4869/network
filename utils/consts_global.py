@@ -123,6 +123,9 @@ PAN_DOT = LAN_DIR + 'pan_%s.dot'
 LOG_DIR = ROOT_DIR + 'logs/'
 LOG_PATH = LOG_DIR + 'applog_%s.txt'
 
+# Temporal GraphML file path
+GRAPHML_PATH = '/tmp/pan.GraphML'
+
 # Correlation of apps in a session
 CORRELATION = [1, 0.9, 0.7, 0.4]
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import igraph as ig
 import matplotlib.pyplot as plt
 from utils.funcs_rw import *
 from scipy.stats import linregress
@@ -73,6 +74,15 @@ def power_law_distribution(lan):
     plt.show()
 
 
+def weakly_connected_components(lan):
+    num = nx.number_weakly_connected_components(lan)
+    components = nx.weakly_connected_component_subgraphs(lan)
+
+    print 'Number of weakly connected components: %d' % num
+    for c in components:
+        print c.number_of_nodes(), c.nodes()
+
+
 def strongly_connected_components(lan):
     num = nx.number_strongly_connected_components(lan)
     components = nx.strongly_connected_component_subgraphs(lan)
@@ -105,8 +115,8 @@ def link_analysis(lan):
     print nx.hits(lan)
 
 
-def greedy_longest_path(lan, source):
-    path, weights = [source], 0
+def single_source_longest_path(lan, source):
+    path, weight = [source], 0
     while lan.successors(source):
         next, mw = None, 0
         for node in lan.successors(source):
@@ -117,21 +127,45 @@ def greedy_longest_path(lan, source):
         # form a cycle
         if next in path: break
 
-        weights += mw
+        weight += mw
         path.append(next)
         source = next
 
-    return path, weights
+    return path, weight
 
 
 def longest_path(lan):
-    path, weights = [], 0
+    paths = []
     for node in lan.nodes():
-        result = greedy_longest_path(lan, node)
-        if result[1] > weights:
-            path = result[0]
-            weights = result[1]
-    return path, weights
+        paths.append(single_source_longest_path(lan, node))
+    return sorted(paths, key=lambda x: x[1], reverse=True)[0]
+
+
+def star_topologies(lan):
+    idict, odict = lan.in_degree(), lan.out_degree()  # { node: degree, ... }
+    ilist = sorted([(node, degree) for node, degree in idict.iteritems()],
+                   key=lambda x: x[1], reverse=True)
+    olist = sorted([(node, degree) for node, degree in odict.iteritems()],
+                   key=lambda x: x[1], reverse=True)
+
+    print lan.successors(olist[0][0])
+
+
+# convert graph in networkx to igraph
+def convert_to_igraph(uid):
+    nx.write_graphml(load_pan(uid), GRAPHML_PATH)
+    return ig.Graph.Read_GraphML(GRAPHML_PATH)
+
+
+def communities(uid):
+    pan = convert_to_igraph(uid)
+
+    clusters = pan.community_edge_betweenness().as_clustering()
+    # clusters = pan.community_spinglass()
+    membership = clusters.membership
+    vc = ig.VertexClustering(pan, membership)
+
+    ig.plot(vc, bbox=(1000, 1000))
 
 
 if __name__ == '__main__':
@@ -142,12 +176,16 @@ if __name__ == '__main__':
     # strongly_connected_components(gan)
 
     for uid in load_uids()[:1]:
-        pan = load_pan(uid)
-        print longest_path(pan)
+        communities('a1')
+        # for c in nx.k_clique_communities(load_gan().to_undirected(), 5):
+        #     print len(c)
+        # star_topologies(pan)
 
+        # print longest_path(pan)
         # scale_and_density(pan)
         # power_law_distribution(pan)
         # degree_distribution(pan)
+        # weakly_connected_components(pan)
         # strongly_connected_components(pan)
         # centrality(pan)
         # link_analysis(pan)
