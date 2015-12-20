@@ -23,3 +23,12 @@ com.android.mediacenter->@媒体中心
 com.android.email->@电子邮件
 com.android.settings->@设置
 com.android.wallpaper.livepicker->@壁纸
+com.android.nfc->@NFC
+com.android.keyguard->@锁屏
+com.android.musicfx->@音效设置
+com.android.wifi->@Wifi连接
+com.android.vpndialogs->@VPN对话框
+com.android.notepad->@记事本
+com.android.flashlight->@手电筒
+com.android.gamecenter->@游戏中心
+com.android.safe->@安全

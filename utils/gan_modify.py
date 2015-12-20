@@ -5,7 +5,7 @@ from utils.gan_rels_else import *
 
 
 def add_app(gan, new_app):
-    old_apps = gan.nodes()  # apps already in gan
+    old_apps = [app for app in gan.nodes() if app not in load_napps()]  # apps already in gan
     gan.add_node(new_app)  # add new app to gan
 
     for app_pair in [(new_app, old_app) for old_app in old_apps]:
@@ -73,8 +73,8 @@ def add_apps(new_apps):
         print '> %d ...' % count  # display progress
         add_app(gan, new_app)  # add one app each time
 
-    # dump gan
-    dump_gan(gan)
+    # nx.write_dot(gan, LAN_DIR + 'gan.dot')
+    pickle_dump(gan, LAN_DIR + 'gan.pickle')
 
 
 if __name__ == '__main__':

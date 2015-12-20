@@ -86,6 +86,9 @@ VERBDICT_TXT = FILE_DIR + 'verbdict.txt'
 # Dict of titles of all common apps
 APPDICT_TXT = FILE_DIR + 'appdict.txt'
 
+# Dict of app mapping result
+APPMAP_TXT = FILE_DIR + 'appmap.txt'
+
 # Dict of all native apps
 NATDICT_TXT = FILE_DIR + 'natdict.txt'
 

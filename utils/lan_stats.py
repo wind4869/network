@@ -8,19 +8,48 @@ from scipy.stats import linregress
 
 
 # get r-value(Pearson correlation coefficient)
-# linregress[0] = slope(斜率)
-# linregress[1] = intercept(截距)
+# linregress(x, y)[0] = slope(斜率)
+# linregress(x, y)[1] = intercept(截距)
 def pearson(x, y):
     return linregress(x, y)[2]
 
 
+def correlation_analyse():
+    for uid in load_uids():
+        pan = load_pan(uid)
+        apps_score = nx.pagerank(pan)
+
+        x, y = [], []
+        for app in apps_score:
+            x.append(apps_score[app])
+            y.append(pan.node[app]['weight'])
+
+        # correlated significantly if r > 0.8
+        r = pearson(x, y)
+        if r > 0.8:
+            print r, uid
+
+
+# number of nodes, number of edges and density
 def scale_and_density(lan):
     nodes = lan.number_of_nodes()
     edges = lan.number_of_edges()
     density = float(edges) / (nodes * (nodes - 1))
+    return nodes, edges, density
 
-    print ' nodes: %d\n edges: %d\n density: %.3f' % \
-          (nodes, edges, density)
+
+# get maximum, minimum and average statistics of PAN
+def stats_scale_and_density():
+    nodes, edges, density = [], [], []
+    for uid in load_uids():
+        result = scale_and_density(load_pan(uid))
+        nodes.append(result[0])
+        edges.append(result[1])
+        density.append(result[2])
+
+    print 'max: ', [max(x) for x in (nodes, edges, density)]
+    print 'min: ', [min(x) for x in (nodes, edges, density)]
+    print 'avg: ', [float(sum(x)) / len(x) for x in (nodes, edges, density)]
 
 
 def degree_histograms(lan):
@@ -134,6 +163,7 @@ def single_source_longest_path(lan, source):
     return path, weight
 
 
+# get longest path using a greedy algorithm
 def longest_path(lan):
     paths = []
     for node in lan.nodes():
@@ -141,6 +171,7 @@ def longest_path(lan):
     return sorted(paths, key=lambda x: x[1], reverse=True)[0]
 
 
+# get the centers of star topologies
 def star_topologies(lan):
     idict, odict = lan.in_degree(), lan.out_degree()  # { node: degree, ... }
     ilist = sorted([(node, degree) for node, degree in idict.iteritems()],
@@ -148,7 +179,7 @@ def star_topologies(lan):
     olist = sorted([(node, degree) for node, degree in odict.iteritems()],
                    key=lambda x: x[1], reverse=True)
 
-    print lan.successors(olist[0][0])
+    return ilist, olist
 
 
 # convert graph in networkx to igraph
@@ -157,6 +188,7 @@ def convert_to_igraph(uid):
     return ig.Graph.Read_GraphML(GRAPHML_PATH)
 
 
+# get communities using igraph
 def communities(uid):
     pan = convert_to_igraph(uid)
 
@@ -168,24 +200,69 @@ def communities(uid):
     ig.plot(vc, bbox=(1000, 1000))
 
 
+def compare_gan_pans_nodes():
+    apps_count = {}
+    for uid in load_uids():
+        for node in load_pan(uid).nodes():
+            apps_count.setdefault(node, 0)
+            apps_count[node] += 1
+
+    app_count_tuples, apps_in_pans = [], set([])
+    for node, count in apps_count.iteritems():
+        app_count_tuples.append((node, count))
+        apps_in_pans.add(node)
+
+    # sort by frequency
+    app_count_tuples.sort(key=lambda x: x[1], reverse=True)
+
+    # apps in gan
+    apps_in_gan = set(load_gan().nodes())
+
+    # total amount
+    print len(apps_in_gan), len(apps_in_pans)  # 2685, 665
+
+    # intersection
+    print len(apps_in_gan & apps_in_pans)  # 523 = (665 - 142)
+
+    for threshold in [1, 8, 16]:
+        apps = set([x[0] for x in filter(
+            lambda x: x[1] > threshold,
+            app_count_tuples)])
+        print len(apps)  # 213, 37, 20
+        print len(apps & apps_in_gan)  # 186, 36, 20
+
+
+def compare_gan_pans_edges():
+    edges_count = {}
+    for uid in load_uids():
+        for edge in load_pan(uid).edges():
+            edges_count.setdefault(edge, 0)
+            edges_count[edge] += 1
+
+    edge_count_tuples, edges_in_pans = [], set([])
+    for edge, count in edges_count.iteritems():
+        edge_count_tuples.append((edge, count))
+        edges_in_pans.add(edge)
+
+    # sort by frequency
+    edge_count_tuples.sort(key=lambda x: x[1], reverse=True)
+
+    # edges in gan
+    edges_in_gan = set(load_gan().edges())
+
+    # total amount
+    print len(edges_in_gan), len(edges_in_pans)  # 132841, 9143
+
+    # intersection
+    print len(edges_in_gan & edges_in_pans)  # 619 = (9143 - 8524)
+
+    for threshold in [1, 8, 16]:
+        edges = set([x[0] for x in filter(
+            lambda x: x[1] > threshold,
+            edge_count_tuples)])
+        print len(edges)  # 1746, 172, 71
+        print len(edges & edges_in_gan)  # 185, 17, 6
+
+
 if __name__ == '__main__':
-    # gan = load_gan()
-    # scale_and_density(gan)
-    # power_law_distribution(gan)
-    # degree_distribution(gan)
-    # strongly_connected_components(gan)
-
-    for uid in load_uids()[:1]:
-        communities('a1')
-        # for c in nx.k_clique_communities(load_gan().to_undirected(), 5):
-        #     print len(c)
-        # star_topologies(pan)
-
-        # print longest_path(pan)
-        # scale_and_density(pan)
-        # power_law_distribution(pan)
-        # degree_distribution(pan)
-        # weakly_connected_components(pan)
-        # strongly_connected_components(pan)
-        # centrality(pan)
-        # link_analysis(pan)
+    pass

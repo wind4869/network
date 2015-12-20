@@ -9,6 +9,12 @@ def maketime(s):
     return time.mktime(time.strptime(s, TIME_FORMAT))
 
 
+# map to app already exists in gan
+def domap(app):
+    appmap = load_appmap()
+    return appmap[app] if app in appmap else app
+
+
 # create pan
 def create_pan(uid):
     # create a directed graph
@@ -25,7 +31,7 @@ def create_pan(uid):
         elif line[0] not in ['[', ']']:
             record = line.strip().split(',')
             # usage time
-            app = record[2]
+            app = domap(record[2])  # do mapping
             times.setdefault(app, 0)
             times[app] += maketime(record[1]) - maketime(record[0])
             # add to session
@@ -58,7 +64,14 @@ def create_pan(uid):
     dump_pan(uid, pan)
 
 
-if __name__ == '__main__':
+# create PAN for all users
+def create_all():
+    count = 1
     for uid in load_uids():
-        pan = load_pan(uid)
-        print pan.number_of_nodes(), pan.number_of_edges(), uid
+        print '> %d ...' % count
+        create_pan(uid)
+        count += 1
+
+
+if __name__ == '__main__':
+    create_all()

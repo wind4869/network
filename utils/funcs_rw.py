@@ -65,6 +65,16 @@ def load_natdict():
     return natdict
 
 
+def load_appmap():
+    appmap = {}
+    f = open_in_utf8(FILE_DIR + 'appmap.txt')
+    for line in f.readlines():
+        key, value = line.strip().split('->')
+        appmap[key] = value
+    f.close()
+    return appmap
+
+
 # load raw intents from file
 def load_rintents(app):
     path = INTENT_PATH % app
@@ -113,7 +123,7 @@ def packageName(title):
 
 def title(app):
     record = appDetails.find_one({'packageName': app})
-    return title['title'] if record else load_natdict()[app]
+    return record['title'] if record else load_natdict()[app]
 
 
 def description(app):
@@ -225,7 +235,7 @@ def load_gan():
 
 # dump and load pan
 def dump_pan(uid, pan):
-    nx.write_dot(pan, PAN_DOT % uid)
+    # nx.write_dot(pan, PAN_DOT % uid)
     pickle_dump(pan, PAN_PICKLE % uid)
 
 

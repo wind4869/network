@@ -32,7 +32,9 @@ def download_details_htmls(app):
 
     if exists(DETAIL_URL % app) and \
             exists(HTML_URL % app):
-        [run(cmd) for cmd in DETAIL_CMD % app, HTML_CMD % app]
+        [run(cmd) for cmd in
+         DETAIL_CMD % (app, app),
+         HTML_CMD % (app, app)]
     else:
         print 'information not exists: %s' % app
 
@@ -74,10 +76,10 @@ def store_app_details(app):
         TIME_FORMAT, localtime(int(str(raw_details['updatedDate'])[:10]))) \
         if raw_details['updatedDate'] else ''
 
-    # get version
+    # get version (may be modified according to the API)
     details['version'] = {
-        'versionCode': raw_details['latestApk']['versionCode'],
-        'versionName': raw_details['latestApk']['versionName'],
+        'versionCode': raw_details['apks'][0]['versionCode'],
+        'versionName': raw_details['apks'][0]['versionName'],
     }
 
     # get developer
@@ -124,8 +126,8 @@ def store_intents_filters_permissions(app):
 
 # store inputs, outputs and refs to mongodb
 def store_inputs_outputs_refs(app):
-    # update_appdict()  # update appdict.txt
-    # inputs, outputs = get_inputs_outputs(app)
+    update_appdict()  # update appdict.txt
+    inputs, outputs = get_inputs_outputs(app)
 
     appDetails.update(
         {
@@ -133,8 +135,8 @@ def store_inputs_outputs_refs(app):
         },
         {
             '$set': {
-                # 'inputs': inputs,
-                # 'outputs': outputs,
+                'inputs': inputs,
+                'outputs': outputs,
                 'refs': get_refs(app),
             }
         })
@@ -142,14 +144,13 @@ def store_inputs_outputs_refs(app):
 
 # store all attributes of all apps
 def store():
-    # for app in load_capps():
-    #     store_app_details(app)
-    #     store_intents_filters_permissions(app)
+    for app in load_capps():
+        store_app_details(app)
+        store_intents_filters_permissions(app)
 
     for app in load_capps():
         store_inputs_outputs_refs(app)
 
 
 if __name__ == '__main__':
-    # store()
     pass
