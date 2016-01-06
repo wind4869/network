@@ -122,8 +122,9 @@ def packageName(title):
 
 
 def title(app):
+    natdict = load_natdict()
     record = appDetails.find_one({'packageName': app})
-    return record['title'] if record else load_natdict()[app]
+    return record['title'] if record else natdict[app] if app in natdict else app
 
 
 def description(app):
@@ -241,6 +242,25 @@ def dump_pan(uid, pan):
 
 def load_pan(uid):
     return pickle_load(PAN_PICKLE % uid)
+
+
+# get neighbors of app in lan
+def neighbors(lan, app):
+    return set(lan.successors(app) + lan.predecessors(app))
+
+
+# compute similarity of two pans
+def g_sim(pan1, pan2):
+    mnodes = max(pan1.number_of_nodes(), pan2.number_of_nodes())
+    mcs = 0
+
+    for app_from, app_to in pan1.edges():
+        if pan2.has_edge(app_from, app_to):
+            mcs += 1
+            # mcs += pan1[app_from][app_to]['weight'] + \
+            #        pan2[app_from][app_to]['weight']
+
+    return mcs * 1.0 / mnodes
 
 
 if __name__ == '__main__':

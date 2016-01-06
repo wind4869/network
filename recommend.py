@@ -28,24 +28,6 @@ def recommend_connection_based(uid):
     return sorted(temp, key=lambda x: x[1], reverse=True)
 
 
-# get neighbors of app in lan
-def neighbors(lan, app):
-    return set(lan.successors(app) + lan.predecessors(app))
-
-
-# compute similarity of two pans
-def g_sim(pan1, pan2):
-    mnodes = max(pan1.number_of_nodes(), pan2.number_of_nodes())
-    mcs = 0
-
-    for app_from, app_to in pan1.edges():
-        if pan2.has_edge(app_from, app_to):
-            mcs += pan1[app_from][app_to]['weight'] + \
-                   pan2[app_from][app_to]['weight']
-
-    return mcs * 1.0 / mnodes
-
-
 # use "pan of u2->pan of u1" pattern to recommend
 def recommend_by_pan(pan_base, pan_other):
     apps_base, apps_other = [set(pan.nodes()) for pan in pan_base, pan_other]
