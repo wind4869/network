@@ -32,10 +32,11 @@ def create_pan(uid):
             record = line.strip().split(',')
             # usage time
             app = domap(record[2])  # do mapping
-            times.setdefault(app, 0)
-            times[app] += maketime(record[1]) - maketime(record[0])
-            # add to session
-            session.append(app)
+            if app != u'com.android.launcher':
+                times.setdefault(app, 0)
+                times[app] += maketime(record[1]) - maketime(record[0])
+                # add to session
+                session.append(app)
         elif len(session) > 1:
             for index in xrange(len(session)):
                 app_from = session[index]

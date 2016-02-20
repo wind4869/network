@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import pandas
 import urllib2
 
 from time import strftime, localtime

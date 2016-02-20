@@ -236,7 +236,7 @@ def load_gan():
 
 # dump and load pan
 def dump_pan(uid, pan):
-    # nx.write_dot(pan, PAN_DOT % uid)
+    nx.write_dot(pan, PAN_DOT % uid)
     pickle_dump(pan, PAN_PICKLE % uid)
 
 
@@ -251,7 +251,7 @@ def neighbors(lan, app):
 
 # compute similarity of two pans
 def g_sim(pan1, pan2):
-    mnodes = max(pan1.number_of_nodes(), pan2.number_of_nodes())
+    medges = pan1.number_of_edges() + pan2.number_of_edges()
     mcs = 0
 
     for app_from, app_to in pan1.edges():
@@ -260,7 +260,7 @@ def g_sim(pan1, pan2):
             # mcs += pan1[app_from][app_to]['weight'] + \
             #        pan2[app_from][app_to]['weight']
 
-    return mcs * 1.0 / mnodes
+    return 2 * mcs / float(medges)
 
 
 if __name__ == '__main__':
