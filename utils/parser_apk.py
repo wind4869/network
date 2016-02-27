@@ -114,4 +114,7 @@ def get_intents(app):
 
 
 if __name__ == '__main__':
-    pass
+    for v in versions[apps[0]]:
+        # apk_decompile(str(v))
+        # run(HTML_CMD % (pkg, v, pkg, v))
+        print v
