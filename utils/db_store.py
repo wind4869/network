@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import urllib2
-
 from time import strftime, localtime
 from BeautifulSoup import BeautifulSoup
 
@@ -15,22 +13,11 @@ appDetails = getAppDetails()
 usageRecords = getUsageRecords()
 
 
-# judge whether information of app exists
-def exists(url):
-    try:
-        if urllib2.urlopen(url).geturl() == url:
-            return True
-    except urllib2.HTTPError:
-        pass
-
-    return False
-
-
 # download detail and home page of app
 def download_details_htmls(app):
 
-    if exists(DETAIL_URL % app) and \
-            exists(HTML_URL % app):
+    if url_exists(DETAIL_URL % app) and \
+            url_exists(HTML_URL % app):
         [run(cmd) for cmd in
          DETAIL_CMD % (app, app),
          HTML_CMD % (app, app)]

@@ -4,8 +4,9 @@ import numpy as np
 import igraph as ig
 import pygraphviz as pyv
 import matplotlib.pyplot as plt
-from utils.funcs_rw import *
 from scipy.stats import linregress, spearmanr
+
+from utils.funcs_rw import *
 
 
 # get r-value(Pearson correlation coefficient)

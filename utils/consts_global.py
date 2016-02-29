@@ -12,14 +12,18 @@ EVOLUTION = True
 CURL_CMD = 'curl -C - -L -o %s %s'
 
 # APK download url and cmd
-APK_PATH = ROOT_DIR + 'apks/%s.apk'
+APK_DIR = ROOT_DIR + 'apks/'
+APK_PATH = APK_DIR + '%s.apk'
 APK_URL = 'http://apps.wandoujia.com/apps/%s/download'
 
 if EVOLUTION:  # new constants for evolution research
-    APK_PATH = ROOT_DIR + 'apks/%s/%s.apk'
+    APK_PATH = APK_DIR + '%s/%s.apk'
     APK_URL = 'http://apk.hiapk.com/appdown/%s/%s'
 
 APK_CMD = CURL_CMD % (APK_PATH, APK_URL)
+
+# Version url
+VERSION_URL = 'http://apps.wandoujia.com/apps/%s/versions'
 
 # Detail download url and cmd
 DETAIL_PATH = ROOT_DIR + 'details/%s.txt'
@@ -27,11 +31,12 @@ DETAIL_URL = 'http://apps.wandoujia.com/api/v1/apps/%s'
 DETAIL_CMD = CURL_CMD % (DETAIL_PATH, DETAIL_URL)
 
 # Html download url and cmd
-HTML_PATH = ROOT_DIR + 'htmls/%s.html'
+HTML_DIR = ROOT_DIR + 'htmls/'
+HTML_PATH = HTML_DIR + '%s.html'
 HTML_URL = 'http://www.wandoujia.com/apps/%s'
 
 if EVOLUTION:  # new constants for evolution research
-    HTML_PATH = ROOT_DIR + 'htmls/%s/%s.html'
+    HTML_PATH = HTML_DIR + '%s/%s.html'
     HTML_URL = 'http://apk.hiapk.com/appinfo/%s/%s'
 
 HTML_CMD = CURL_CMD % (HTML_PATH, HTML_URL)
@@ -56,15 +61,16 @@ INTEGER_ATTRS = [
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 # Path of Jar, xml, intent and filter files
-APP_DIR = ROOT_DIR + 'apps/%s/'
+APP_DIR = ROOT_DIR + 'apps/'
+APP_PATH = APP_DIR + '%s'
 
 if EVOLUTION:  # new constants for evolution research:
-    APP_DIR = ROOT_DIR + 'apps/%s/%s/'
+    APP_PATH = APP_DIR + '%s/%s/'
 
-JAR_PATH = APP_DIR + 'classes.jar'
-XML_PATH = APP_DIR + 'AndroidManifest.xml'
-INTENT_PATH = APP_DIR + 'intents.txt'
-INTENT_FILTER_PATH = APP_DIR + 'intent-filters.txt'
+JAR_PATH = APP_PATH + 'classes.jar'
+XML_PATH = APP_PATH + 'AndroidManifest.xml'
+INTENT_PATH = APP_PATH + 'intents.txt'
+INTENT_FILTER_PATH = APP_PATH + 'intent-filters.txt'
 
 # Tools for apk analysis
 TOOL_DIR = ROOT_DIR + 'tools/'
@@ -85,13 +91,6 @@ TRAIN_SET = MF_DIR + 'train.txt'
 TEST_SET = MF_DIR + 'test.txt'
 MODEL = MF_DIR + 'model'
 OUTPUT = MF_DIR + 'output'
-
-# Tools(files) for LDA
-LDA_DIR = TOOL_DIR + 'lda/'
-DESC_DICT = LDA_DIR + 'desc.dict'
-CORPUS_MM = LDA_DIR + 'corpus.mm'
-TFIDF_MODEL = LDA_DIR + 'tfidf.model'
-LDA_MODEL = LDA_DIR + 'lda.model'
 
 # CMDs for MF
 TRAIN_CMD = '%s %s %s' % (MF_TRAIN, TRAIN_SET, MODEL)
@@ -164,23 +163,63 @@ CORRELATION = [1, 0.9, 0.7, 0.4]
 # Something about tests
 TEST_DIR = ROOT_DIR + 'tests/'
 
-# For stats: frequent pattern analysis of filters
+# For frequent pattern analysis of filters
 FILTER_DIR = TEST_DIR + 'filters/'
 FILTERS_MATCHED = FILTER_DIR + 'filters_matched.txt'
 CODE_DICT = FILTER_DIR + 'code_dict.txt'
 CODED_LIST = FILTER_DIR + 'coded_list.txt'
 APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
 
-# ==================== THE END =================================
+# For LDA analysis of descriptions
+LDA_DIR = TEST_DIR + 'lda/'
+DESC_DICT = LDA_DIR + 'desc.dict'
+CORPUS_MM = LDA_DIR + 'corpus.mm'
+TFIDF_MODEL = LDA_DIR + 'tfidf.model'
+LDA_MODEL = LDA_DIR + 'lda.model'
 
+# For figures
+FIGURE_PATH = TEST_DIR + 'figures/%s.pdf'
 
 if EVOLUTION:
-    versions = {
-        'com.tencent.mm': [7, 24, 38, 50, 54, 75, 77, 84, 85, 104, 107, 110, 134, 135, 138, 139, 161, 167, 169, 191, 192, 212, 215, 216, 218, 219, 224, 225, 251, 252, 253, 254, 255, 256, 257, 258, 259, 261, 350, 351, 352, 354, 355, 360, 361, 380, 420, 440, 460, 461, 462, 480, 501, 520, 540, 541, 542, 543, 561, 580, 581, 600, 601, 620, 621, 622, 640, 660, 680, 700, 720, 740],
-        'com.eg.android.AlipayGphone': [23, 24, 26, 27, 28, 29, 31, 33, 34, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 60, 61, 65, 67, 68, 70, 73, 76, 77, 78, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90],
+
+    APPS = [
+        'com.tencent.mm',
+        'com.eg.android.AlipayGphone',
+        'com.taobao.taobao',
+    ]
+
+    VERSIONS = {
+        'com.tencent.mm': [
+            7, 24, 38, 50, 54, 75, 77, 84, 85, 104,
+            107, 110, 134, 135, 138, 139, 161, 167, 169, 191,
+            192, 212, 215, 216, 218, 219, 224, 225, 251, 252,
+            253, 254, 255, 256, 257, 258, 259, 261, 350, 351,
+            352, 354, 355, 360, 361, 380, 420, 440, 460, 461,
+            462, 480, 501, 520, 540, 541, 542, 543, 561, 580,
+            581, 600, 601, 620, 621, 622, 640, 660, 680, 700,
+            720, 740
+        ],
+        'com.eg.android.AlipayGphone': [
+            23, 24, 26, 27, 28, 29, 31, 33, 34, 37,
+            38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+            48, 49, 50, 51, 52, 60, 61, 65, 67, 68,
+            70, 73, 76, 77, 78, 79, 81, 82, 83, 84,
+            85, 86, 87, 88, 89, 90
+        ],
+        'com.taobao.taobao': [
+            14, 15, 16, 17, 18, 19, 21, 22, 23, 24,
+            25, 26, 27, 30, 32, 34, 35, 36, 38, 40,
+            41, 42, 43, 44, 45, 51, 52, 53, 54, 56,
+            58, 59, 60, 61, 62, 63, 64, 65, 66, 67,
+            68, 69, 70, 71, 72, 73, 78, 81, 83, 85,
+            86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+            96, 97, 98, 99, 101, 102, 103, 104, 105, 107,
+            108, 109, 110, 111, 113, 114, 115, 116, 117, 119,
+            121, 122, 123, 124, 126, 127, 128, 129, 130
+        ],
     }
 
-    apps = ['com.eg.android.AlipayGphone', 'com.tencent.mm']
+# ==================== THE END =================================
 
 
 if __name__ == '__main__':

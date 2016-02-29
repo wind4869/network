@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
 
 import xml.etree.cElementTree as et
+
 from utils.funcs_rw import *
 from utils.consts_global import *
 
 
 # use curl to download app
-def apk_download(pkg):
-    print '> downloading %s.apk ... ' % pkg
-    run(APK_CMD % (pkg, pkg))
+def apk_download(app):
+    print '> downloading %s.apk ... ' % app
+    run(APK_CMD % (app, app))
 
 
 # use dex2jar to get jar by decompiling apk
-def dex_decompile(pkg):
-    print '-> decompiling classes.dex for %s.jar ... ' % pkg
-    run(D2J_CMD % (pkg, pkg))
+def dex_decompile(app, v):
+    print '-> decompiling classes.dex for %s.jar ... ' % app
+    run(D2J_CMD % (app, app))
 
 
 # use APKParser to extract AndroidManifest.xml from apk
-def xml_extract(pkg):
+def xml_extract(app):
     print '--> extracting AndroidManifest.xml ... '
-    run(XML_CMD % (pkg, pkg))
+    run(XML_CMD % (app, app))
 
 
 # get jar and AndroidManifest.xml
@@ -37,12 +38,12 @@ def apk_decompile(pkg):
 
 
 # parse xml to extract intent-filters and permissions(perms)
-def get_filters(app):
+def get_filters(app, v):
     filters = []
     ns = {'android': '{http://schemas.android.com/apk/res/android}'}
     keys = ['mimeType', 'scheme', 'host', 'port', 'path', 'pathPrefix', 'pathPattern']
 
-    path = XML_PATH % app
+    path = XML_PATH % (app, v)
     if not os.path.exists(path):
         print '[parser_xml][File not exists]: %s' % path
         return [], []
@@ -83,12 +84,12 @@ def get_filters(app):
 
 
 # extract explicit and implicit intents from raw intents
-def get_intents(app):
+def get_intents(app, v):
     explicits = []  # explict intents
     implicits = []  # implicit intents
 
     # raw string of intents
-    raw_intents = load_rintents(app)
+    raw_intents = load_rintents(app, v)
     # pattern for removing self-calling intents
     self_pattern = re.compile('^' + app.replace('.', '\.'))
 
@@ -114,7 +115,4 @@ def get_intents(app):
 
 
 if __name__ == '__main__':
-    for v in versions[apps[0]]:
-        # apk_decompile(str(v))
-        # run(HTML_CMD % (pkg, v, pkg, v))
-        print v
+    pass

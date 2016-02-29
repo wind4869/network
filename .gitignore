@@ -5,4 +5,6 @@ details/
 htmls/
 *.pyc
 *.dot
+*.pdf
+*.png
 .DS_Store

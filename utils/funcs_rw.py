@@ -3,6 +3,7 @@
 import os
 import re
 import codecs
+import urllib2
 import cPickle as pickle
 
 import networkx as nx
@@ -76,8 +77,8 @@ def load_appmap():
 
 
 # load raw intents from file
-def load_rintents(app):
-    path = INTENT_PATH % app
+def load_rintents(app, v):
+    path = INTENT_PATH % (app, v)
     if not os.path.exists(path):
         print '[load_rintents][File not exists]: %s' % path
         return None
@@ -261,6 +262,17 @@ def g_sim(pan1, pan2):
             #        pan2[app_from][app_to]['weight']
 
     return 2 * mcs / float(medges)
+
+
+# judge whether url of app exists
+def url_exists(url):
+    try:
+        if urllib2.urlopen(url).geturl() == url:
+            return True
+    except urllib2.HTTPError:
+        pass
+
+    return False
 
 
 if __name__ == '__main__':
