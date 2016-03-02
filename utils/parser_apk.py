@@ -104,8 +104,8 @@ def get_intents(app, v):
                             class_name = intent.get('class')
                             if class_name:
                                 class_name = class_name.replace('/', '.')  # remove self-calling intents
-                                if not self_pattern.match(class_name):
-                                    explicits.append(class_name)
+                                # if not self_pattern.match(class_name):
+                                explicits.append(class_name)
                         else:
                             intent.pop('explicit')  # implicit intents
                             if intent:

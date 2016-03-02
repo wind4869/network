@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
 import jieba
 import matplotlib.pyplot as plt
 from gensim import corpora, models
+from sklearn.cluster import KMeans
 from collections import defaultdict
 from BeautifulSoup import BeautifulSoup
 
@@ -51,6 +53,19 @@ def parser_dataset(app, versions):
         [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [D2J_CMD, XML_CMD]]]
 
 
+def raw_desc(app, v):
+    raws = []
+    soup = BeautifulSoup(open(HTML_PATH % (app, v)))
+
+    for pre in soup.findAll('pre'):
+        raws.append(pre.text)
+
+    if len(raws) < 2:
+        raws.append('')
+
+    return raws
+
+
 def heat_map(data, xlabel, ylabel, fname):
     fig, ax = plt.subplots()
     im = ax.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
@@ -69,50 +84,45 @@ def heat_map(data, xlabel, ylabel, fname):
     plt.ylabel(ylabel)
 
     plt.grid()
-    # plt.colorbar(im)
+
+    # if re.match(r'^topics_\d+$', fname):
+    #     plt.colorbar(im)
+
     plt.savefig(FIGURE_PATH % fname, format='pdf')
     plt.show()
 
 
-def preproccess(app, v):
+def preproccess(raw):
 
-    # step 1. get raw description from html
-    raw = ""
-    soup = BeautifulSoup(open(HTML_PATH % (app, v)))
-    for pre in soup.findAll('pre'):
-        raw += pre.text
-
-    # step 2. word segmentation
+    # step 1. word segmentation
     word_list = list(jieba.cut(raw, cut_all=False))
 
-    # step 3. remove common stop words
+    # step 2. remove common stop words
     stoplist = load_content(STOPLIST_TXT)
     word_list = [word for word in word_list if word not in stoplist and len(word) > 1]
 
-    # step 4. remove words that appear only once
-    frequency = defaultdict(int)
-    for word in word_list:
-        frequency[word] += 1
-    word_list = [word for word in word_list if frequency[word] > 1]
+    # step 3. remove words that appear only once
+    # frequency = defaultdict(int)
+    # for word in word_list:
+    #     frequency[word] += 1
+    # word_list = [word for word in word_list if frequency[word] > 1]
 
     return word_list
 
 
-def train(num_topics):
+def train_lda(app, num_topics):
 
-    train_set = []
-    for app in APPS:
-        train_set.extend([preproccess(app, v) for v in VERSIONS[app]])
+    train_set = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
 
     dictionary = corpora.Dictionary(train_set)
     dictionary.save(DESC_DICT)  # store the dictionary, for future reference
 
     corpus = [dictionary.doc2bow(text) for text in train_set]
-    # corpora.MmCorpus.serialize(CORPUS_MM, corpus)
+    corpora.MmCorpus.serialize(CORPUS_MM, corpus)
 
-    tfidf = models.TfidfModel(corpus)
+    tfidf = models.TfidfModel(corpus, id2word=dictionary)
     corpus_tfidf = tfidf[corpus]
-    # tfidf.save(TFIDF_MODEL)
+    tfidf.save(TFIDF_MODEL)
 
     lda = models.LdaModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
     lda.save(LDA_MODEL)  # store to disk, for later use
@@ -121,13 +131,7 @@ def train(num_topics):
         print lda.print_topic(i)
 
 
-def predict(app, v, dictionary, lda):
-    word_list = preproccess(app, v)
-    doc_bow = dictionary.doc2bow(word_list)
-    return lda[doc_bow]
-
-
-def topics_test(app):
+def predict_lda(app):
 
     dictionary = corpora.Dictionary.load(DESC_DICT)
     lda = models.LdaModel.load(LDA_MODEL)
@@ -135,13 +139,46 @@ def topics_test(app):
 
     data = []
     for v in VERSIONS[app]:
+        raw = raw_desc(app, v)[1]  # only use update desc
+        if not raw:
+            continue
+
         temp = [0 for i in xrange(num)]
-        for t in predict(app, v, dictionary, lda):
+        word_list = preproccess(raw)
+        doc_bow = dictionary.doc2bow(word_list)
+
+        for t in lda[doc_bow]:
             index, probability = t
             temp[index] = probability
         data.append(temp)
 
-    heat_map(data, 'Topic Labels', 'Version Labels', 'topics_%d' % num)
+    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+
+
+def train_word2vec(app, num_clusters):
+
+    train_set = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
+
+    # train a word2vec model
+    word2vec = models.Word2Vec(train_set)
+
+    # initialize a k-means object and use it to extract centroids
+    kmeans_clustering = KMeans(num_clusters)
+    idx = kmeans_clustering.fit_predict(word2vec.syn0)
+
+    # create a word / index (cluster number) dictionary
+    word_centroid_map = dict(zip(word2vec.index2word, idx))
+
+    # one cluster for one topic
+    topics = [[] for i in xrange(num_clusters)]
+    for word, index in word_centroid_map.iteritems():
+        topics[index].append(word)
+
+    # print each topic
+    for t in topics:
+        print ', '.join(t)
+
+    return topics
 
 
 def unique(c):
@@ -149,13 +186,9 @@ def unique(c):
 
 
 def get_components_each(app, v):
-    intents = get_intents(app, v)
-    filters = get_filters(app, v)[0]
-    return [
-        ['.'.join(i.split('.')[:3]) for i in intents[0]],
-        intents[1],
-        filters
-    ]
+    components = list(get_intents(app, v))
+    components.append(get_filters(app, v)[0])
+    return components
 
 
 def get_components_all(app):
@@ -173,6 +206,7 @@ def get_components_all(app):
 
 
 def components_test(app, index):
+
     data = []
     components_all = get_components_all(app)[index]
 
@@ -183,20 +217,23 @@ def components_test(app, index):
 
         data.append([1 if i in components else 0 for i in components_all])
 
-    # heat_map(data, 'Explict-intent Labels', 'Version Labels', 'explict_intents')
-    # heat_map(data, 'Implicit-intent Labels', 'Version Labels', 'implicit_intents')
-    heat_map(data, 'Intent-filter Labels', 'Version Labels', 'intent_filters')
+    if index == 0:
+        heat_map(map(list, zip(*data)), 'Version Labels', 'Explict-intent Labels', 'explict_intents')
+    elif index == 1:
+        heat_map(map(list, zip(*data)), 'Version Labels', 'Implicit-intent Labels', 'implicit_intents')
+    elif index == 2:
+        heat_map(map(list, zip(*data)), 'Version Labels', 'Intent-filter Labels', 'intent_filters')
 
 
 if __name__ == '__main__':
-    app = 'com.taobao.taobao'
+    # app = 'com.taobao.taobao'
     # parser_dataset(app, download_dataset(app))
 
-    # app = APPS[0]
+    app = APPS[0]
 
-    # train(30)
-    # topics_test(app)
-    # components_test(app, 1)
+    # components_test(app, 2)
 
-    for v in VERSIONS[app]:
-        print v
+    # train_lda(app, 30)
+    # predict_lda(app)
+
+    train_word2vec(app, 30)
