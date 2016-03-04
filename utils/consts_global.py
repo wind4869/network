@@ -171,11 +171,12 @@ CODED_LIST = FILTER_DIR + 'coded_list.txt'
 APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
 
 # For LDA analysis of descriptions
-LDA_DIR = TEST_DIR + 'lda/'
-DESC_DICT = LDA_DIR + 'desc.dict'
-CORPUS_MM = LDA_DIR + 'corpus.mm'
-TFIDF_MODEL = LDA_DIR + 'tfidf.model'
-LDA_MODEL = LDA_DIR + 'lda.model'
+TOPOC_DIR = TEST_DIR + 'topics/'
+DESC_DICT = TOPOC_DIR + 'desc.dict'
+CORPUS_MM = TOPOC_DIR + 'corpus.mm'
+TFIDF_MODEL = TOPOC_DIR + 'tfidf.model'
+LDA_MODEL = TOPOC_DIR + 'lda.model'
+WORD2VEC = TOPOC_DIR + 'word2vec.pickle'
 
 # For figures
 FIGURE_PATH = TEST_DIR + 'figures/%s.pdf'

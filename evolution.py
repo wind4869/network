@@ -9,6 +9,7 @@ from collections import defaultdict
 from BeautifulSoup import BeautifulSoup
 
 from utils.parser_apk import *
+from utils.bm25 import BM25
 
 
 # get number, apk and html of each version for app
@@ -84,11 +85,9 @@ def heat_map(data, xlabel, ylabel, fname):
     plt.ylabel(ylabel)
 
     plt.grid()
+    # plt.colorbar(im)
 
-    # if re.match(r'^topics_\d+$', fname):
-    #     plt.colorbar(im)
-
-    plt.savefig(FIGURE_PATH % fname, format='pdf')
+    # plt.savefig(FIGURE_PATH % fname, format='pdf')
     plt.show()
 
 
@@ -127,6 +126,7 @@ def train_lda(app, num_topics):
     lda = models.LdaModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
     lda.save(LDA_MODEL)  # store to disk, for later use
 
+    # print each topic
     for i in xrange(num_topics):
         print lda.print_topic(i)
 
@@ -155,7 +155,7 @@ def predict_lda(app):
     heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', 'topics_%d' % num)
 
 
-def train_word2vec(app, num_clusters):
+def train_word2vec(app, num_topics):
 
     train_set = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
 
@@ -163,22 +163,67 @@ def train_word2vec(app, num_clusters):
     word2vec = models.Word2Vec(train_set)
 
     # initialize a k-means object and use it to extract centroids
-    kmeans_clustering = KMeans(num_clusters)
+    kmeans_clustering = KMeans(num_topics)
     idx = kmeans_clustering.fit_predict(word2vec.syn0)
 
     # create a word / index (cluster number) dictionary
     word_centroid_map = dict(zip(word2vec.index2word, idx))
 
     # one cluster for one topic
-    topics = [[] for i in xrange(num_clusters)]
+    topics = [[] for i in xrange(num_topics)]
     for word, index in word_centroid_map.iteritems():
         topics[index].append(word)
+
+    # store topics
+    pickle_dump(topics, WORD2VEC)
 
     # print each topic
     for t in topics:
         print ', '.join(t)
 
-    return topics
+
+def predict_tfidf(app):
+
+    dictionary = corpora.Dictionary.load(DESC_DICT)
+    tfidf = models.TfidfModel.load(TFIDF_MODEL)
+    topics = pickle_load(WORD2VEC)
+    num = len(topics)
+
+    data = []
+    for v in VERSIONS[app]:
+        raw = ''.join(raw_desc(app, v))
+        if not raw:
+            continue
+
+        tfidf_dict = {}
+        corpus = dictionary.doc2bow(preproccess(raw))
+        for index, score in tfidf[corpus]:
+            tfidf_dict[index] = score
+
+        temp = []
+        for i in xrange(num):
+            score = 0
+            for word in topics[i]:
+                score += tfidf_dict.get(dictionary.token2id[word], 0)
+            temp.append(score / float(len(topics[i])))
+        data.append(temp)
+
+    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+
+
+def predict_bm25(app):
+    docs = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
+    bm25 = BM25(docs)
+
+    topics = pickle_load(WORD2VEC)
+    num = len(topics)
+
+    data = []
+    for t in topics:
+        scores = bm25.bm25_score(t)
+        data.append([x if x > 0 else 0 for x in scores])
+
+    heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
 
 
 def unique(c):
@@ -236,4 +281,6 @@ if __name__ == '__main__':
     # train_lda(app, 30)
     # predict_lda(app)
 
-    train_word2vec(app, 30)
+    # train_word2vec(app, 20)
+    predict_tfidf(app)
+    # predict_bm25(app)
