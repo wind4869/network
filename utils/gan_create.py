@@ -76,12 +76,13 @@ def create_gan():
 
 
 if __name__ == '__main__':
-    gan = load_gan()
+    # gan = load_gan()
     # for u, v in gan.edges():
     #     print '%s -> %s (%.2f), %r' % \
     #           (title(u), title(v), gan[u][v]['weight'], gan[u][v]['weights'])
-    cats = set([])
-    for app in load_capps():
-        if categories(app):
-            cats.add(categories(app)[0])
-    print '\n'.join(cats)
+    print sim_match('com.tencent.mm', 'com.tencent.mobileqq')
+    # cats = set([])
+    # for app in load_capps():
+    #     if categories(app):
+    #         cats.add(categories(app)[0])
+    # print '\n'.join(cats)

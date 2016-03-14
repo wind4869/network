@@ -16,8 +16,6 @@ def pearson(x, y):
     return linregress(x, y)
 
 
-# GAN: 0.31/5.21E-61(out), 0.44/2.04E-128(in)
-# PAN: 0.35/0.20(out), 0.35/0.18(in)
 def correlation_analyse():
     rank = []
     for app in load_capps():
@@ -81,7 +79,7 @@ def stats_scale_and_density():
     ax3.legend(loc=0)
 
     plt.xlabel('User Labels')
-    plt.savefig('/Users/wind/Desktop/fig_scale.pdf', format='pdf')
+    # plt.savefig('/Users/wind/Desktop/fig_scale.pdf', format='pdf')
     plt.show()
 
 
@@ -117,7 +115,7 @@ def power_law_distribution(lan):
     plt.xlabel('Degree Values')
     plt.ylabel('Number of Nodes (Apps)')
     # plt.title('Power Law Distribution of GAN')
-    plt.savefig('/Users/wind/Desktop/fig_degree.pdf', format='pdf')
+    # plt.savefig('/Users/wind/Desktop/fig_degree.pdf', format='pdf')
     plt.show()
 
 
@@ -403,7 +401,7 @@ def compare_gan_pan_all():
     ax2.set_ylabel('Ratios of Common Edges in GAN (%)')
     ax2.legend(loc=(0.02, 0.9))
 
-    plt.savefig('/Users/wind/Desktop/fig_percentage.pdf', format='pdf')
+    # plt.savefig('/Users/wind/Desktop/fig_percentage.pdf', format='pdf')
     plt.show()
 
 
@@ -479,7 +477,7 @@ def draw_comparison_graphs(l1, l2):
         #                label='%.2f' % (v / float(40)), style='bold')
 
     graph.layout(prog='dot')
-    graph.draw('/Users/wind/Desktop/fig_difference.pdf', format='pdf')
+    # graph.draw('/Users/wind/Desktop/fig_difference.pdf', format='pdf')
     # graph.draw('/Users/wind/Desktop/fig_commonness.pdf', format='pdf')
 
 
@@ -513,7 +511,7 @@ def compare_similarity():
     plt.ylabel('User Labels')
 
     plt.colorbar(im)
-    plt.savefig('/Users/wind/Desktop/fig_similarity.pdf', format='pdf')
+    # plt.savefig('/Users/wind/Desktop/fig_similarity.pdf', format='pdf')
     plt.show()
 
 
@@ -663,7 +661,7 @@ def compare_pattern():
     plt.xlabel('User Labels')
     plt.ylabel('Number of Edges')
     plt.legend(loc=0)
-    plt.savefig('/Users/wind/Desktop/fig_pattern.pdf', format='pdf')
+    # plt.savefig('/Users/wind/Desktop/fig_pattern.pdf', format='pdf')
     plt.show()
 
 
@@ -673,20 +671,23 @@ def titleEn(app):
 
 
 if __name__ == '__main__':
-    # stats_scale_and_density()
+    stats_scale_and_density()
     # compare_pan_community()
     # correlation_analyse()
-    # power_law_distribution(load_gan())
+    power_law_distribution(load_gan())
 
-    # compare_gan_pan_all()
+    compare_gan_pan_all()
     compare_similarity()
     # compare_personality()
-    # compare_pattern()
+    compare_pattern()
 
     # data for 'fig_difference.pdf'
-    # l1 = [((u'com.tencent.mobileqq', u'com.tencent.mm'), 36), ((u'com.tencent.mm', u'com.tencent.mobileqq'), 35), ((u'com.eg.android.AlipayGphone', u'com.tencent.mm'), 20), ((u'com.UCMobile', u'com.tencent.mobileqq'), 17), ((u'com.taobao.taobao', u'com.tencent.mm'), 17), ((u'com.sina.weibo', u'com.tencent.mm'), 17), ((u'com.UCMobile', u'com.tencent.mm'), 16), ((u'com.sina.weibo', u'com.tencent.mobileqq'), 15), ((u'com.tencent.mm', u'com.sina.weibo'), 15), ((u'com.tencent.mobileqq', u'com.sina.weibo'), 12), ((u'cn.wps.moffice_eng', u'com.tencent.mm'), 9), ((u'com.qiyi.video', u'com.tencent.mobileqq'), 9), ((u'com.baidu.tieba', u'com.tencent.mm'), 9), ((u'com.tencent.mm', u'com.baidu.tieba'), 9), ((u'com.taobao.taobao', u'com.eg.android.AlipayGphone'), 9), ((u'com.sankuai.meituan', u'com.tencent.mm'), 9), ((u'com.youdao.dict', u'com.tencent.mm'), 9)]
     # l2 = [((u'com.tencent.mm', u'com.eg.android.AlipayGphone'), 23), ((u'com.tencent.mobileqq', u'com.eg.android.AlipayGphone'), 21), ((u'com.tencent.mobileqq', u'com.UCMobile'), 18), ((u'com.eg.android.AlipayGphone', u'com.tencent.mobileqq'), 18), ((u'com.tencent.mm', u'com.UCMobile'), 18), ((u'com.tencent.mobileqq', u'com.taobao.taobao'), 16), ((u'com.taobao.taobao', u'com.tencent.mobileqq'), 15), ((u'com.tencent.mm', u'com.taobao.taobao'), 15), ((u'com.tencent.mm', u'cn.wps.moffice_eng'), 10), ((u'com.tencent.mm', u'com.sankuai.meituan'), 9)]
     # draw_comparison_graphs(l1, l2)
 
     # subpattern('l1')
     # subpattern('f2')
+
+    # graph = pyv.AGraph(LAN_DIR + 'pan_a3.dot')
+    # graph.layout(prog='dot')
+    # graph.draw('/Users/wind/Desktop/fig_difference.pdf', format='pdf')

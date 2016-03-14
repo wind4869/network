@@ -31,7 +31,7 @@ def gan_edge_pie_chart():
     sizes = [number_of_explicit, number_of_implicit, number_of_similar]
 
     pie_chart(
-        ['Explicit', 'Implicit', 'Similar'],
+        ['IR', 'SR', 'SM'],
         sizes,
         ['lightskyblue', 'lightcoral', 'yellow'],
         (0, 0.1, 0.2)
@@ -96,4 +96,5 @@ def pan_gan_intersection():
 
 
 if __name__ == '__main__':
-    pan_gan_intersection()
+    # pan_gan_intersection()
+    gan_edge_pie_chart()

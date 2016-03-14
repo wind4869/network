@@ -87,7 +87,7 @@ def heat_map(data, xlabel, ylabel, fname):
     plt.grid()
     # plt.colorbar(im)
 
-    # plt.savefig(FIGURE_PATH % fname, format='pdf')
+    plt.savefig(FIGURE_PATH % fname, format='pdf')
     plt.show()
 
 
@@ -254,20 +254,22 @@ def components_test(app, index):
 
     data = []
     components_all = get_components_all(app)[index]
+    for i in xrange(len(components_all)):
+        print i, components_all[i]
 
-    for v in VERSIONS[app]:
-        components = get_components_each(app, v)[index]
-        if not components:
-            continue
+    # for v in VERSIONS[app]:
+    #     components = get_components_each(app, v)[index]
+    #     if not components:
+    #         continue
+    #
+    #     data.append([1 if i in components else 0 for i in components_all])
 
-        data.append([1 if i in components else 0 for i in components_all])
-
-    if index == 0:
-        heat_map(map(list, zip(*data)), 'Version Labels', 'Explict-intent Labels', 'explict_intents')
-    elif index == 1:
-        heat_map(map(list, zip(*data)), 'Version Labels', 'Implicit-intent Labels', 'implicit_intents')
-    elif index == 2:
-        heat_map(map(list, zip(*data)), 'Version Labels', 'Intent-filter Labels', 'intent_filters')
+    # if index == 0:
+    #     heat_map(map(list, zip(*data)), 'Version Labels', 'Explict-intent Labels', 'explict_intents')
+    # elif index == 1:
+    #     heat_map(map(list, zip(*data)), 'Version Labels', 'Implicit-intent Labels', 'implicit_intents')
+    # elif index == 2:
+    #     heat_map(map(list, zip(*data)), 'Version Labels', 'Intent-filter Labels', 'intent_filters')
 
 
 if __name__ == '__main__':
@@ -282,5 +284,5 @@ if __name__ == '__main__':
     # predict_lda(app)
 
     # train_word2vec(app, 20)
-    predict_tfidf(app)
+    # predict_tfidf(app)
     # predict_bm25(app)
