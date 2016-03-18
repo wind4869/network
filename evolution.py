@@ -178,8 +178,13 @@ def train_word2vec(app, num_topics):
     pickle_dump(topics, WORD2VEC)
 
     # print each topic
-    for t in topics:
-        print ', '.join(t)
+    print_topics()
+
+
+def print_topics():
+    topics = pickle_load(WORD2VEC)
+    for i in xrange(len(topics)):
+        print i, ','.join(topics[i])
 
 
 def predict_tfidf(app):
@@ -191,7 +196,7 @@ def predict_tfidf(app):
 
     data = []
     for v in VERSIONS[app]:
-        raw = ''.join(raw_desc(app, v))
+        raw = raw_desc(app, v)[1]
         if not raw:
             continue
 
@@ -254,35 +259,37 @@ def components_test(app, index):
 
     data = []
     components_all = get_components_all(app)[index]
-    for i in xrange(len(components_all)):
-        print i, components_all[i]
+    # for i in xrange(len(components_all)):
+    #     print i, components_all[i]
 
-    # for v in VERSIONS[app]:
-    #     components = get_components_each(app, v)[index]
-    #     if not components:
-    #         continue
-    #
-    #     data.append([1 if i in components else 0 for i in components_all])
+    for v in VERSIONS[app]:
+        components = get_components_each(app, v)[index]
+        if not components:
+            continue
 
-    # if index == 0:
-    #     heat_map(map(list, zip(*data)), 'Version Labels', 'Explict-intent Labels', 'explict_intents')
-    # elif index == 1:
-    #     heat_map(map(list, zip(*data)), 'Version Labels', 'Implicit-intent Labels', 'implicit_intents')
-    # elif index == 2:
-    #     heat_map(map(list, zip(*data)), 'Version Labels', 'Intent-filter Labels', 'intent_filters')
+        data.append([1 if i in components else 0 for i in components_all])
+
+    if index == 0:
+        heat_map(map(list, zip(*data)), 'Version Labels', 'Explict-intent Labels', 'explict_intents')
+    elif index == 1:
+        heat_map(map(list, zip(*data)), 'Version Labels', 'Implicit-intent Labels', 'implicit_intents')
+    elif index == 2:
+        heat_map(map(list, zip(*data)), 'Version Labels', 'Intent-filter Labels', 'intent_filters')
 
 
 if __name__ == '__main__':
     # app = 'com.taobao.taobao'
     # parser_dataset(app, download_dataset(app))
 
+    index = 2
     app = APPS[0]
+    components_all = get_components_all(app)[index]
 
-    # components_test(app, 2)
+    components_test(app, index)
 
     # train_lda(app, 30)
     # predict_lda(app)
 
     # train_word2vec(app, 20)
-    # predict_tfidf(app)
+    predict_tfidf(app)
     # predict_bm25(app)

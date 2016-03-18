@@ -54,24 +54,28 @@ def get_filters(app, v):
         print '[parser_xml][cElementTree.ParseError]: %s' % path
         return [], []
 
-    for f in tree.iter('intent-filter'):
-        action, category, data = [], [], []
-        for a in f.iter('action'):
-            action.append(a.attrib[ns['android'] + 'name'])
-        for c in f.iter('category'):
-            category.append(c.attrib[ns['android'] + 'name'])
-        for d in f.iter('data'):
-            piece, attrs = {}, d.attrib
-            for key in keys:
-                value = attrs.get(ns['android'] + key)
-                if value:
-                    piece[key] = value
-            if piece:
-                data.append(piece)
+    for a in tree.iter('activity'):
+        activity = a.attrib[ns['android'] + 'name']
+        for f in a.iter('intent-filter'):
 
-        piece = {'actions': action, 'categories': category, 'datas': data}
-        [piece.pop(key) for key in piece.copy() if not piece[key]]
-        filters.append(piece)
+            action, category, data = [], [], []
+            for a in f.iter('action'):
+                action.append(a.attrib[ns['android'] + 'name'])
+            for c in f.iter('category'):
+                category.append(c.attrib[ns['android'] + 'name'])
+            for d in f.iter('data'):
+                piece, attrs = {}, d.attrib
+                for key in keys:
+                    value = attrs.get(ns['android'] + key)
+                    if value:
+                        piece[key] = value
+                if piece:
+                    data.append(piece)
+
+            piece = {'actions': action, 'categories': category, 'datas': data}
+            [piece.pop(key) for key in piece.copy() if not piece[key]]
+            # filters.append((activity, piece))
+            filters.append(piece)
 
     perms = []
     perm_pattern = re.compile(r'^android\.permission')
@@ -115,4 +119,5 @@ def get_intents(app, v):
 
 
 if __name__ == '__main__':
-    pass
+    for f in get_filters('com.tencent.mm', 740)[0]:
+        print f
