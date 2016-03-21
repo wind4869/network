@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import math
-import numpy
 import Levenshtein
 
 from utils.funcs_rw import *
@@ -35,11 +33,6 @@ def sim_io(u, v):
     for i in [a * b for a, b in zip(u, v)]:
         if i: count += 1
     return float(count) / 9
-
-
-# calculate cosine similarity of two vectors
-def sim_cosine(u, v):
-    return numpy.dot(u, v) / (math.sqrt(numpy.dot(u, u)) * math.sqrt(numpy.dot(v, v)))
 
 
 # get sim matching result

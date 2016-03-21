@@ -220,6 +220,27 @@ if EVOLUTION:
         ],
     }
 
+# For existence type of intents/filters
+EXISTENCE = enum(
+    'ENTIRE',
+    'PERSIST',
+    'INTERRUPT',
+    'DISAPPEAR'
+)
+
+# For type of components
+COMPONENT = enum(
+    'E_INTENT',
+    'I_INTENT',
+    'I_FILTER'
+)
+
+# For the direction of data
+DIRECTION = enum(
+    'COMPONENT',
+    'VERSION'
+)
+
 # ==================== THE END =================================
 
 

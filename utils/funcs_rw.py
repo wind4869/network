@@ -2,6 +2,8 @@
 
 import os
 import re
+import math
+import numpy
 import codecs
 import urllib2
 import cPickle as pickle
@@ -262,6 +264,11 @@ def g_sim(pan1, pan2):
             #        pan2[app_from][app_to]['weight']
 
     return 2 * mcs / float(medges)
+
+
+# calculate cosine similarity of two vectors
+def sim_cosine(u, v):
+    return numpy.dot(u, v) / (math.sqrt(numpy.dot(u, u)) * math.sqrt(numpy.dot(v, v)))
 
 
 # judge whether url of app exists

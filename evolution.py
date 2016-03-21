@@ -248,9 +248,9 @@ def get_components_all(app):
     for v in VERSIONS[app]:
         components = get_components_each(app, v)
 
-        eintents.extend(components[0])
-        iintents.extend(components[1])
-        filters.extend(components[2])
+        eintents.extend(components[COMPONENT.E_INTENT])
+        iintents.extend(components[COMPONENT.I_INTENT])
+        filters.extend(components[COMPONENT.I_FILTER])
 
     return [unique(c) for c in [eintents, iintents, filters]]
 
@@ -259,8 +259,8 @@ def components_test(app, index):
 
     data = []
     components_all = get_components_all(app)[index]
-    # for i in xrange(len(components_all)):
-    #     print i, components_all[i]
+    for i in xrange(len(components_all)):
+        print i, components_all[i]
 
     for v in VERSIONS[app]:
         components = get_components_each(app, v)[index]
