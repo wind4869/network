@@ -78,6 +78,7 @@ INTENT_FILTER_PATH = APP_PATH + 'intent-filters.txt'
 TOOL_DIR = ROOT_DIR + 'tools/'
 APK_PARSER = TOOL_DIR + 'APKParser.jar'
 DEX_TO_JAR = TOOL_DIR + 'dex2jar/d2j-dex2jar.sh'
+INTENT_ANALYSIS = TOOL_DIR + 'IntentAnalysis.sh'
 
 # CMDs for apk analysis
 XML_CMD = 'java -jar %s "%s" > "%s"' % \

@@ -68,6 +68,15 @@ def parser_dataset(app, versions):
         parameters = (app, v, app, v)
         [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [D2J_CMD, XML_CMD]]]
 
+    # prepare for intent extracting
+    f = open('/Users/wind/repos/IntentAnalysis/versions.txt', 'w')
+    f.write(app + '\n')
+    [f.write(str(v) + '\n') for v in versions]
+    f.close()
+
+    # start extracting
+    run(INTENT_ANALYSIS)
+
 
 def raw_desc(app, v):
     raws = []
@@ -293,14 +302,13 @@ def components_test(app, index):
 
 
 if __name__ == '__main__':
-    # app = 'com.taobao.taobao'
-
     count = 0
     apps = load_content(APPSC2_TXT)
     for app in apps[1:]:
         count += 1
         print '> %d. %s' % (count, app)
-        parser_dataset(app, download_dataset(app))
+        versions = download_dataset(app)
+        parser_dataset(app, versions)
 
     # index = 2
     # app = APPS[0]
