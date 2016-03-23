@@ -15,30 +15,45 @@ from utils.bm25 import BM25
 # get number, apk and html of each version for app
 def download_dataset(app):
 
+    # get all version numbers from wandoujia (limited)
     versions = set([])
     soup = BeautifulSoup(urllib2.urlopen(VERSION_URL % app).read())
     for span in soup.findAll(attrs={'class': 'version-code'}):
         versions.add(int(re.findall(r'\d+', span.text)[0]))
 
-    latest = sorted(versions)[-1]
-    print 'Latest version: ' + str(latest)
+    versions = sorted(versions)
+    max_version = versions[-1]
+    print 'versions: ', max_version, versions
 
+    # create apk and html directory of app
     run('mkdir %s%s' % (APK_DIR, app))
     run('mkdir %s%s' % (HTML_DIR, app))
 
-    versions = []
-    for v in xrange(latest + 1):
+    # crawl versions as much as possible in limited time
+    version_range = xrange(max_version) if max_version < 1000 else versions
 
-        if url_exists(HTML_URL % (app, v)):
+    version_date = {}
+    for v in version_range:
+        url = HTML_URL % (app, v)
+        if url_exists(url):
 
-            print '> %d ...' % v
-            versions.append(v)
+            # get datetime of this version
+            soup = BeautifulSoup(urllib2.urlopen(url).read())
+            date = \
+                soup.findAll(attrs={'class': 'line_content'})[-1].findAll('span')[-1].text.strip()
+            version_date[v] = date
 
+            # download apk and html of this version from http://apk.hiapk.com
             parameters = (app, v, app, v)
             [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [HTML_CMD, APK_CMD]]]
 
-    print versions
-    return versions
+            print '>> %d (%s) crawled ...' % (v, date)
+        else:
+            print '>> %d missed' % v
+
+    # store version numbers to pickle file
+    pickle_dump(version_date, VERSION_PATH % app)
+    return sorted(version_date.keys())
 
 
 def parser_dataset(app, versions):
@@ -47,7 +62,7 @@ def parser_dataset(app, versions):
 
     for v in versions:
 
-        print '> %d ...' % v
+        print '>> %d analysing ...' % v
         run('mkdir %s%s/%s' % (APP_DIR, app, v))
 
         parameters = (app, v, app, v)
@@ -279,17 +294,23 @@ def components_test(app, index):
 
 if __name__ == '__main__':
     # app = 'com.taobao.taobao'
-    # parser_dataset(app, download_dataset(app))
 
-    index = 2
-    app = APPS[0]
-    components_all = get_components_all(app)[index]
+    count = 0
+    apps = load_content(APPSC2_TXT)
+    for app in apps[1:]:
+        count += 1
+        print '> %d. %s' % (count, app)
+        parser_dataset(app, download_dataset(app))
 
-    components_test(app, index)
+    # index = 2
+    # app = APPS[0]
+    # components_all = get_components_all(app)[index]
+    #
+    # components_test(app, index)
 
     # train_lda(app, 30)
     # predict_lda(app)
 
     # train_word2vec(app, 20)
-    predict_tfidf(app)
+    # predict_tfidf(app)
     # predict_bm25(app)

@@ -22,9 +22,6 @@ if EVOLUTION:  # new constants for evolution research
 
 APK_CMD = CURL_CMD % (APK_PATH, APK_URL)
 
-# Version url
-VERSION_URL = 'http://apps.wandoujia.com/apps/%s/versions'
-
 # Detail download url and cmd
 DETAIL_PATH = ROOT_DIR + 'details/%s.txt'
 DETAIL_URL = 'http://apps.wandoujia.com/api/v1/apps/%s'
@@ -40,6 +37,11 @@ if EVOLUTION:  # new constants for evolution research
     HTML_URL = 'http://apk.hiapk.com/appinfo/%s/%s'
 
 HTML_CMD = CURL_CMD % (HTML_PATH, HTML_URL)
+
+# Version dictionary (version: date) and url
+VERSION_DIR = ROOT_DIR + 'versions/'
+VERSION_PATH = VERSION_DIR + '%s.pickle'
+VERSION_URL = 'http://apps.wandoujia.com/apps/%s/versions'
 
 # APP attributes
 STRING_ATTRS = [
@@ -120,6 +122,12 @@ APPLIST_TXT = FILE_DIR + 'applist.txt'
 
 # List of all common stop words
 STOPLIST_TXT = FILE_DIR + 'stoplist.txt'
+
+# List of apps that appear in http://apk.hiapk.com
+APPSC1_TXT = FILE_DIR + 'apps_c1.txt'
+
+# List of apps for evolution stats
+APPSC2_TXT = FILE_DIR + 'apps_c2.txt'
 
 # ==================== FOR LANS ================================
 
