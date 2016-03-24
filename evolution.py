@@ -15,7 +15,7 @@ from utils.bm25 import BM25
 # get number, apk and html of each version for app
 def download_dataset(app):
 
-    # get all version numbers from wandoujia (limited)
+    # get version numbers from wandoujia (limited)
     versions = set([])
     soup = BeautifulSoup(urllib2.urlopen(VERSION_URL % app).read())
     for span in soup.findAll(attrs={'class': 'version-code'}):
@@ -23,13 +23,13 @@ def download_dataset(app):
 
     versions = sorted(versions)
     max_version = versions[-1]
-    print 'versions: ', max_version, versions
+    print '>>', len(versions), versions
 
     # create apk and html directory of app
     run('mkdir %s%s' % (APK_DIR, app))
     run('mkdir %s%s' % (HTML_DIR, app))
 
-    # crawl versions as much as possible in limited time
+    # crawl as much versions as possible in the limited time
     version_range = xrange(max_version) if max_version < 1000 else versions
 
     version_date = {}
@@ -43,20 +43,21 @@ def download_dataset(app):
                 soup.findAll(attrs={'class': 'line_content'})[-1].findAll('span')[-1].text.strip()
             version_date[v] = date
 
+            print '>> %d (%s) crawling ...' % (v, date)
+
             # download apk and html of this version from http://apk.hiapk.com
             parameters = (app, v, app, v)
             [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [HTML_CMD, APK_CMD]]]
 
-            print '>> %d (%s) crawled ...' % (v, date)
         else:
             print '>> %d missed' % v
 
-    # store version numbers to pickle file
+    # store dict (version: date) numbers to file
     pickle_dump(version_date, VERSION_PATH % app)
     return sorted(version_date.keys())
 
 
-def parser_dataset(app, versions):
+def analyse_dataset(app, versions):
 
     run('mkdir %s%s/' % (APP_DIR, app))
 
@@ -68,14 +69,29 @@ def parser_dataset(app, versions):
         parameters = (app, v, app, v)
         [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [D2J_CMD, XML_CMD]]]
 
+    # remove all apk files
+    # print '>> remove all apk files'
+    # run('rm -r %s' % (APK_DIR + app))
+
+
+def extract_dataset(app, versions):
+
+    print '>> start extracting ... '
+
     # prepare for intent extracting
     f = open('/Users/wind/repos/IntentAnalysis/versions.txt', 'w')
     f.write(app + '\n')
     [f.write(str(v) + '\n') for v in versions]
     f.close()
 
-    # start extracting
+    # do intents extracting
     run(INTENT_ANALYSIS)
+
+    # remove all jar files
+    # print '>> remove all jar files'
+    # run('rm %s/*/classes.jar' % (APP_DIR + app))
+
+    print '>> extraction finished '
 
 
 def raw_desc(app, v):
@@ -302,13 +318,22 @@ def components_test(app, index):
 
 
 if __name__ == '__main__':
-    count = 0
+    count = 1
     apps = load_content(APPSC2_TXT)
-    for app in apps[1:]:
-        count += 1
+
+    for app in apps[count:]:
+
         print '> %d. %s' % (count, app)
+        count += 1
+
         versions = download_dataset(app)
-        parser_dataset(app, versions)
+        analyse_dataset(app, versions)
+        extract_dataset(app, versions)
+
+    # app = apps[count]
+    # versions = sorted(pickle_load(VERSION_PATH % app).keys())
+    # analyse_dataset(app, versions)
+    # extract_dataset(app, versions)
 
     # index = 2
     # app = APPS[0]
