@@ -70,8 +70,8 @@ def analyse_dataset(app, versions):
         [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [D2J_CMD, XML_CMD]]]
 
     # remove all apk files
-    # print '>> remove all apk files'
-    # run('rm -r %s' % (APK_DIR + app))
+    print '>> remove all apk files'
+    run('rm -r %s' % (APK_DIR + app))
 
 
 def extract_dataset(app, versions):
@@ -88,8 +88,8 @@ def extract_dataset(app, versions):
     run(INTENT_ANALYSIS)
 
     # remove all jar files
-    # print '>> remove all jar files'
-    # run('rm %s/*/classes.jar' % (APP_DIR + app))
+    print '>> remove all jar files'
+    run('rm %s/*/classes.jar' % (APP_DIR + app))
 
     print '>> extraction finished '
 
@@ -149,9 +149,12 @@ def preproccess(raw):
     return word_list
 
 
-def train_lda(app, num_topics):
+def train_lda(apps, num_topics):
 
-    train_set = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
+    train_set = []
+    for app in apps:
+        for v in get_versions(app):
+            train_set.append(preproccess(''.join(raw_desc(app, v))))
 
     dictionary = corpora.Dictionary(train_set)
     dictionary.save(DESC_DICT)  # store the dictionary, for future reference
@@ -178,7 +181,7 @@ def predict_lda(app):
     num = lda.num_topics
 
     data = []
-    for v in VERSIONS[app]:
+    for v in get_versions(app):
         raw = raw_desc(app, v)[1]  # only use update desc
         if not raw:
             continue
@@ -195,9 +198,12 @@ def predict_lda(app):
     heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', 'topics_%d' % num)
 
 
-def train_word2vec(app, num_topics):
+def train_word2vec(apps, num_topics):
 
-    train_set = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
+    train_set = []
+    for app in apps:
+        for v in get_versions(app):
+            train_set.append(preproccess(''.join(raw_desc(app, v))))
 
     # train a word2vec model
     word2vec = models.Word2Vec(train_set)
@@ -235,7 +241,7 @@ def predict_tfidf(app):
     num = len(topics)
 
     data = []
-    for v in VERSIONS[app]:
+    for v in get_versions(app):
         raw = raw_desc(app, v)[1]
         if not raw:
             continue
@@ -257,7 +263,7 @@ def predict_tfidf(app):
 
 
 def predict_bm25(app):
-    docs = [preproccess(''.join(raw_desc(app, v))) for v in VERSIONS[app]]
+    docs = [preproccess(''.join(raw_desc(app, v))) for v in get_versions(app)]
     bm25 = BM25(docs)
 
     topics = pickle_load(WORD2VEC)
@@ -268,7 +274,9 @@ def predict_bm25(app):
         scores = bm25.bm25_score(t)
         data.append([x if x > 0 else 0 for x in scores])
 
-    heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+    return data
+
+    # heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
 
 
 def unique(c):
@@ -285,7 +293,7 @@ def get_components_all(app):
 
     eintents, iintents, filters = [], [], []
 
-    for v in VERSIONS[app]:
+    for v in get_versions(app):
         components = get_components_each(app, v)
 
         eintents.extend(components[COMPONENT.E_INTENT])
@@ -302,7 +310,7 @@ def components_test(app, index):
     for i in xrange(len(components_all)):
         print i, components_all[i]
 
-    for v in VERSIONS[app]:
+    for v in get_versions(app):
         components = get_components_each(app, v)[index]
         if not components:
             continue
@@ -318,7 +326,7 @@ def components_test(app, index):
 
 
 if __name__ == '__main__':
-    count = 1
+    count = 5
     apps = load_content(APPSC2_TXT)
 
     for app in apps[count:]:
@@ -341,9 +349,36 @@ if __name__ == '__main__':
     #
     # components_test(app, index)
 
-    # train_lda(app, 30)
+    # train_lda(APPS, 30)
     # predict_lda(app)
 
-    # train_word2vec(app, 20)
+    # train_word2vec(APPS, 50)
     # predict_tfidf(app)
-    # predict_bm25(app)
+
+    # for app in APPS:
+    #     data_topics = predict_bm25(app)
+    #     data_versions = map(list, zip(*data_topics))
+    #
+    #     y = []
+    #     for i in xrange(1, len(data_versions)):
+    #         y.append(sim_cosine(data_versions[i - 1], data_versions[i]))
+    #
+    #     x = xrange(len(data_versions) - 1)
+    #
+    #     plt.plot(x, y, 'ro-')
+    #     plt.show()
+
+        # kmeans_clustering = KMeans(10)
+        #
+        # count = 0
+        # result_tuples = []
+        # for i in kmeans_clustering.fit_predict(data_versions):
+        #     result_tuples.append((count, i))
+        #     count += 1
+        #
+        # clusters = [[] for i in xrange(10)]
+        # for word, index in result_tuples:
+        #     clusters[index].append(word)
+
+        # print clusters
+

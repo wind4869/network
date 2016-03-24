@@ -282,5 +282,15 @@ def url_exists(url):
     return False
 
 
+# get apps for evolution analysis
+def load_eapps():
+    return load_content(APPSC2_TXT)
+
+
+# get all version numbers of an app
+def get_versions(app):
+    return sorted(pickle_load(VERSION_PATH % app).keys())
+
+
 if __name__ == '__main__':
     pass

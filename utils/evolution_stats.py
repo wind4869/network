@@ -190,6 +190,7 @@ def get_part(t1=100, t2=700):
 
     return part
 
+
 if __name__ == '__main__':
     # app = APPS[1]
     # existence_test(app, COMPONENT.I_INTENT)
