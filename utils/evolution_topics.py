@@ -212,7 +212,6 @@ if __name__ == '__main__':
         #     clusters[index].append(word)
 
         # print clusters
-    print get_versions(apps[0])
 
 
 
