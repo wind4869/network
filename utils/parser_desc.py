@@ -3,7 +3,7 @@
 import jieba
 import jieba.posseg as pseg
 
-from utils.funcs_rw import *
+from utils.functions import *
 from utils.consts_global import *
 
 

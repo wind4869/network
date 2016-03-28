@@ -6,7 +6,7 @@ import pygraphviz as pyv
 import matplotlib.pyplot as plt
 from scipy.stats import linregress, spearmanr
 
-from utils.funcs_rw import *
+from utils.functions import *
 
 
 # get r-value(Pearson correlation coefficient)

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-from utils.funcs_rw import *
+from utils.functions import *
 
 
 def pie_chart(labels, sizes, colors, explode):

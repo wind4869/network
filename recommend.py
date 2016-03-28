@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from utils.funcs_rw import *
+from utils.functions import *
 from math import ceil
 from random import choice
 

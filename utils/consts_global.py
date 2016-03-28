@@ -190,12 +190,6 @@ WORD2VEC = TOPOC_DIR + 'word2vec.pickle'
 # For figures
 FIGURE_PATH = TEST_DIR + 'figures/%s.pdf'
 
-APPS = [
-    'com.tencent.mm',
-    'com.eg.android.AlipayGphone',
-    'com.taobao.taobao',
-]
-
 # For existence type of intents/filters
 EXISTENCE = enum(
     'ENTIRE',

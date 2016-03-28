@@ -138,5 +138,23 @@ def store():
         store_inputs_outputs_refs(app)
 
 
+# store dictionary (version: datetime) of 50 apps
+def store_versions():
+    data = []
+    for app in load_eapps():
+        temp = {}
+
+        raw_dict = pickle_load(VERSION_PATH % app)
+        for k, v in raw_dict.iteritems():
+            temp[str(k)] = v
+
+        data.append({
+            'packageName': app,
+            'versions': temp
+        })
+
+    appVersions.insert(data)
+
+
 if __name__ == '__main__':
     pass

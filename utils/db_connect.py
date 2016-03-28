@@ -14,5 +14,9 @@ def getUsageRecords():
     return appInfo['usageRecords']
 
 
+def getAppVersions():
+    return appInfo['appVersions']
+
+
 if __name__ == '__main__':
     pass

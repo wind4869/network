@@ -6,9 +6,9 @@ import math
 import numpy
 import codecs
 import urllib2
-import cPickle as pickle
-
 import networkx as nx
+import cPickle as pickle
+import matplotlib.pyplot as plt
 
 from utils.db_connect import *
 from utils.consts_global import *
@@ -17,6 +17,8 @@ from utils.consts_global import *
 # get db object
 appDetails = getAppDetails()
 usageRecords = getUsageRecords()
+appVersions = getAppVersions()
+
 
 # open file use utf-8 encoding
 open_in_utf8 = lambda filename: \
@@ -289,7 +291,32 @@ def load_eapps():
 
 # get all version numbers of an app
 def get_versions(app):
-    return sorted(pickle_load(VERSION_PATH % app).keys())
+    version_dict = appVersions.find_one({'packageName': app})['versions']
+    return sorted([int(v) for v in version_dict])
+
+
+def heat_map(data, xlabel, ylabel, fname):
+    fig, ax = plt.subplots()
+    im = ax.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
+
+    # Move left and bottom spines outward by 10 points
+    ax.spines['left'].set_position(('outward', 10))
+    ax.spines['bottom'].set_position(('outward', 10))
+    # Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    plt.grid()
+    # plt.colorbar(im)
+
+    plt.savefig(FIGURE_PATH % fname, format='pdf')
+    plt.show()
 
 
 if __name__ == '__main__':

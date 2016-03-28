@@ -2,7 +2,7 @@
 
 import Levenshtein
 
-from utils.funcs_rw import *
+from utils.functions import *
 
 
 # get io matching result

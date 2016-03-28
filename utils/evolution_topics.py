@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import re
 import jieba
-import matplotlib.pyplot as plt
 from gensim import corpora, models
 from sklearn.cluster import KMeans
 from collections import defaultdict
@@ -10,88 +8,6 @@ from BeautifulSoup import BeautifulSoup
 
 from utils.parser_apk import *
 from utils.bm25 import BM25
-
-
-# get number, apk and html of each version for app
-def download_dataset(app):
-
-    # get version numbers from wandoujia (limited)
-    versions = set([])
-    soup = BeautifulSoup(urllib2.urlopen(VERSION_URL % app).read())
-    for span in soup.findAll(attrs={'class': 'version-code'}):
-        versions.add(int(re.findall(r'\d+', span.text)[0]))
-
-    versions = sorted(versions)
-    max_version = versions[-1]
-    print '>>', len(versions), versions
-
-    # create apk and html directory of app
-    run('mkdir %s%s' % (APK_DIR, app))
-    run('mkdir %s%s' % (HTML_DIR, app))
-
-    # crawl as much versions as possible in the limited time
-    version_range = xrange(max_version) if max_version < 1000 else versions
-
-    version_date = {}
-    for v in version_range:
-        url = HTML_URL % (app, v)
-        if url_exists(url):
-
-            # get datetime of this version
-            soup = BeautifulSoup(urllib2.urlopen(url).read())
-            date = \
-                soup.findAll(attrs={'class': 'line_content'})[-1].findAll('span')[-1].text.strip()
-            version_date[v] = date
-
-            print '>> %d (%s) crawling ...' % (v, date)
-
-            # download apk and html of this version from http://apk.hiapk.com
-            parameters = (app, v, app, v)
-            [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [HTML_CMD, APK_CMD]]]
-
-        else:
-            print '>> %d missed' % v
-
-    # store dict (version: date) numbers to file
-    pickle_dump(version_date, VERSION_PATH % app)
-    return sorted(version_date.keys())
-
-
-def analyse_dataset(app, versions):
-
-    run('mkdir %s%s/' % (APP_DIR, app))
-
-    for v in versions:
-
-        print '>> %d analysing ...' % v
-        run('mkdir %s%s/%s' % (APP_DIR, app, v))
-
-        parameters = (app, v, app, v)
-        [run(cmd) for cmd in [raw_cmd % parameters for raw_cmd in [D2J_CMD, XML_CMD]]]
-
-    # remove all apk files
-    print '>> remove all apk files'
-    run('rm -r %s' % (APK_DIR + app))
-
-
-def extract_dataset(app, versions):
-
-    print '>> start extracting ... '
-
-    # prepare for intent extracting
-    f = open('/Users/wind/repos/IntentAnalysis/versions.txt', 'w')
-    f.write(app + '\n')
-    [f.write(str(v) + '\n') for v in versions]
-    f.close()
-
-    # do intents extracting
-    run(INTENT_ANALYSIS)
-
-    # remove all jar files
-    print '>> remove all jar files'
-    run('rm %s/*/classes.jar' % (APP_DIR + app))
-
-    print '>> extraction finished '
 
 
 def raw_desc(app, v):
@@ -105,30 +21,6 @@ def raw_desc(app, v):
         raws.append('')
 
     return raws
-
-
-def heat_map(data, xlabel, ylabel, fname):
-    fig, ax = plt.subplots()
-    im = ax.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
-
-    # Move left and bottom spines outward by 10 points
-    ax.spines['left'].set_position(('outward', 10))
-    ax.spines['bottom'].set_position(('outward', 10))
-    # Hide the right and top spines
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    # Only show ticks on the left and bottom spines
-    ax.yaxis.set_ticks_position('left')
-    ax.xaxis.set_ticks_position('bottom')
-
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-
-    plt.grid()
-    # plt.colorbar(im)
-
-    plt.savefig(FIGURE_PATH % fname, format='pdf')
-    plt.show()
 
 
 def preproccess(raw):
@@ -279,69 +171,8 @@ def predict_bm25(app):
     # heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
 
 
-def unique(c):
-    return reduce(lambda a, b: a if b in a else a + [b], [[], ] + c)
-
-
-def get_components_each(app, v):
-    components = list(get_intents(app, v))
-    components.append(get_filters(app, v)[0])
-    return components
-
-
-def get_components_all(app):
-
-    eintents, iintents, filters = [], [], []
-
-    for v in get_versions(app):
-        components = get_components_each(app, v)
-
-        eintents.extend(components[COMPONENT.E_INTENT])
-        iintents.extend(components[COMPONENT.I_INTENT])
-        filters.extend(components[COMPONENT.I_FILTER])
-
-    return [unique(c) for c in [eintents, iintents, filters]]
-
-
-def components_test(app, index):
-
-    data = []
-    components_all = get_components_all(app)[index]
-    for i in xrange(len(components_all)):
-        print i, components_all[i]
-
-    for v in get_versions(app):
-        components = get_components_each(app, v)[index]
-        if not components:
-            continue
-
-        data.append([1 if i in components else 0 for i in components_all])
-
-    if index == 0:
-        heat_map(map(list, zip(*data)), 'Version Labels', 'Explict-intent Labels', 'explict_intents')
-    elif index == 1:
-        heat_map(map(list, zip(*data)), 'Version Labels', 'Implicit-intent Labels', 'implicit_intents')
-    elif index == 2:
-        heat_map(map(list, zip(*data)), 'Version Labels', 'Intent-filter Labels', 'intent_filters')
-
-
 if __name__ == '__main__':
-    count = 5
-    apps = load_content(APPSC2_TXT)
-
-    for app in apps[count:]:
-
-        print '> %d. %s' % (count, app)
-        count += 1
-
-        versions = download_dataset(app)
-        analyse_dataset(app, versions)
-        extract_dataset(app, versions)
-
-    # app = apps[count]
-    # versions = sorted(pickle_load(VERSION_PATH % app).keys())
-    # analyse_dataset(app, versions)
-    # extract_dataset(app, versions)
+    apps = load_eapps()
 
     # index = 2
     # app = APPS[0]
@@ -367,7 +198,7 @@ if __name__ == '__main__':
     #
     #     plt.plot(x, y, 'ro-')
     #     plt.show()
-
+    #
         # kmeans_clustering = KMeans(10)
         #
         # count = 0
@@ -381,4 +212,7 @@ if __name__ == '__main__':
         #     clusters[index].append(word)
 
         # print clusters
+    print get_versions(apps[0])
+
+
 

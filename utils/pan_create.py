@@ -2,7 +2,7 @@
 
 import time
 
-from utils.funcs_rw import *
+from utils.functions import *
 
 
 # creates time object from string

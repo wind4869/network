@@ -2,7 +2,7 @@
 
 import xml.etree.cElementTree as et
 
-from utils.funcs_rw import *
+from utils.functions import *
 from utils.consts_global import *
 
 
