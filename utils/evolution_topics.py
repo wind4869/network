@@ -166,52 +166,50 @@ def predict_bm25(app):
         scores = bm25.bm25_score(t)
         data.append([x if x > 0 else 0 for x in scores])
 
+    heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
     return data
 
-    # heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+
+def sim_neighbors():
+
+    data_topics = [predict_bm25(app) for app in apps]
+    data_versions = map(list, zip(*data_topics))
+
+    y = []
+    for i in xrange(1, len(data_versions)):
+        y.append(sim_cosine(data_versions[i - 1], data_versions[i]))
+
+    x = xrange(len(data_versions) - 1)
+
+    plt.plot(x, y, 'ro-')
+    plt.show()
+
+
+def cluster_test():
+    data_topics = [predict_bm25(app) for app in apps]
+    data_versions = map(list, zip(*data_topics))
+
+    count = 0
+    result_tuples = []
+
+    kmeans_clustering = KMeans(10)
+    for i in kmeans_clustering.fit_predict(data_versions):
+        result_tuples.append((count, i))
+        count += 1
+
+    clusters = [[] for i in xrange(10)]
+    for word, index in result_tuples:
+        clusters[index].append(word)
+
+    print clusters
 
 
 if __name__ == '__main__':
     apps = load_eapps()
 
-    # index = 2
-    # app = APPS[0]
-    # components_all = get_components_all(app)[index]
-    #
-    # components_test(app, index)
+    # train_lda(apps, 50)
+    # predict_lda(apps[0])
 
-    # train_lda(APPS, 30)
-    # predict_lda(app)
-
-    # train_word2vec(APPS, 50)
-    # predict_tfidf(app)
-
-    # for app in APPS:
-    #     data_topics = predict_bm25(app)
-    #     data_versions = map(list, zip(*data_topics))
-    #
-    #     y = []
-    #     for i in xrange(1, len(data_versions)):
-    #         y.append(sim_cosine(data_versions[i - 1], data_versions[i]))
-    #
-    #     x = xrange(len(data_versions) - 1)
-    #
-    #     plt.plot(x, y, 'ro-')
-    #     plt.show()
-    #
-        # kmeans_clustering = KMeans(10)
-        #
-        # count = 0
-        # result_tuples = []
-        # for i in kmeans_clustering.fit_predict(data_versions):
-        #     result_tuples.append((count, i))
-        #     count += 1
-        #
-        # clusters = [[] for i in xrange(10)]
-        # for word, index in result_tuples:
-        #     clusters[index].append(word)
-
-        # print clusters
-
-
-
+    # train_word2vec(apps, 50)
+    # predict_bm25(apps[0])
+    predict_tfidf(apps[2])

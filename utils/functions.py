@@ -315,7 +315,7 @@ def heat_map(data, xlabel, ylabel, fname):
     plt.grid()
     # plt.colorbar(im)
 
-    plt.savefig(FIGURE_PATH % fname, format='pdf')
+    # plt.savefig(FIGURE_PATH % fname, format='pdf')
     plt.show()
 
 

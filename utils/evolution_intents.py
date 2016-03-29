@@ -149,4 +149,3 @@ if __name__ == '__main__':
         existence_test(app, COMPONENT.I_FILTER)
         cover_test(app, COMPONENT.I_FILTER)
         version_test(app, COMPONENT.I_FILTER)
-    print len(get_components_all(app)[1])

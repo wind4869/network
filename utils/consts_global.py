@@ -169,18 +169,18 @@ CORRELATION = [1, 0.9, 0.7, 0.4]
 
 # ==================== FOR TESTS ===============================
 
-# Something about tests
-TEST_DIR = ROOT_DIR + 'tests/'
+# Temporary files
+TEMP_DIR = ROOT_DIR + 'temp/'
 
 # For frequent pattern analysis of filters
-FILTER_DIR = TEST_DIR + 'filters/'
+FILTER_DIR = TEMP_DIR + 'filters/'
 FILTERS_MATCHED = FILTER_DIR + 'filters_matched.txt'
 CODE_DICT = FILTER_DIR + 'code_dict.txt'
 CODED_LIST = FILTER_DIR + 'coded_list.txt'
 APP_FILTERS_SCORE = FILTER_DIR + 'app_filters_score.txt'
 
 # For LDA analysis of descriptions
-TOPOC_DIR = TEST_DIR + 'topics/'
+TOPOC_DIR = TEMP_DIR + 'topics/'
 DESC_DICT = TOPOC_DIR + 'desc.dict'
 CORPUS_MM = TOPOC_DIR + 'corpus.mm'
 TFIDF_MODEL = TOPOC_DIR + 'tfidf.model'
@@ -188,7 +188,7 @@ LDA_MODEL = TOPOC_DIR + 'lda.model'
 WORD2VEC = TOPOC_DIR + 'word2vec.pickle'
 
 # For figures
-FIGURE_PATH = TEST_DIR + 'figures/%s.pdf'
+FIGURE_PATH = TEMP_DIR + 'figures/%s.pdf'
 
 # For existence type of intents/filters
 EXISTENCE = enum(
