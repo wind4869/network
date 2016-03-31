@@ -3,12 +3,14 @@
 import os
 import re
 import math
+import time
 import numpy
 import codecs
 import urllib2
 import networkx as nx
 import cPickle as pickle
 import matplotlib.pyplot as plt
+from scipy.stats import linregress
 
 from utils.db_connect import *
 from utils.consts_global import *
@@ -84,7 +86,7 @@ def load_appmap():
 def load_rintents(app, v):
     path = INTENT_PATH % (app, v)
     if not os.path.exists(path):
-        print '[load_rintents][File not exists]: %s' % path
+        # print '[load_rintents][File not exists]: %s' % path
         return None
 
     f = open(path)
@@ -249,6 +251,18 @@ def load_pan(uid):
     return pickle_load(PAN_PICKLE % uid)
 
 
+# get r-value(Pearson correlation coefficient)
+# linregress(x, y)[0] = slope(斜率)
+# linregress(x, y)[1] = intercept(截距)
+def pearson(x, y):
+    return linregress(x, y)
+
+
+# creates time object from string
+def maketime(s):
+    return time.mktime(time.strptime(s, TIME_FORMAT))
+
+
 # get neighbors of app in lan
 def neighbors(lan, app):
     return set(lan.successors(app) + lan.predecessors(app))
@@ -289,10 +303,15 @@ def load_eapps():
     return load_content(APPSC2_TXT)
 
 
+# get dictionary (version: date)
+def get_version_date(app):
+    return appVersions.find_one({'packageName': app})['versions']
+
+
 # get all version numbers of an app
 def get_versions(app):
-    version_dict = appVersions.find_one({'packageName': app})['versions']
-    return sorted([int(v) for v in version_dict])
+    version_date = get_version_date(app)
+    return sorted([int(v) for v in version_date])
 
 
 def heat_map(data, xlabel, ylabel, fname):

@@ -62,6 +62,9 @@ INTEGER_ATTRS = [
 # Format for updatedTime and so on
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+if EVOLUTION:
+    TIME_FORMAT = '%Y-%m-%d'
+
 # Path of Jar, xml, intent and filter files
 APP_DIR = ROOT_DIR + 'apps/'
 APP_PATH = APP_DIR + '%s'
@@ -189,6 +192,9 @@ WORD2VEC = TOPOC_DIR + 'word2vec.pickle'
 
 # For figures
 FIGURE_PATH = TEMP_DIR + 'figures/%s.pdf'
+
+# For networks
+NETWORK_PATH = TEMP_DIR + 'networks/%s.pickle'
 
 # For existence type of intents/filters
 EXISTENCE = enum(

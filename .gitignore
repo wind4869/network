@@ -4,8 +4,6 @@ apps/
 details/
 htmls/
 temp/
-node_modules/
 *.pyc
 *.dot
 .DS_Store
-package.json

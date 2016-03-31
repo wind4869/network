@@ -45,13 +45,13 @@ def get_filters(app, v):
 
     path = XML_PATH % (app, v)
     if not os.path.exists(path):
-        print '[parser_xml][File not exists]: %s' % path
+        # print '[parser_xml][File not exists]: %s' % path
         return [], []
 
     try:
         tree = et.parse(path)
     except et.ParseError:
-        print '[parser_xml][cElementTree.ParseError]: %s' % path
+        # print '[parser_xml][cElementTree.ParseError]: %s' % path
         return [], []
 
     for a in tree.iter('activity'):

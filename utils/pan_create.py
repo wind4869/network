@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import time
-
 from utils.functions import *
-
-
-# creates time object from string
-def maketime(s):
-    return time.mktime(time.strptime(s, TIME_FORMAT))
 
 
 # map to app already exists in gan

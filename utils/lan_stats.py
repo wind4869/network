@@ -3,17 +3,9 @@
 import numpy as np
 import igraph as ig
 import pygraphviz as pyv
-import matplotlib.pyplot as plt
-from scipy.stats import linregress, spearmanr
+from scipy.stats import spearmanr
 
 from utils.functions import *
-
-
-# get r-value(Pearson correlation coefficient)
-# linregress(x, y)[0] = slope(斜率)
-# linregress(x, y)[1] = intercept(截距)
-def pearson(x, y):
-    return linregress(x, y)
 
 
 def correlation_analyse():
