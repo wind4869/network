@@ -10,10 +10,6 @@ def getAppDetails():
     return appInfo['appDetails']
 
 
-def getUsageRecords():
-    return appInfo['usageRecords']
-
-
 def getAppVersions():
     return appInfo['appVersions']
 

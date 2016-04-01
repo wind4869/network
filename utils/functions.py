@@ -18,7 +18,6 @@ from utils.consts_global import *
 
 # get db object
 appDetails = getAppDetails()
-usageRecords = getUsageRecords()
 appVersions = getAppVersions()
 
 

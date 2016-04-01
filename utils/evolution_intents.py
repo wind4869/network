@@ -210,6 +210,8 @@ def version_test(app, ctype):
     for i in xrange(1, len(data)):
         y.append(sim_cosine(data[i - 1], data[i]))
 
+    print np.mean(y)
+
     x = xrange(len(data) - 1)
     plt.plot(x, y, 'ro-')
     plt.show()
@@ -363,7 +365,10 @@ def scale_stats(points):
 if __name__ == '__main__':
     # existence_test(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
-    cover_test_2()
+    # cover_test_2()
+    for app in load_eapps()[:3]:
+        version_test(app, COMPONENT.I_INTENT)
+
     # date_distribution()
     # points = get_points('2015-1-1', '2015-12-1')
     # network_create(points)
