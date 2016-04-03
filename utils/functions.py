@@ -314,6 +314,7 @@ def get_versions(app):
 
 
 def heat_map(data, xlabel, ylabel, fname):
+
     fig, ax = plt.subplots()
     im = ax.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
 
@@ -331,9 +332,9 @@ def heat_map(data, xlabel, ylabel, fname):
     plt.ylabel(ylabel)
 
     plt.grid()
-    # plt.colorbar(im)
+    plt.colorbar(im)
 
-    # plt.savefig(FIGURE_PATH % fname, format='pdf')
+    plt.savefig(FIGURE_PATH % fname, format='pdf')
     plt.show()
 
 
