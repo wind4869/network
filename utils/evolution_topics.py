@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import jieba
+import numpy as np
 from gensim import corpora, models
 from sklearn.cluster import KMeans
 from collections import defaultdict
@@ -46,7 +47,11 @@ def train_lda(apps, num_topics):
     train_set = []
     for app in apps:
         for v in get_versions(app):
-            train_set.append(preproccess(''.join(raw_desc(app, v))))
+            # raw = raw_desc(app, v)[1]  # only use update desc
+            raw = ''.join(raw_desc(app, v))  # use all desc
+            if not raw:
+                continue
+            train_set.append(preproccess(raw))
 
     dictionary = corpora.Dictionary(train_set)
     dictionary.save(DESC_DICT)  # store the dictionary, for future reference
@@ -66,28 +71,38 @@ def train_lda(apps, num_topics):
         print lda.print_topic(i)
 
 
-def predict_lda(app):
+def predict_lda_each(app, v, dictionary, lda):
 
-    dictionary = corpora.Dictionary.load(DESC_DICT)
-    lda = models.LdaModel.load(LDA_MODEL)
-    num = lda.num_topics
+    raw = raw_desc(app, v)[1]  # only use update desc
+    # raw = ''.join(raw_desc(app, v))  # use all desc
 
-    data = []
-    for v in get_versions(app):
-        raw = raw_desc(app, v)[1]  # only use update desc
-        if not raw:
-            continue
-
-        temp = [0 for i in xrange(num)]
+    if raw:
+        vector = [0 for i in xrange(lda.num_topics)]
         word_list = preproccess(raw)
         doc_bow = dictionary.doc2bow(word_list)
 
         for t in lda[doc_bow]:
             index, probability = t
-            temp[index] = probability
-        data.append(temp)
+            vector[index] = probability
 
-    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+        return vector
+    else:
+        return None
+
+
+def predict_lda(app):
+
+    dictionary = corpora.Dictionary.load(DESC_DICT)
+    lda = models.LdaModel.load(LDA_MODEL)
+
+    data = []
+    for v in get_versions(app):
+        vector = predict_lda_each(app, v, dictionary, lda)
+        if vector:
+            data.append(vector)
+
+    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', app)
+    return data
 
 
 def train_word2vec(apps, num_topics):
@@ -151,7 +166,7 @@ def predict_tfidf(app):
             temp.append(score / float(len(topics[i])))
         data.append(temp)
 
-    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', app)
 
 
 def predict_bm25(app):
@@ -166,13 +181,13 @@ def predict_bm25(app):
         scores = bm25.bm25_score(t)
         data.append([x if x > 0 else 0 for x in scores])
 
-    heat_map(data, 'Version Labels', 'Topic Labels', 'topics_%d' % num)
+    heat_map(data, 'Version Labels', 'Topic Labels', app)
     return data
 
 
 def sim_neighbors():
 
-    data_topics = [predict_bm25(app) for app in apps]
+    data_topics = [predict_bm25(app) for app in load_eapps()]
     data_versions = map(list, zip(*data_topics))
 
     y = []
@@ -186,8 +201,9 @@ def sim_neighbors():
 
 
 def cluster_test():
-    data_topics = [predict_bm25(app) for app in apps]
-    data_versions = map(list, zip(*data_topics))
+
+    data_versions = [predict_lda(app) for app in load_eapps()]
+    data_topics = map(list, zip(*data_versions))
 
     count = 0
     result_tuples = []
@@ -204,12 +220,60 @@ def cluster_test():
     print clusters
 
 
-if __name__ == '__main__':
+def proper_version(app, low, high):
+    version_date = get_version_date(app)
+    versions = sorted([int(v) for v in version_date])
+    low, high = [maketime(t) for t in low, high]
+
+    prev = -1
+    for v in versions:
+        if maketime(version_date[str(v)]) > high or v == versions[-1]:
+            if prev != -1 and maketime(version_date[str(prev)]) > low:
+                return prev
+            else:
+                return -1
+        prev = v
+
+    return -1
+
+
+def topics_common():
+
+    dictionary = corpora.Dictionary.load(DESC_DICT)
+    lda = models.LdaModel.load(LDA_MODEL)
+
+    points = []
+    months = [str(i) for i in xrange(1, 13)]
+    for year in ['2012', '2013', '2014', '2015']:
+        for month in months:
+            points.append('-'.join([year, month, '1']))
+
+    data = []
+    low = '2011-12-1'
     apps = load_eapps()
 
-    # train_lda(apps, 50)
-    # predict_lda(apps[0])
+    for high in points:
+        temp = []
+        for app in apps:
+            v = proper_version(app, low, high)
+            if v != -1:
+                vector = predict_lda_each(app, v, dictionary, lda)
+                if vector:
+                    temp.append(np.array(vector))
+        low = high
+        data.append(reduce(lambda a, b: a + b, temp))
+
+    heat_map(map(list, zip(*data)), 'Time Line (2012~2015)', 'Topic Labels', 'topic_common')
+
+
+if __name__ == '__main__':
+    # apps = load_eapps()
+
+    # train_lda(apps, 20)
+    # print predict_lda(apps[0])
 
     # train_word2vec(apps, 50)
     # predict_bm25(apps[0])
-    predict_tfidf(apps[2])
+    # predict_tfidf(apps[0])
+
+    topics_common()
