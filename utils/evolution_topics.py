@@ -7,9 +7,9 @@ from sklearn.cluster import KMeans
 from collections import defaultdict
 from BeautifulSoup import BeautifulSoup
 
+from utils.fp_apriori import *
 from utils.parser_apk import *
 from utils.bm25 import BM25
-
 
 def raw_desc(app, v):
     raws = []
@@ -101,7 +101,7 @@ def predict_lda(app):
         if vector:
             data.append(vector)
 
-    heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', app)
+    # heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', app)
     return data
 
 
@@ -200,24 +200,58 @@ def sim_neighbors():
     plt.show()
 
 
-def cluster_test():
+def cluster_version(app, num_clusters=5):
 
-    data_versions = [predict_lda(app) for app in load_eapps()]
-    data_topics = map(list, zip(*data_versions))
+    data_versions = predict_lda(app)
+    num_versions = len(data_versions)
+
+    if num_versions < num_clusters:
+        return
 
     count = 0
     result_tuples = []
 
-    kmeans_clustering = KMeans(10)
+    kmeans_clustering = KMeans(num_clusters)
+    data = [[0 for i in xrange(num_versions)] for j in xrange(num_clusters)]
+
     for i in kmeans_clustering.fit_predict(data_versions):
+        result_tuples.append((count, i))
+        data[i][count] = 1
+        count += 1
+
+    clusters = [[] for i in xrange(num_clusters)]
+    for number, index in result_tuples:
+        clusters[index].append(number)
+
+    heat_map(data, 'Version Labels', 'Cluster Labels', app)
+
+
+def cluster_topic(app, num_clusters=5):
+
+    data_topics = map(list, zip(*predict_lda(app)))
+    count = 0
+    result_tuples = []
+
+    kmeans_clustering = KMeans(num_clusters)
+    for i in kmeans_clustering.fit_predict(data_topics):
         result_tuples.append((count, i))
         count += 1
 
-    clusters = [[] for i in xrange(10)]
-    for word, index in result_tuples:
-        clusters[index].append(word)
+    clusters = [[] for i in xrange(num_clusters)]
+    for number, index in result_tuples:
+        clusters[index].append(number)
 
-    print clusters
+    return clusters
+
+
+def cluster_topic_fp():
+
+    data = []
+    for app in load_eapps():
+        temp = cluster_topic(app)
+        data.append(sorted(temp, key=lambda x: len(x))[-1])
+
+    frequent_patterns(data)
 
 
 def proper_version(app, low, high):
@@ -267,7 +301,7 @@ def topics_common():
 
 
 if __name__ == '__main__':
-    # apps = load_eapps()
+    apps = load_eapps()
 
     # train_lda(apps, 20)
     # print predict_lda(apps[0])
@@ -276,4 +310,5 @@ if __name__ == '__main__':
     # predict_bm25(apps[0])
     # predict_tfidf(apps[0])
 
-    topics_common()
+    # topics_common()
+    cluster_topic_fp()

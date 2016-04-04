@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 # create 1-itemset candidate
 def createC1(dataSet):
     C1 = []
@@ -63,9 +66,9 @@ def frequent_patterns(dataSet, minSupport=0.2):
     L, supportData = apriori(dataSet, minSupport)
     for itemset in L:
         if itemset:
-            print 'frequent %d-itemset: ' % k
+            print '> frequent %d-itemset: ' % k
         for item in itemset:
-            print '{%s} sup: %.2f' % (','.join(item), supportData[item])
+            print list(item), '%.2f' % supportData[item]
         k += 1
 
 
