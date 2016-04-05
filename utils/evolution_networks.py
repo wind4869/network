@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from itertools import combinations
+from collections import defaultdict
 
 from utils.parser_apk import *
 from utils.gan_rels_intent import *
@@ -75,7 +76,7 @@ def get_points(start, end):
             points.append('-'.join([year, month, '1']))
 
     return filter(
-        lambda t: maketime(start) <= maketime(t) < maketime(end),
+        lambda t: maketime(start) <= maketime(t) <= maketime(end),
         points
     )
 
@@ -83,6 +84,9 @@ def get_points(start, end):
 def network_create(points):
 
     for point in points:
+
+        print '> ' + point
+
         apps = []
         t = maketime(point)
 
@@ -107,7 +111,21 @@ def network_create(points):
                 if w:
                     network.add_edge(app_from[0], app_to[0], weight=w)
 
+        for app in apps:
+            n, v = app
+            if network.has_node(n):
+                network.node[n]['version'] = v
+
         pickle_dump(network, NETWORK_PATH % point)
+
+
+def get_commons(points):
+    apps = []
+    for point in points:
+        network = pickle_load(NETWORK_PATH % point)
+        apps.append(network.nodes())
+
+    return reduce(lambda a, b: set(a) & set(b), apps)
 
 
 def scale_stats(points):
@@ -115,15 +133,9 @@ def scale_stats(points):
     x = xrange(len(points))
     yn, ye = [], []
 
-    apps = []
-    for point in points:
-        network = pickle_load(NETWORK_PATH % point)
-        apps.append(network.nodes())
-
-    common_apps = reduce(lambda a, b: set(a) & set(b), apps)
-    print len(common_apps), common_apps
-
     edges = []
+    common_apps = get_commons(points)
+
     for point in points:
         network = pickle_load(NETWORK_PATH % point).subgraph(common_apps)
         n, e = network.number_of_nodes(), network.number_of_edges()
@@ -135,8 +147,13 @@ def scale_stats(points):
     ya, yr = [0], [0]
     for i in xrange(1, len(edges)):
         cur, prev = set(edges[i]), set(edges[i - 1])
-        ya.append(len(cur - prev))
-        yr.append(len(prev - cur))
+        added_edges, removed_edges = cur - prev, prev - cur
+
+        print 'add(%d)' % len(added_edges), added_edges
+        print 'rem(%d)' % len(removed_edges), removed_edges
+
+        ya.append(len(added_edges))
+        yr.append(len(removed_edges))
 
     plt.plot(x, ye, 'ro-')
     plt.plot(x, ya, 'bs-')
@@ -151,8 +168,36 @@ def scale_stats(points):
     plt.show()
 
 
+def get_matches(points):
+
+    matches = {}
+    common_apps = get_commons(points)
+
+    for point in points:
+        match = defaultdict(list)
+        network = pickle_load(NETWORK_PATH % point).subgraph(common_apps)
+
+        for app_from, app_to in network.edges():
+            intents = get_intents(app_from, network.node[app_from]['version'])[1]
+            filters = get_filters(app_to, network.node[app_to]['version'])[0]
+            for i in intents:
+                for f in filters:
+                    if implicit_match_one(i, f):
+                        match[(app_from, app_to)].append((i, f))
+
+        matches[point] = match
+
+    return matches
+
+
+def intent_evolution(points):
+
+    matches = get_matches(points)
+
+
 if __name__ == '__main__':
     # date_distribution()
     points = get_points('2015-1-1', '2015-12-1')
     # network_create(points)
-    scale_stats(points)
+    # scale_stats(points)
+    intent_evolution(points)
