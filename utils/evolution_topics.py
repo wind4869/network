@@ -11,6 +11,7 @@ from utils.fp_apriori import *
 from utils.parser_apk import *
 from utils.bm25 import BM25
 
+
 def raw_desc(app, v):
     raws = []
     soup = BeautifulSoup(open(HTML_PATH % (app, v)))

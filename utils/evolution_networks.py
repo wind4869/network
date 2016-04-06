@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 from itertools import combinations
 from collections import defaultdict
 
@@ -170,12 +171,14 @@ def scale_stats(points):
 
 def get_matches(points):
 
-    matches = {}
+    point_apps = {}
     common_apps = get_commons(points)
+    matches, m_intents, m_filters = {}, [], []
 
     for point in points:
         match = defaultdict(list)
         network = pickle_load(NETWORK_PATH % point).subgraph(common_apps)
+        point_apps[point] = [(app, network.node[app]['version']) for app in network.nodes()]
 
         for app_from, app_to in network.edges():
             intents = get_intents(app_from, network.node[app_from]['version'])[1]
@@ -184,15 +187,62 @@ def get_matches(points):
                 for f in filters:
                     if implicit_match_one(i, f):
                         match[(app_from, app_to)].append((i, f))
+                        if i not in m_intents:
+                            m_intents.append(i)
+                        if f not in m_filters:
+                            m_filters.append(f)
 
         matches[point] = match
 
-    return matches
+    return matches, m_intents, m_filters, point_apps
 
 
 def intent_evolution(points):
 
-    matches = get_matches(points)
+    matches, m_intents, m_filters, point_apps = get_matches(points)
+
+    # data = []
+    # for point in points:
+    #     temp = []
+    #     apps = point_apps[point]
+    #     for app in apps:
+    #         temp.append(np.array([1 if i in get_intents(*app)[1] else 0 for i in m_intents]))
+    #         temp.append(np.array([1 if i in get_filters(*app)[0] else 0 for i in m_filters]))
+    #     data.append(reduce(lambda a, b: a + b, temp))
+    #
+    # heat_map(map(list, zip(*data)), 'Time Line (2015.1~2015.12)', 'Intent Labels', 'Intent_evolution')
+    # heat_map(map(list, zip(*data)), 'Time Line (2015.1~2015.12)', 'Filter Labels', 'filter_evolution')
+
+    # find intents and filters that exist all the time
+    intent_count = [[0 for j in xrange(len(points))] for i in xrange(len(m_intents))]
+    filter_count = [[0 for j in xrange(len(points))] for i in xrange(len(m_filters))]
+
+    for index in xrange(len(points)):
+        for app in point_apps[points[index]]:
+            for i in xrange(len(m_intents)):
+                if m_intents[i] in get_intents(*app)[1]:
+                    intent_count[i][index] += 1
+            for i in xrange(len(m_filters)):
+                if m_filters[i] in get_filters(*app)[0]:
+                    filter_count[i][index] += 1
+
+    m_intents = filter(lambda i: all(intent_count[m_intents.index(i)]), m_intents)
+    m_filters = filter(lambda f: all(filter_count[m_filters.index(f)]), m_filters)
+
+    # evolution analysis for stable intents and filters
+    intent_data = [[set([]) for j in xrange(len(points))] for i in xrange(len(m_intents))]
+    filter_data = [[set([]) for j in xrange(len(points))] for i in xrange(len(m_filters))]
+
+    for index in xrange(len(points)):
+        for e, t in matches[points[index]].items():
+            [intent_data[m_intents.index(i)][index].add(e[1]) for i, f in t if i in m_intents]
+            [filter_data[m_filters.index(f)][index].add(e[0]) for i, f in t if f in m_filters]
+
+    intent_data = [[len(intent_data[i][j]) for j in xrange(len(points))] for i in xrange(len(m_intents))]
+    filter_data = [[len(filter_data[i][j]) for j in xrange(len(points))] for i in xrange(len(m_filters))]
+
+    heat_map(intent_data, 'Time Line (2015.1~2015.12)', 'Intent Labels', 'intent_evolution')
+    heat_map(filter_data, 'Time Line (2015.1~2015.12)', 'Filter Labels', 'filter_evolution')
 
 
 if __name__ == '__main__':

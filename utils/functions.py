@@ -333,10 +333,10 @@ def heat_map(data, xlabel, ylabel, fname):
     # plt.xticks([0, 12, 24, 36], ['2012', '2013', '2014', '2015'])
 
     plt.grid()
-    # plt.colorbar(im)
+    plt.colorbar(im)
 
     plt.savefig(FIGURE_PATH % fname, format='pdf')
-    # plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':
