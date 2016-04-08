@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
 from itertools import combinations
 from collections import defaultdict
 
@@ -18,9 +17,9 @@ def date_distribution():
     # print sorted(first_date, key=lambda t: maketime(t))
 
     dates = []
-    for year in ['2009', '2010', '2011', '2012', '2013', '2014', '2015']:
+    for year in xrange(2009, 2016):
         for month in ['1', '7']:
-            dates.append('-'.join([year, month, '1']))
+            dates.append('-'.join([str(year), month, '1']))
     dates.extend(['2016-1-1', '2016-7-1'])
 
     xlabels = [date[2:-2] for date in dates]
@@ -71,10 +70,9 @@ def intent_match(app_from, app_to):
 def get_points(start, end):
 
     points = []
-    months = [str(i) for i in xrange(1, 13)]
-    for year in ['2014', '2015', '2016']:
-        for month in months:
-            points.append('-'.join([year, month, '1']))
+    for year in xrange(2012, 2017):
+        for month in xrange(1, 13):
+            points.append('-'.join([str(year), str(month), '1']))
 
     return filter(
         lambda t: maketime(start) <= maketime(t) <= maketime(end),
@@ -243,6 +241,14 @@ def intent_evolution(points):
 
     heat_map(intent_data, 'Time Line (2015.1~2015.12)', 'Intent Labels', 'intent_evolution')
     heat_map(filter_data, 'Time Line (2015.1~2015.12)', 'Filter Labels', 'filter_evolution')
+
+    # print '> intent:'
+    # for i in xrange(len(intent_data)):
+    #     print intent_data[i], m_intents[i]
+    #
+    # print '> filter:'
+    # for i in xrange(len(filter_data)):
+    #     print filter_data[i], m_filters[i]
 
 
 if __name__ == '__main__':

@@ -4,11 +4,10 @@ import jieba
 import numpy as np
 from gensim import corpora, models
 from sklearn.cluster import KMeans
-from collections import defaultdict
 from BeautifulSoup import BeautifulSoup
 
 from utils.fp_apriori import *
-from utils.parser_apk import *
+from utils.evolution_networks import *
 from utils.bm25 import BM25
 
 
@@ -272,21 +271,26 @@ def proper_version(app, low, high):
     return -1
 
 
-def topics_common():
+def topics_common(low, start, end):
 
     dictionary = corpora.Dictionary.load(DESC_DICT)
     lda = models.LdaModel.load(LDA_MODEL)
+    points = get_points(start, end)
 
-    points = []
-    months = [str(i) for i in xrange(1, 13)]
-    for year in ['2012', '2013', '2014', '2015']:
-        for month in months:
-            points.append('-'.join([year, month, '1']))
+    apps = []
+    for app in load_eapps():
+        version_date = get_version_date(app)
+        versions = sorted([int(v) for v in version_date])
+
+        s = maketime(version_date[str(versions[0])])
+        e = maketime(version_date[str(versions[-1])])
+
+        if s <= maketime(start) and e >= maketime(end):
+            apps.append(app)
+
+    # apps = load_eapps()
 
     data = []
-    low = '2011-12-1'
-    apps = load_eapps()
-
     for high in points:
         temp = []
         for app in apps:
@@ -296,9 +300,9 @@ def topics_common():
                 if vector:
                     temp.append(np.array(vector))
         low = high
-        data.append(reduce(lambda a, b: a + b, temp))
+        data.append(reduce(lambda a, b: a + b, temp, np.array([0 for i in xrange(lda.num_topics)])))
 
-    heat_map(map(list, zip(*data)), 'Time Line (2012~2015)', 'Topic Labels', 'topic_common')
+    heat_map(map(list, zip(*data)), 'Time Line (2015.1~2015.12)', 'Topic Labels', 'topic_common_%d' % len(apps))
 
 
 if __name__ == '__main__':
@@ -311,5 +315,6 @@ if __name__ == '__main__':
     # predict_bm25(apps[0])
     # predict_tfidf(apps[0])
 
-    # topics_common()
-    cluster_topic_fp()
+    topics_common('2014-12-1', '2015-1-1', '2015-12-1')
+    # cluster_topic_fp()
+
