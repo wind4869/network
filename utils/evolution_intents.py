@@ -105,21 +105,26 @@ def existence_each(app, ctype):
     return map(lambda x: float(x) / sum(result), result)
 
 
-def existence_test(ctype):
+def existence_test(ctype, num_types=4):
 
-    apps = ordered_apps(ctype)
-
+    apps = load_eapps()
     x = xrange(len(apps))
-    y = [[], [], [], []]
+
+    y = [[] for i in xrange(num_types)]
 
     for app in apps:
         result = existence_each(app, ctype)
-        [y[i].append(result[i]) for i in xrange(4)]
+        [y[i].append(result[i]) for i in xrange(num_types)]
 
-    f, ax = plt.subplots(4, 1, sharex=True)
+    temp = []
+    for i in xrange(1, num_types):
+        temp, y[i] = parallel_sort(y[0][:], y[i])
+    y[0] = temp
+
     shape = ['ro-', 'go-', 'bo-', 'yo-']
+    f, ax = plt.subplots(num_types, 1, sharex=True)
 
-    for i in xrange(len(y)):
+    for i in xrange(num_types):
         ax[i].plot(x, y[i], shape[i])
 
     if ctype == COMPONENT.I_INTENT:
@@ -249,8 +254,58 @@ def version_test():
     plt.show()
 
 
+def number_each(app):
+
+    versions = get_versions(app)
+
+    yi, yf = [], []
+    for v in versions:
+        components = get_components_each(app, v)
+        ni = len(components[COMPONENT.I_INTENT])
+        nf = len(components[COMPONENT.I_FILTER])
+        if ni and nf:
+            yi.append(ni)
+            yf.append(nf)
+
+    x = xrange(len(yi))
+
+    return yi[-1], yf[-1]
+
+    # plt.plot(x, yi, 'ro-')
+    # plt.plot(x, yf, 'bs-')
+    # plt.savefig(FIGURE_PATH % ('number_' + app), format='pdf')
+    # plt.show()
+    # plt.close()
+
+
+def number_test():
+
+    temp = []
+    yi, yf = [], []
+    apps = load_eapps()
+    x = xrange(len(apps))
+
+    for app in apps:
+
+        ni, nf = number_each(app)
+        yi.append(ni)
+        yf.append(nf)
+
+    print pearson(yi, yf)
+
+    yi, yf = parallel_sort(yi, yf)
+
+    plt.plot(x, yi, 'ro-')
+    plt.plot(x, yf, 'bs-')
+    plt.savefig(FIGURE_PATH % 'number', format='pdf')
+    plt.show()
+
+
 if __name__ == '__main__':
     # existence_test(COMPONENT.I_INTENT)
+    existence_test(COMPONENT.I_FILTER)
+    # cover_test_1(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
     # cover_test_2()
-    version_test()
+    # version_test()
+    # number_test()
