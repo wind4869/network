@@ -316,6 +316,7 @@ def get_versions(app):
 def heat_map(data, xlabel, ylabel, fname):
 
     fig, ax = plt.subplots()
+    # fig = plt.figure(figsize=(10, 8))
     im = ax.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
 
     # Move left and bottom spines outward by 10 points
@@ -333,7 +334,7 @@ def heat_map(data, xlabel, ylabel, fname):
     # plt.xticks([0, 12, 24, 36], ['2012', '2013', '2014', '2015'])
 
     plt.grid()
-    plt.colorbar(im)
+    # plt.colorbar(im)
 
     plt.savefig(FIGURE_PATH % fname, format='pdf')
     plt.show()

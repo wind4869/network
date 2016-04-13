@@ -256,4 +256,12 @@ if __name__ == '__main__':
     points = get_points('2015-1-1', '2015-12-1')
     # network_create(points)
     # scale_stats(points)
-    intent_evolution(points)
+    # intent_evolution(points)
+    network = pickle_load(NETWORK_PATH % '2015-12-1')
+    print network.number_of_nodes(), network.number_of_edges()
+    degree_rank = []
+    idict, odict = network.in_degree(), network.out_degree()
+    for app in network.nodes():
+        degree_rank.append((app, idict[app] + odict[app]))
+    degree_rank = sorted(degree_rank, key=lambda x: x[1], reverse=True)
+    print degree_rank

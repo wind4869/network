@@ -191,7 +191,8 @@ LDA_MODEL = TOPOC_DIR + 'lda.model'
 WORD2VEC = TOPOC_DIR + 'word2vec.pickle'
 
 # For figures
-FIGURE_PATH = TEMP_DIR + 'figures/%s.pdf'
+FIGURE_DIR = TEMP_DIR + 'figures/'
+FIGURE_PATH = FIGURE_DIR + '%s.pdf'
 
 # For networks
 NETWORK_PATH = TEMP_DIR + 'networks/%s.pickle'

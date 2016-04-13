@@ -301,11 +301,136 @@ def number_test():
     plt.show()
 
 
+def case_study(app):
+
+    ctypes = [COMPONENT.I_INTENT, COMPONENT.I_FILTER]
+    ylabels = ['Intent Label', 'Filter Label']
+    fnames = ['intent_', 'filter_']
+
+    for i in xrange(len(ctypes) - 1):
+        count = 0
+        cs = get_components_all(app)[ctypes[i]]
+        with open(FIGURE_DIR + fnames[i] + app + '.txt', 'w') as f:
+            for c in cs:
+                content = ' '.join([str(x) for x in count, c])
+                f.write(content + '\n')
+                count += 1
+
+        data = get_data(app, ctypes[i], DIRECTION.COMPONENT)
+        heat_map(data, 'Version Labels', ylabels[i], fnames[i] + app)
+
+
+def wechat_intent(app='com.tencent.mm'):
+
+    cs = get_components_all(app)[COMPONENT.I_INTENT]
+    data = get_data(app, COMPONENT.I_INTENT, DIRECTION.COMPONENT)
+
+    shade = {
+        'android.intent.action.CALL': 0,
+        'android.intent.action.DIAL': 0,
+        'android.intent.action.SEND': .1,
+        'android.intent.action.SENDTO': .1,
+        'android.intent.action.INSERT': .2,
+        'android.intent.action.INSERT_OR_EDIT': .2,
+        'android.intent.action.GET_CONTENT': .3,
+        'android.intent.action.PICK': .3,
+        'com.android.music.musicservicecommand': .4,
+        'android.intent.action.VIEW_DOWNLOADS': .5,
+        }
+
+    new_data = []
+    for i in xrange(len(data)):
+        action = cs[i]['action']
+        if 'com.tencent' in action:
+            continue
+
+        s = shade.get(action, .9)
+
+        if 'uri' in cs[i]:
+            s = .8
+        elif action == 'android.intent.action.VIEW' and \
+                        cs[i].get('mimeType', '') in ['text/plain', 'video/*']:
+            s = .7
+        elif 'android.settings' in action:
+            s = .6
+        elif cs[i].get('mimeType', '') == 'vnd.android-dir/mms-sms':
+            s = .5
+
+        for j in xrange(len(data[0])):
+            data[i][j] = s if data[i][j] else 1
+
+        new_data.append(data[i])
+
+    plt.figure(figsize=(16, 9))
+    plt.imshow(new_data, cmap=plt.cm.hot, interpolation='nearest')
+    plt.xticks(xrange(0, len(new_data[0]), 5))
+    plt.yticks(
+        [
+            2, 3, 6, 9, 12,
+            13, 14, 15, 16, 18,
+            19, 20, 21, 22, 23,
+            24, 25, 26, 28, 31,
+            36, 37,
+        ],
+        [
+            'view message', 'set wireless', 'command music', 'set location', 'send text',
+            'insert', 'set apn', 'insert person', 'call', 'view text',
+            'get video', 'get image', 'set display', 'view video', 'insert contact',
+            'view downloads', 'sendto', 'pick', 'dial', 'set app ops',
+            'set nfc', 'set manage app',
+        ])
+    plt.grid()
+    plt.savefig(FIGURE_PATH % 'intents', format='pdf')
+    plt.show()
+
+
+def wechat_filter(app='com.tencent.mm'):
+
+    cs = get_components_all(app)[COMPONENT.I_FILTER]
+    data = get_data(app, COMPONENT.I_FILTER, DIRECTION.COMPONENT)
+
+    yticks_dict = {
+        4:  ('send image/video/*', 0),
+        5:  ('send i/v/app/text', 0),
+        9:  ('view timeline/profile', .3),
+        11: ('sendm image', .5),
+        14: ('send image', .5),
+        16: ('view t/p/login/phonenum', .3),
+        24: ('view t/p/l/p/voip', .3),
+        25: ('send i/v/a/t/audio', .1),
+        27: ('view image', .6),
+        29: ('send i/v/a/t', .1),
+        30: ('send i/v/a/t/a', .1),
+    }
+
+    for i in xrange(len(data)):
+
+        s = yticks_dict.get(i, ('', .9))[1]
+
+        for j in xrange(len(data[0])):
+            data[i][j] = s if data[i][j] else 1
+
+    plt.figure(figsize=(16, 9))
+    plt.imshow(data, cmap=plt.cm.hot, interpolation='nearest')
+    
+    plt.xticks(xrange(0, len(data[0]), 5))
+    plt.yticks(
+        yticks_dict.keys(),
+        [v[0] for v in yticks_dict.values()]
+    )
+    plt.grid()
+    plt.savefig(FIGURE_PATH % 'filters', format='pdf')
+    plt.show()
+
+
 if __name__ == '__main__':
     # existence_test(COMPONENT.I_INTENT)
-    existence_test(COMPONENT.I_FILTER)
+    # existence_test(COMPONENT.I_FILTER)
     # cover_test_1(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
     # cover_test_2()
     # version_test()
     # number_test()
+    # case_study('com.tencent.mm')
+    # wechat_intent()
+    wechat_filter()
