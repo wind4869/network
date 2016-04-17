@@ -391,28 +391,28 @@ def wechat_filter(app='com.tencent.mm'):
 
     yticks_dict = {
         4:  ('send image/video/*', 0),
-        5:  ('send i/v/app/text', 0),
-        9:  ('view timeline/profile', .3),
-        11: ('sendm image', .5),
-        14: ('send image', .5),
-        16: ('view t/p/login/phonenum', .3),
-        24: ('view t/p/l/p/voip', .3),
-        25: ('send i/v/a/t/audio', .1),
+        5:  ('send +app/text', 0),
+        9:  ('view timeline/profile', .2),
+        11: ('sendm image', .4),
+        14: ('send image', .4),
+        16: ('view +login/phonenum', .2),
+        24: ('view +voip', .2),
+        25: ('send +audio', 0),
         27: ('view image', .6),
-        29: ('send i/v/a/t', .1),
-        30: ('send i/v/a/t/a', .1),
+        29: ('send +app/text', 0),
+        30: ('send +audio', 0),
     }
 
     for i in xrange(len(data)):
 
-        s = yticks_dict.get(i, ('', .9))[1]
+        s = yticks_dict.get(i, ('', .8))[1]
 
         for j in xrange(len(data[0])):
             data[i][j] = s if data[i][j] else 1
 
     plt.figure(figsize=(16, 9))
     plt.imshow(data, cmap=plt.cm.hot, interpolation='nearest')
-    
+
     plt.xticks(xrange(0, len(data[0]), 5))
     plt.yticks(
         yticks_dict.keys(),

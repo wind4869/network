@@ -90,6 +90,8 @@ def power_law_distribution(lan):
     ix, ox, x = [range(len(h)) for h in ihist, ohist, hist]
     iy, oy, y = [[sum(h[i:]) for i in xrange(len(h))] for h in ihist, ohist, hist]
 
+    return pearson(ix, iy)[2], pearson(ox, oy)[2]
+
     # y = c * x^-r (power function)
     plt.plot(ix, iy, color='blue', linewidth=2)  # In-Degree
     plt.plot(ox, oy, color='red', linewidth=2)  # Out-Degree
@@ -98,10 +100,6 @@ def power_law_distribution(lan):
     # lny = -rlnx + lnc (linear correlation)
     ix, ox, x = [np.array([np.log(i) for i in d[1:]]) for d in ix, ox, x]
     iy, oy, y = [np.array([np.log(i) for i in a[1:]]) for a in iy, oy, y]
-
-    # print 'r-value of In-Degree: %f' % pearson(ix, iy)
-    # print 'r-value of Out-Degree: %f' % pearson(ox, oy)
-    # print 'r-value of Degree: %f' % pearson(x, y)
 
     plt.legend(['In Degree', 'Out Degree'])
     plt.xlabel('Degree Values')
