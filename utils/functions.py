@@ -313,6 +313,16 @@ def get_versions(app):
     return sorted([int(v) for v in version_date])
 
 
+def unique(c):
+    return reduce(lambda a, b: a if b in a else a + [b], [[], ] + c)
+
+
+def parallel_sort(list1, list2):
+    data = zip(list1, list2)
+    data.sort()
+    return map(lambda t: list(t), zip(*data))
+
+
 def heat_map(data, xlabel, ylabel, fname):
 
     fig, ax = plt.subplots()

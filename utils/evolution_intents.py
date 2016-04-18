@@ -6,16 +6,6 @@ from utils.parser_apk import *
 from utils.gan_rels_intent import *
 
 
-def unique(c):
-    return reduce(lambda a, b: a if b in a else a + [b], [[], ] + c)
-
-
-def parallel_sort(list1, list2):
-    data = zip(list1, list2)
-    data.sort()
-    return map(lambda t: list(t), zip(*data))
-
-
 def get_components_each(app, v):
     components = list(get_intents(app, v))
     components.append(get_filters(app, v)[0])
