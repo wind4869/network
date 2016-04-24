@@ -323,6 +323,19 @@ def parallel_sort(list1, list2):
     return map(lambda t: list(t), zip(*data))
 
 
+def get_points(start, end):
+
+    points = []
+    for year in xrange(2009, 2017):
+        for month in xrange(1, 13):
+            points.append('-'.join([str(year), str(month), '1']))
+
+    return filter(
+        lambda t: maketime(start) <= maketime(t) <= maketime(end),
+        points
+    )
+
+
 def heat_map(data, xlabel, ylabel, fname):
 
     fig, ax = plt.subplots()
@@ -339,17 +352,20 @@ def heat_map(data, xlabel, ylabel, fname):
     ax.xaxis.set_ticks_position('bottom')
 
     plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+    # plt.ylabel(ylabel)
 
-    plt.yticks(xrange(0, len(data), 5))
-    plt.xticks(xrange(0, len(data[0]), 5))
+    plt.yticks(xrange(len(data)), ['Hot'])
+    # plt.yticks(xrange(len(data)), ['Wechat'])
+    # plt.yticks(xrange(0, len(data), 5))
+    # plt.yticks([0, 1], ['UC', 'Baidu'])
+    # plt.xticks(xrange(0, len(data[0]), 5))
     # plt.xticks(xrange(0, 49, 12), [str(y) for y in xrange(2012, 2017)])
 
     plt.grid()
-    plt.colorbar(im)
+    # plt.colorbar(im)
 
     plt.savefig(FIGURE_PATH % fname, format='pdf')
-    plt.show()
+    # plt.show()
 
 
 if __name__ == '__main__':

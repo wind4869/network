@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import jieba
-import numpy as np
-from numpy import array
 from gensim import corpora, models
 from sklearn.cluster import KMeans
 from BeautifulSoup import BeautifulSoup
 
-from utils.fp_apriori import *
+from utils.fp_apriori import frequent_patterns
 from utils.evolution_networks import *
 from utils.bm25 import BM25
 
@@ -96,15 +94,19 @@ def predict_lda(app):
     dictionary = corpora.Dictionary.load(DESC_DICT)
     lda = models.LdaModel.load(LDA_MODEL)
 
-    data, versions = [], []
+    data, versions, version_data = [], [], {}
     for v in get_versions(app):
         vector = predict_lda_each(app, v, dictionary, lda)
         if vector:
             data.append(vector)
             versions.append(v)
+            version_data[v] = vector
 
     # heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', app)
-    return data  # , versions
+
+    # return data
+    return version_data
+    # return data, versions
 
 
 def print_lda():
@@ -249,88 +251,134 @@ def cluster_version_each(app, num_clusters=5):
     for number, index in result_tuples:
         clusters[index].append(number)
 
-    return clusters
+    count = 0
+    shade = [2, 4, 6, 8, 10]
+    data = [0 for i in xrange(len(data_versions))]
 
-    # heat_map(data, 'Version Labels', 'Cluster Labels', app)
+    for i in sorted(clusters, key=lambda x: len(x)):
+        for j in i:
+            data[j] = count
+        count += 1
+
+    # return data
+
+    heat_map([data], 'Version Labels', 'Cluster Labels', app)
 
 
 def cluster_version():
 
+    result = [cluster_version_each(app) for app in load_eapps()]
+    result.sort(key=lambda x: len(x))
+
     data = []
+    for i in xrange(len(result)):
+        temp = [0 for j in xrange(len(result[-1]))]
+        for k in xrange(len(result[i])):
+            temp[k] += result[i][k]
+        data.append(temp)
 
-    for app in load_eapps():
-        result = cluster_version_each(app)
-        if result:
-            total = reduce(lambda a, b: a + b, [len(i) for i in result])
-            data.append([len(i) / float(total) for i in result])
-
-    plt.imshow(map(list, zip(*data)), cmap=plt.cm.Greys, interpolation='nearest')
-
-    plt.grid()
-    plt.xlabel('App Labels')
-    plt.ylabel('Cluster Labels')
-
-    plt.savefig(FIGURE_PATH % 'topic_version', format='pdf')
-    plt.show()
+    heat_map(data, 'Version Labels', 'App Labels', 'cluster_version')
 
 
-def compare_wechat_alipay():
+def compare_two_1(app1, app2):
 
     data = []
 
-    wechat = predict_lda(apps[1])
-    alipay = predict_lda(apps[2])
+    pl1 = predict_lda(app1)
+    pl2 = predict_lda(app2)
 
-    vd_wechat = get_version_date(apps[1])
-    vd_alipay = get_version_date(apps[2])
+    vd1 = get_version_date(app1)
+    vd2 = get_version_date(app2)
 
-    for u in wechat[0]:
+    for u in pl1[0]:
         temp = []
-        for v in alipay[0]:
+        for v in pl2[0]:
             temp.append(sim_cosine(u, v))
         data.append(temp)
 
     plt.figure(figsize=(16, 9))
+
+    x = [0, 34]
+    y = [30, 54]
     im = plt.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
 
-    plt.xticks(xrange(len(alipay[1])), [vd_alipay[str(v)][3:] for v in alipay[1]], rotation=90)
-    plt.yticks(xrange(len(wechat[1])), [vd_wechat[str(v)][3:] for v in wechat[1]])
-    plt.yticks()
+    plt.xticks(xrange(len(pl2[1])), [vd2[str(v)][3:] for v in pl2[1]], rotation=90)
+    plt.yticks(xrange(len(pl1[1])), [vd1[str(v)][3:] for v in pl1[1]])
 
-    plt.xlabel('Versions of Alipay')
-    plt.ylabel('Versions of Wechat')
+    plt.xlabel('Versions of %s' % app2)
+    plt.ylabel('Versions of %s' % app1)
+    plt.plot(x, y, 'r-', linewidth=2)
 
     plt.grid()
     plt.colorbar(im)
 
-    plt.savefig(FIGURE_PATH % 'compare_wechat_alipay', format='pdf')
+    plt.savefig(FIGURE_PATH % ('compare_%s_%s' % (app1, app2)), format='pdf')
+    plt.show()
+
+
+def month_vector(app, start, end):
+
+    data = []
+
+    version_data = predict_lda(app)
+    points = get_points(start, end)
+    version_date = get_version_date(app)
+
+    for i in xrange(1, len(points)):
+
+        low, high = [maketime(points[index]) for index in i - 1, i]
+        temp = np.array([0.0 for i in xrange(20)])
+
+        for v, d in version_data.items():
+            if low <= maketime(version_date[str(v)]) < high:
+                temp += np.array(d)
+
+        data.append(temp)
+
+    return data
+
+
+def compare_two_2(app1, app2):
+
+    data = []
+
+    mvector1 = month_vector(app1, '2013-1-1', '2016-2-1')
+    mvector2 = month_vector(app2, '2013-1-1', '2016-2-1')
+
+    for u in mvector1:
+        temp = []
+        for v in mvector2:
+            temp.append(sim_cosine(u, v))
+        data.append(temp)
+
+    im = plt.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
+
+    plt.xticks(xrange(0, len(mvector2), 12), [str(y) for y in xrange(2013, 2017)])
+    plt.yticks(xrange(0, len(mvector1), 12), [str(y) for y in xrange(2013, 2017)])
+
+    plt.xlabel('Versions of Alipay')
+    plt.ylabel('Versions of Taobao')
+    plt.plot([0, 36], [0, 36], 'r-')
+
+    plt.grid()
+    plt.colorbar(im)
+
+    plt.savefig(FIGURE_PATH % ('compare_%s_%s' % (app1, app2)), format='pdf')
     plt.show()
 
 
 def cluster_topic():
 
     result = []
-    for app in load_eapps():
-        temp = k_means(map(list, zip(*predict_lda(app))))
-        result.append(sorted(temp, key=lambda x: len(x)))
+    # for app in load_eapps():
+    #     temp = k_means(map(list, zip(*predict_lda(app))))
+    #     result.append(sorted(temp, key=lambda x: len(x)))
 
-    shade = [0, 0.2, 0.4, 0.6, 0.8]
-    data = [[0 for j in xrange(20)] for i in xrange(50)]
-    for i in xrange(50):
-        for j in xrange(5):
-            for k in result[i][j]:
-                data[i][k] = 0.8 - shade[j]
+    clusters = []
+    for c in result:
+        clusters.append(sorted(c, key=lambda x: len(x))[-1])
 
-    # frequent_patterns(data)
-
-    plt.imshow(map(list, zip(*data)), cmap=plt.cm.jet, interpolation='nearest')
-
-    plt.grid()
-    plt.xlabel('App Labels')
-    plt.ylabel('Topic Labels')
-
-    plt.savefig(FIGURE_PATH % 'topic_cluster', format='pdf')
-    plt.show()
+    frequent_patterns(clusters)
 
 
 def topic_importance():
@@ -338,17 +386,27 @@ def topic_importance():
     data = []
     apps = load_eapps()
 
-    for app in apps:
-        d = predict_lda(app)
-        data.append(reduce(lambda a, b: a + b, [np.array(i) for i in d]) / len(d))
+    # for app in apps:
+    #     d = predict_lda(app)
+    #     data.append(reduce(lambda a, b: a + b,
+    #                        [np.array(i) for i in d]) / len(d))
+
+    # print [list(d) for d in data]
+
+    # temp = []
+    # for i in xrange(len(data)):
+    #     if apps[i] in ['com.UCMobile', 'com.baidu.browser.apps']:
+    #         print apps[i], data[i]
+    #         temp.append(data[i])
 
     result = []
-    for c in k_means(data, 4):
+    for c in k_means(data, 10):
         result.append([apps[i] for i in c])
 
     print result
 
-    # heat_map(map(list, zip(*data)), 'App Labels', 'Topic Labels', 'topic_importance')
+    # heat_map(temp, 'Topic Labels', 'Two Similar Apps', 'topic_importance')
+    heat_map(map(list, zip(*data)), 'App Labels', 'Topic Labels', 'topic_importance')
 
 
 def proper_version(app, low, high):
@@ -397,9 +455,15 @@ def topics_common(low, start, end):
                 if vector:
                     temp.append(np.array(vector))
         low = high
-        data.append(reduce(lambda a, b: a + b, temp, np.array([0 for i in xrange(lda.num_topics)])))
+        data.append(reduce(lambda a, b: a + b, temp,
+                           np.array([0 for i in xrange(lda.num_topics)])))
 
-    heat_map(map(list, zip(*data)), 'Time Line (2012.1~2016.3)', 'Topic Labels', 'topic_common_%d' % len(apps))
+    heat_map(
+        map(list, zip(*data)),
+        'Time Line (2012.1~2016.3)',
+        'Topic Labels',
+        'topic_common_%d' % len(apps)
+    )
 
 
 def version_range_each(app):
@@ -410,7 +474,8 @@ def version_range_each(app):
     for i in xrange(1, len(data)):
         y.append(sim_cosine(data[i - 1], data[i]))
 
-    return np.var(y)
+    return y
+    # return np.var(y)
 
     x = xrange(len(data) - 1)
     plt.plot(x, y, 'ro-')
@@ -420,23 +485,17 @@ def version_range_each(app):
 
 def version_range():
 
-    temp = []
-    for app in load_eapps():
-        temp.append((app, downloadCount(app)))
+    result = [version_range_each(app) for app in load_eapps()]
+    result.sort(key=lambda x: len(x))
 
-    apps = [x[0] for x in sorted(temp, key=lambda x: x[1])]
+    data = []
+    for i in xrange(len(result)):
+        temp = [0 for j in xrange(len(result[-1]))]
+        for k in xrange(len(result[i])):
+            temp[k] += result[i][k]
+        data.append(temp)
 
-    x = xrange(len(apps))
-    y = []
-    d = []
-
-    for app in apps:
-        y.append(version_range_each(app))
-        d.append(downloadCount(app))
-
-    plt.plot(x, y, 'ro-')
-    plt.savefig(FIGURE_PATH % 'version_range', format='pdf')
-    plt.show()
+    heat_map(data, 'Cosine Similarities', 'App Labels', 'version_range')
 
 
 def version_rank():
@@ -465,7 +524,10 @@ if __name__ == '__main__':
     apps = load_eapps()
 
     # train_lda(apps, 20)
-    # predict_lda(apps[0])
+    # for app in apps:
+    #     predict_lda(app)
+
+    # print_lda()
 
     # train_word2vec(apps, 50)
     # predict_bm25(apps[0])
@@ -476,6 +538,22 @@ if __name__ == '__main__':
     # topic_importance()
 
     # cluster_version()
-    # compare_wechat_alipay()
+    # cluster_version_each(apps[0])
+
+    # compare_two_2('com.tencent.mm', 'com.tencent.mobileqq')
+    # compare_two_2('com.UCMobile', 'com.baidu.browser.apps')
+    # compare_two_2('com.tencent.mm', 'com.eg.android.AlipayGphone')
+    # compare_two_2('com.taobao.taobao', 'com.eg.android.AlipayGphone')
+
     # version_range_each(apps[0])
-    version_range()
+    # version_range()
+    # version_rank()
+
+    # data = map(list, zip(*data))
+    # result = []
+    # for i in xrange(len(data)):
+    #     result.append(sum(data[i]))
+    #
+    # heat_map([result], 'Topic Labels', '', 'topic_hot_degree')
+
+

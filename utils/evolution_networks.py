@@ -8,19 +8,6 @@ from utils.parser_apk import *
 from utils.gan_rels_intent import *
 
 
-def get_points(start, end):
-
-    points = []
-    for year in xrange(2009, 2017):
-        for month in xrange(1, 13):
-            points.append('-'.join([str(year), str(month), '1']))
-
-    return filter(
-        lambda t: maketime(start) <= maketime(t) <= maketime(end),
-        points
-    )
-
-
 def intent_match(app_from, app_to):
 
     explicits, implicits = get_intents(*app_from)
@@ -111,7 +98,7 @@ def version_distribution():
         y = [count for i in xrange(len(versions))]
         count += 1
 
-        plt.plot(x, y, 'r-', linewidth=4)
+        plt.plot(x, y, 'ro-', linewidth=4)
 
     plt.grid()
     plt.xticks([maketime(y + '-1-1') for y in xlabels], xlabels)
@@ -396,16 +383,16 @@ def heat_map_intent(data, fname):
 
 if __name__ == '__main__':
 
-    # version_distribution()
+    version_distribution()
     # network_create()
     # scale_and_density()
     # distribution_quality_test()
     # community_test()
 
     # points = get_points('2012-1-1', '2016-3-1')
-    points = get_points('2015-1-1', '2015-12-1')
+    # points = get_points('2015-1-1', '2015-12-1')
     # matches, m_intents, m_filters, point_apps = get_matches(points)
 
     # scale_stats_common(points)
-    intent_cover_test(points, True)
-    intent_match_test(points, True)
+    # intent_cover_test(points, True)
+    # intent_match_test(points, True)

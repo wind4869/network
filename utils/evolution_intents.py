@@ -218,7 +218,8 @@ def version_each(app, ctype):
     for i in xrange(1, len(data)):
         y.append(sim_cosine(data[i - 1], data[i]))
 
-    return np.var(y)
+    return y
+    # return np.var(y)
 
     x = xrange(len(data) - 1)
     plt.plot(x, y, 'ro-')
@@ -226,7 +227,7 @@ def version_each(app, ctype):
     plt.show()
 
 
-def version_test():
+def version_test_1():
     apps = load_eapps()
     x = xrange(len(apps))
 
@@ -242,6 +243,21 @@ def version_test():
     plt.plot(x, yf, 'bs-')
     plt.savefig(FIGURE_PATH % 'version', format='pdf')
     plt.show()
+
+
+def version_test_2(ctype):
+
+    result = [version_each(app, ctype) for app in load_eapps()]
+    result.sort(key=lambda x: len(x))
+
+    data = []
+    for i in xrange(len(result)):
+        temp = [0 for j in xrange(len(result[-1]))]
+        for k in xrange(len(result[i])):
+            temp[k] += result[i][k]
+        data.append(temp)
+
+    heat_map(data, 'Cosine Similarities', 'App Labels', 'version_test')
 
 
 def number_each(app):
@@ -270,24 +286,42 @@ def number_each(app):
 
 def number_test():
 
-    temp = []
-    yi, yf = [], []
     apps = load_eapps()
-    x = xrange(len(apps))
+    x = xrange(len(apps) - 1)
+    y, yi, yf = [], [], []
+
+    xlabels = []
 
     for app in apps:
 
         ni, nf = number_each(app)
+        y.append(float(ni) / nf)
         yi.append(ni)
         yf.append(nf)
+        xlabels.append(title(app))
 
-    print pearson(yi, yf)
+    t, xlabels = parallel_sort(y[:], xlabels)
+    t, yi = parallel_sort(y[:], yi)
+    y, yf = parallel_sort(y[:], yf)
 
-    yi, yf = parallel_sort(yi, yf)
+    y, yi, yf = map(lambda l: l[:-1], [y, yi, yf])
 
-    plt.plot(x, yi, 'ro-')
-    plt.plot(x, yf, 'bs-')
-    plt.savefig(FIGURE_PATH % 'number', format='pdf')
+    f, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
+
+    ax1.plot(x, y, 'ro-', label='Ratio of Blew Two')
+    ax2.plot(x, yi, 'go-', label='Number of Intents')
+    ax3.plot(x, yf, 'bo-', label='Number of Intent-filters')
+
+    ax1.grid()
+    ax2.grid()
+    ax3.grid()
+
+    ax1.legend(loc=0)
+    ax2.legend(loc=0)
+    ax3.legend(loc=0)
+
+    plt.xlabel('App Labels')
+    plt.savefig(FIGURE_PATH % 'number_test', format='pdf')
     plt.show()
 
 
@@ -419,8 +453,10 @@ if __name__ == '__main__':
     # cover_test_1(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
     # cover_test_2()
-    # version_test()
+    # version_test_1()
+    version_test_2(COMPONENT.I_INTENT)
+    version_test_2(COMPONENT.I_FILTER)
     # number_test()
     # case_study('com.tencent.mm')
     # wechat_intent()
-    wechat_filter()
+    # wechat_filter()
