@@ -104,8 +104,8 @@ def predict_lda(app):
 
     # heat_map(map(list, zip(*data)), 'Version Labels', 'Topic Labels', app)
 
-    # return data
-    return version_data
+    return data
+    # return version_data
     # return data, versions
 
 
@@ -498,6 +498,21 @@ def version_range():
     heat_map(data, 'Cosine Similarities', 'App Labels', 'version_range')
 
 
+def version_test():
+
+    data = [version_range_each(app) for app in load_eapps()]
+    data.sort(key=lambda x: len(x))
+
+    plt.figure(figsize=(16, 9))
+    plt.boxplot(data, showfliers=False)
+    plt.ylabel('Cosine Similarity of Topic Vector')
+    plt.xlabel('App Labels (Ordered by the Number of Versions)')
+    plt.title('Adjacent Version Rangeability of Each App')
+
+    plt.savefig(FIGURE_PATH % 'version_test', format='pdf')
+    plt.show()
+
+
 def version_rank():
 
     apps = load_eapps()
@@ -548,6 +563,7 @@ if __name__ == '__main__':
     # version_range_each(apps[0])
     # version_range()
     # version_rank()
+    version_test()
 
     # data = map(list, zip(*data))
     # result = []
@@ -555,5 +571,3 @@ if __name__ == '__main__':
     #     result.append(sum(data[i]))
     #
     # heat_map([result], 'Topic Labels', '', 'topic_hot_degree')
-
-

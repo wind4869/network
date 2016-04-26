@@ -227,6 +227,36 @@ def version_each(app, ctype):
     plt.show()
 
 
+def version_test():
+
+    data = [
+        (app,
+         version_each(app, COMPONENT.I_INTENT),
+         version_each(app, COMPONENT.I_FILTER))
+        for app in load_eapps()
+    ]
+
+    data.sort(key=lambda x: len(x[1]))
+    data_intent = [d[1] for d in data]
+    data_filter = [d[2] for d in data]
+
+    plt.figure(figsize=(16, 9))
+    labels = ['' for i in xrange(len(data))]
+
+    plt.subplot(2, 1, 1)
+    plt.boxplot(data_intent, labels=labels, showfliers=False)
+    plt.title('Adjacent Version Rangeability of Each App (Cosine Similarity)')
+    plt.ylabel('Measured by Intents')
+
+    plt.subplot(2, 1, 2)
+    plt.boxplot(data_filter, showfliers=False)
+    plt.ylabel('Measured by Intent-filters')
+
+    plt.xlabel('App Labels (Ordered by the Number of Versions)')
+    plt.savefig(FIGURE_PATH % 'version_test', format='pdf')
+    plt.show()
+
+
 def version_test_1():
     apps = load_eapps()
     x = xrange(len(apps))
@@ -450,13 +480,18 @@ def wechat_filter(app='com.tencent.mm'):
 if __name__ == '__main__':
     # existence_test(COMPONENT.I_INTENT)
     # existence_test(COMPONENT.I_FILTER)
+
     # cover_test_1(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
     # cover_test_2()
+
+    version_test()
     # version_test_1()
-    version_test_2(COMPONENT.I_INTENT)
-    version_test_2(COMPONENT.I_FILTER)
+    # version_test_2(COMPONENT.I_INTENT)
+    # version_test_2(COMPONENT.I_FILTER)
+
     # number_test()
+
     # case_study('com.tencent.mm')
     # wechat_intent()
     # wechat_filter()
