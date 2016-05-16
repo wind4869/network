@@ -148,23 +148,25 @@ def get_part(t1=100, t2=700):
     graph.vs['size'] = [15 for i in xrange(len(graph.vs))]
 
     # draw the graph
-    ig.plot(graph, bbox=(2400, 1400))
+    ig.plot(graph, FIGURE_PATH % 'network', bbox=(2400, 1400))
 
     return part
 
 
 if __name__ == '__main__':
 
-    apps = load_eapps()
+    # apps = load_eapps()
+    #
+    # count = 1
+    # for app in apps[count - 1:]:
+    #
+    #     print '> %d. %s' % (count, app)
+    #     count += 1
+    #
+    #     download_dataset(app)
+    #
+    #     versions = get_versions(app)
+    #     analyse_dataset(app, versions)
+    #     extract_dataset(app, versions)
 
-    count = 1
-    for app in apps[count - 1:]:
-
-        print '> %d. %s' % (count, app)
-        count += 1
-
-        download_dataset(app)
-
-        versions = get_versions(app)
-        analyse_dataset(app, versions)
-        extract_dataset(app, versions)
+    get_part()

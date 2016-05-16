@@ -112,10 +112,13 @@ def existence_test(ctype, num_types=4):
     y[0] = temp
 
     shape = ['ro-', 'go-', 'bo-', 'yo-']
+    labels = ['EP', 'CP', 'IP', 'DP']
     f, ax = plt.subplots(num_types, 1, sharex=True)
 
     for i in xrange(num_types):
-        ax[i].plot(x, y[i], shape[i])
+        ax[i].plot(x, y[i], shape[i], label=labels[i])
+        ax[i].legend(loc=0)
+    plt.xlabel('App Labels')
 
     if ctype == COMPONENT.I_INTENT:
         plt.savefig(FIGURE_PATH % 'existence_intent', format='pdf')
@@ -149,7 +152,8 @@ def cover_each(app, ctype):
         yp.append((sum(v) / float(length)))
         yc.append(sum(v) / float(end - start + 1))
 
-    return [np.mean(y) for y in yp, yc]
+    return yp, yc
+    # return [np.mean(y) for y in yp, yc]
 
     x = xrange(length)
     plt.plot(x, yp, 'ro-')
@@ -212,6 +216,33 @@ def cover_test_2():
     plt.savefig(FIGURE_PATH % 'continuity', format='pdf')
 
 
+def cover_test_3():
+
+    result = [(cover_each(app, COMPONENT.I_INTENT)[0], app) for app in load_eapps()]
+    result.sort(key=lambda x: np.var(x[0]))
+
+    apps = [x[1] for x in result]
+    data_intent = [x[0] for x in result]
+    data_filter = [cover_each(app, COMPONENT.I_FILTER)[0] for app in apps]
+
+    plt.figure(figsize=(16, 9))
+    labels = ['' for i in xrange(len(data_intent))]
+
+    plt.subplot(2, 1, 1)
+    plt.boxplot(data_intent, labels=labels, showfliers=False)
+    # plt.title('Cover Proportion of Interface')
+    # plt.title('Cover Continuity of Interface')
+    plt.ylabel('CR of Intents')
+
+    plt.subplot(2, 1, 2)
+    plt.boxplot(data_filter, showfliers=False)
+    plt.ylabel('CR of Intent-filters')
+
+    plt.xlabel('App Labels')
+    plt.savefig(FIGURE_PATH % 'cover_test', format='pdf')
+    plt.show()
+
+
 def version_each(app, ctype):
     y = []
     data = get_data(app, ctype)
@@ -236,23 +267,26 @@ def version_test():
         for app in load_eapps()
     ]
 
-    data.sort(key=lambda x: len(x[1]))
+    data.sort(key=lambda x: np.median(x[1]))
     data_intent = [d[1] for d in data]
     data_filter = [d[2] for d in data]
+
+    for d in data:
+        print d[0]
 
     plt.figure(figsize=(16, 9))
     labels = ['' for i in xrange(len(data))]
 
     plt.subplot(2, 1, 1)
     plt.boxplot(data_intent, labels=labels, showfliers=False)
-    plt.title('Adjacent Version Rangeability of Each App (Cosine Similarity)')
+    # plt.title('Adjacent Version Rangeability of Each App (Cosine Similarity)')
     plt.ylabel('Measured by Intents')
 
     plt.subplot(2, 1, 2)
     plt.boxplot(data_filter, showfliers=False)
     plt.ylabel('Measured by Intent-filters')
 
-    plt.xlabel('App Labels (Ordered by the Number of Versions)')
+    plt.xlabel('App Labels')
     plt.savefig(FIGURE_PATH % 'version_test', format='pdf')
     plt.show()
 
@@ -261,14 +295,23 @@ def version_test_1():
     apps = load_eapps()
     x = xrange(len(apps))
 
+    temp = []
     yi, yf = [], []
     for app in apps:
+        temp.append(app)
         yi.append(version_each(app, COMPONENT.I_INTENT))
         yf.append(version_each(app, COMPONENT.I_FILTER))
 
     print pearson(yi, yf)
 
-    yi, yf = parallel_sort(yi, yf)
+    t, yf = parallel_sort(yi, yf)
+    yi, temp = parallel_sort(yi, temp)
+
+    count = 0
+    for app in temp:
+        print count, app
+        count += 1
+
     plt.plot(x, yi, 'ro-')
     plt.plot(x, yf, 'bs-')
     plt.savefig(FIGURE_PATH % 'version', format='pdf')
@@ -427,12 +470,13 @@ def wechat_intent(app='com.tencent.mm'):
             36, 37,
         ],
         [
-            'view message', 'set wireless', 'command music', 'set location', 'send text',
-            'insert', 'set apn', 'insert person', 'call', 'view text',
-            'get video', 'get image', 'set display', 'view video', 'insert contact',
-            'view downloads', 'sendto', 'pick', 'dial', 'set app ops',
-            'set nfc', 'set manage app',
+            'VIEW message', 'SET wireless', 'MUSIC_COMMAND', 'SET location', 'SEND plain/text',
+            'INSERT', 'SET apn', 'INSERT person', 'CALL', 'VIEW text/plain',
+            'GET video/*', 'GET image/*', 'SET display', 'VIEW video/*', 'INSERT contact',
+            'VIEW_DOWNLOADS', 'SENDTO', 'PICK', 'DIAL', 'SET app_ops',
+            'SET nfc', 'SET manage_app',
         ])
+    plt.xlabel('Version Labels')
     plt.grid()
     plt.savefig(FIGURE_PATH % 'intents', format='pdf')
     plt.show()
@@ -484,8 +528,9 @@ if __name__ == '__main__':
     # cover_test_1(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
     # cover_test_2()
+    # cover_test_3()
 
-    version_test()
+    # version_test()
     # version_test_1()
     # version_test_2(COMPONENT.I_INTENT)
     # version_test_2(COMPONENT.I_FILTER)
@@ -493,5 +538,11 @@ if __name__ == '__main__':
     # number_test()
 
     # case_study('com.tencent.mm')
-    # wechat_intent()
+    wechat_intent()
     # wechat_filter()
+
+    # app = 'com.sankuai.meituan.takeoutnew'
+    # app = 'com.cleanmaster.mguard_cn'
+
+    # print version_each(app, COMPONENT.I_INTENT)
+    # print version_each(app, COMPONENT.I_FILTER)

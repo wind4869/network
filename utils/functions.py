@@ -283,7 +283,10 @@ def g_sim(pan1, pan2):
 
 # calculate cosine similarity of two vectors
 def sim_cosine(u, v):
-    return numpy.dot(u, v) / (math.sqrt(numpy.dot(u, u)) * math.sqrt(numpy.dot(v, v)))
+    a = math.sqrt(numpy.dot(u, u))
+    b = math.sqrt(numpy.dot(v, v))
+    c = numpy.dot(u, v)
+    return 0 if not c else c / (a * b)
 
 
 # judge whether url of app exists
@@ -338,8 +341,9 @@ def get_points(start, end):
 
 def heat_map(data, xlabel, ylabel, fname):
 
+    # plt.figure(figsize=(16, 9))
     fig, ax = plt.subplots()
-    im = ax.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
+    im = plt.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
 
     # Move left and bottom spines outward by 10 points
     ax.spines['left'].set_position(('outward', 10))
@@ -352,20 +356,20 @@ def heat_map(data, xlabel, ylabel, fname):
     ax.xaxis.set_ticks_position('bottom')
 
     plt.xlabel(xlabel)
-    # plt.ylabel(ylabel)
+    plt.ylabel(ylabel)
 
-    plt.yticks(xrange(len(data)), ['Hot'])
-    # plt.yticks(xrange(len(data)), ['Wechat'])
+    # plt.yticks(xrange(len(data)), ['Hot'])
+    # plt.yticks(xrange(len(data)), ['True', 'False'])
     # plt.yticks(xrange(0, len(data), 5))
     # plt.yticks([0, 1], ['UC', 'Baidu'])
     # plt.xticks(xrange(0, len(data[0]), 5))
     # plt.xticks(xrange(0, 49, 12), [str(y) for y in xrange(2012, 2017)])
 
     plt.grid()
-    # plt.colorbar(im)
+    # plt.colorbar(im, orientation='horizontal')
 
     plt.savefig(FIGURE_PATH % fname, format='pdf')
-    # plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':

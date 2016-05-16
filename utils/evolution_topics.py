@@ -257,12 +257,12 @@ def cluster_version_each(app, num_clusters=5):
 
     for i in sorted(clusters, key=lambda x: len(x)):
         for j in i:
-            data[j] = count
+            data[j] = shade[count]
         count += 1
 
-    # return data
+    return data
 
-    heat_map([data], 'Version Labels', 'Cluster Labels', app)
+    # heat_map([data], 'Version Labels', 'Cluster Labels', app)
 
 
 def cluster_version():
@@ -342,14 +342,28 @@ def compare_two_2(app1, app2):
 
     data = []
 
-    mvector1 = month_vector(app1, '2013-1-1', '2016-2-1')
-    mvector2 = month_vector(app2, '2013-1-1', '2016-2-1')
+    mvector1 = month_vector(app1, '2012-1-1', '2016-2-1')
+    mvector2 = month_vector(app2, '2014-1-1', '2016-2-1')
 
     for u in mvector1:
         temp = []
         for v in mvector2:
             temp.append(sim_cosine(u, v))
         data.append(temp)
+
+    above, middle, blew = [], [], []
+    for i in xrange(len(data)):
+        for j in xrange(len(data[0])):
+            d = data[i][j]
+            if i - 23 < j:
+                above.append(d)
+            elif i - 23 > j:
+                blew.append(d)
+            else:
+                middle.append(d)
+
+    print np.mean(middle), np.mean(blew), np.mean(above)
+    print len(middle), len(blew), len(above)
 
     im = plt.imshow(data, cmap=plt.cm.Greys, interpolation='nearest')
 
@@ -399,14 +413,22 @@ def topic_importance():
     #         print apps[i], data[i]
     #         temp.append(data[i])
 
-    result = []
-    for c in k_means(data, 10):
-        result.append([apps[i] for i in c])
+    # result = []
+    # for c in k_means(data, 10):
+    #     result.append([apps[i] for i in c])
+    #
+    # print result
 
-    print result
+    result = []
+
+    for i in xrange(50):
+        temp = []
+        for j in xrange(50):
+            temp.append(sim_cosine(result[i], result[j]))
+        data.append(temp)
 
     # heat_map(temp, 'Topic Labels', 'Two Similar Apps', 'topic_importance')
-    heat_map(map(list, zip(*data)), 'App Labels', 'Topic Labels', 'topic_importance')
+    heat_map(map(list, zip(*data)), 'App Labels', 'App Labels', 'topic_importance')
 
 
 def proper_version(app, low, high):
@@ -500,14 +522,19 @@ def version_range():
 
 def version_test():
 
-    data = [version_range_each(app) for app in load_eapps()]
-    data.sort(key=lambda x: len(x))
+    data = [(version_range_each(app), app) for app in load_eapps()]
+    data.sort(key=lambda x: np.median(x[0]))
+
+    count = 0
+    for d in data:
+        print count, d[1]
+        count += 1
 
     plt.figure(figsize=(16, 9))
-    plt.boxplot(data, showfliers=False)
+    plt.boxplot([d[0] for d in data], showfliers=False)
     plt.ylabel('Cosine Similarity of Topic Vector')
-    plt.xlabel('App Labels (Ordered by the Number of Versions)')
-    plt.title('Adjacent Version Rangeability of Each App')
+    plt.xlabel('App Labels')
+    # plt.title('Adjacent Version Rangeability of Each App')
 
     plt.savefig(FIGURE_PATH % 'version_test', format='pdf')
     plt.show()
@@ -537,6 +564,10 @@ def version_rank():
 if __name__ == '__main__':
 
     apps = load_eapps()
+    # count = 0
+    # for app in apps:
+    #     print count, app
+    #     count += 1
 
     # train_lda(apps, 20)
     # for app in apps:
@@ -571,3 +602,6 @@ if __name__ == '__main__':
     #     result.append(sum(data[i]))
     #
     # heat_map([result], 'Topic Labels', '', 'topic_hot_degree')
+
+    # heat_map(data, 'Time Interval', 'Right of Privacy', 'temp')
+    # predict_lda('com.snda.youni')
