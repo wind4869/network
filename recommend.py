@@ -6,24 +6,24 @@ from random import choice
 
 
 # Method 1st: use "gan->pan" pattern to recommend
-def recommend_connection_based(uid):
+def recommend_gan_based(uid):
     gan, pan = load_gan(), load_pan(uid)
     apps_gan, apps_pan = [set(lan.nodes()) for lan in gan, pan]
 
     result = {}  # record score of each app candidate
-    for app in apps_gan - apps_gan:
+    for app in apps_gan - apps_pan:
         result.setdefault(app, 0)
 
     # the score is: Σ(edge weight * node weight)
     for common in apps_pan & apps_gan:
-        for app in gan.predecessors(common) - apps_pan:
+        for app in set(gan.predecessors(common)) - apps_pan:
             result[app] += gan[app][common]['weight'] * pan.node[common]['weight']
-        for app in gan.successors(common) - apps_pan:
+        for app in set(gan.successors(common)) - apps_pan:
             result[app] += gan[common][app]['weight'] * pan.node[common]['weight']
 
     temp = []
     for app, score in result.iteritems():
-        temp.append([app, round(score, 2)])
+        temp.append((app, round(score, 2)))
 
     return sorted(temp, key=lambda x: x[1], reverse=True)
 
@@ -42,9 +42,9 @@ def recommend_by_pan(pan_base, pan_other):
 
     # the score is: Σ(sim * edge weight * node weight)
     for common in apps_base & apps_other:
-        for app in pan_other.predecessors(common) - apps_base:
+        for app in set(pan_other.predecessors(common)) - apps_base:
             scores[app] += sim * pan_other[app][common]['weight'] * pan_base.node[common]['weight']
-        for app in pan_other.successors(common) - apps_base:
+        for app in set(pan_other.successors(common)) - apps_base:
             scores[app] += sim * pan_other[common][app]['weight'] * pan_base.node[common]['weight']
 
     return scores
@@ -60,27 +60,28 @@ def recommend_pan_based(uid):
         scores = recommend_by_pan(pan_base, pan_other)
         for app in scores:
             if app in result:
-                result += scores[app]
+                result[app] += scores[app]
             else:
                 result[app] = scores[app]
 
     temp = []
     for app, score in result.iteritems():
-        temp.append([app, round(score, 2)])
+        temp.append((app, round(score, 2)))
 
     return sorted(temp, key=lambda x: x[1], reverse=True)
 
 
 # get "user-app-rating" matrix from pan
-def get_ratings(capps, users):
+def get_ratings():
     capps, users = load_capps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
 
     for index in xrange(num_users):
-        pan = load_pan(num_users[index])
+        pan = load_pan(users[index])
         for app in pan.nodes():
-            ratings[index][capps.index(app)] = pan.node[app]['weight']
+            if app in capps:
+                ratings[index][capps.index(app)] = pan.node[app]['weight']
 
     f_train = open(TRAIN_SET, 'w')
     f_test = open(TEST_SET, 'w')
@@ -124,7 +125,7 @@ def recommend_mf_based(uid):
     temp = []
     result = ratings[users.index(uid)]
     for index in xrange(num_capps):
-        temp.append(capps[index], result[index])
+        temp.append((capps[index], result[index]))
 
     return sorted(temp, key=lambda x: x[1], reverse=True)
 
@@ -152,7 +153,7 @@ def get_dataset(uid):
 
 
 # get precision and recall
-def evaluate(uid, topk):
+def evaluate_lan_based(uid, topk):
     training_set, test_set, pan = get_dataset(uid)
 
     def display(num_hit, result):
@@ -161,11 +162,12 @@ def evaluate(uid, topk):
         print '(3) Precision: %s, Recall: %s' \
             % (num_hit * 1.0 / len(result), num_hit * 1.0 / len(test_set))
 
-    print '> Method 1st: Connection-Based Recommendation'
-    result = recommend_connection_based(training_set)[:topk]
+    result = recommend_gan_based()[:topk]
     num_hit = len(test_set & set(result))
     display(num_hit, result)
 
 
 if __name__ == '__main__':
-    pass
+    print recommend_gan_based('a1')
+    # print recommend_pan_based('a1')
+    # print recommend_mf_based('a1')

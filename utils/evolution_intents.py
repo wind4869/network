@@ -112,7 +112,7 @@ def existence_test(ctype, num_types=4):
     y[0] = temp
 
     shape = ['ro-', 'go-', 'bo-', 'yo-']
-    labels = ['EP', 'CP', 'IP', 'DP']
+    labels = ['EC', 'CC', 'IC', 'DC']
     f, ax = plt.subplots(num_types, 1, sharex=True)
 
     for i in xrange(num_types):
@@ -522,8 +522,8 @@ def wechat_filter(app='com.tencent.mm'):
 
 
 if __name__ == '__main__':
-    # existence_test(COMPONENT.I_INTENT)
-    # existence_test(COMPONENT.I_FILTER)
+    existence_test(COMPONENT.I_INTENT)
+    existence_test(COMPONENT.I_FILTER)
 
     # cover_test_1(COMPONENT.I_INTENT)
     # cover_test_1(COMPONENT.I_FILTER)
@@ -538,7 +538,7 @@ if __name__ == '__main__':
     # number_test()
 
     # case_study('com.tencent.mm')
-    wechat_intent()
+    # wechat_intent()
     # wechat_filter()
 
     # app = 'com.sankuai.meituan.takeoutnew'
