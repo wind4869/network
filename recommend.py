@@ -6,8 +6,9 @@ from random import choice
 
 
 # Method 1st: use "gan->pan" pattern to recommend
-def recommend_gan_based(uid):
-    gan, pan = load_gan(), load_pan(uid)
+def recommend_gan_based(uid, pan):
+    gan = load_gan()
+    # gan, pan = load_gan(), load_pan(uid)
     apps_gan, apps_pan = [set(lan.nodes()) for lan in gan, pan]
 
     result = {}  # record score of each app candidate
@@ -51,8 +52,8 @@ def recommend_by_pan(pan_base, pan_other):
 
 
 # Method 2nd: use "pans->pan" pattern to recommend
-def recommend_pan_based(uid):
-    pan_base = load_pan(uid)
+def recommend_pan_based(uid, pan_base):
+    # pan_base = load_pan(uid)
     pans_other = [load_pan(u) for u in load_uids() if u != uid]
 
     result = {}  # record score of each app candidate
@@ -72,13 +73,15 @@ def recommend_pan_based(uid):
 
 
 # get "user-app-rating" matrix from pan
-def get_ratings():
+def get_ratings(uid, pan_base):
     capps, users = load_capps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
 
     for index in xrange(num_users):
         pan = load_pan(users[index])
+        if users[index] == uid:
+            pan = pan_base
         for app in pan.nodes():
             if app in capps:
                 ratings[index][capps.index(app)] = pan.node[app]['weight']
@@ -96,9 +99,9 @@ def get_ratings():
 
 
 # get output file the predict result
-def get_output():
+def get_output(uid, pan_base):
     # step 1: prepare "user-app-rating" matrix
-    get_ratings()
+    get_ratings(uid, pan_base)
     # step 2: train the model
     run(TRAIN_CMD)
     # step 3: do predict using the model
@@ -106,8 +109,8 @@ def get_output():
 
 
 # Method 3rd: MF(matrix factorization) method on usage records
-def recommend_mf_based(uid):
-    get_output()
+def recommend_mf_based(uid, pan_base):
+    get_output(uid, pan_base)
     capps, users = load_capps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
@@ -153,21 +156,30 @@ def get_dataset(uid):
 
 
 # get precision and recall
-def evaluate_lan_based(uid, topk):
+def evaluate(uid, topk, recommend_algorithm):
+
     training_set, test_set, pan = get_dataset(uid)
+    print '(1) Training: %d, Test: %d' % (len(training_set), len(test_set))
 
-    def display(num_hit, result):
-        print '(1) Training: %s, Test: %s' % (len(training_set), len(test_set))
-        print '(2) Top: %s, Hit: %s' % (topk, num_hit)
-        print '(3) Precision: %s, Recall: %s' \
-            % (num_hit * 1.0 / len(result), num_hit * 1.0 / len(test_set))
-
-    result = recommend_gan_based()[:topk]
+    result = [x[0] for x in recommend_algorithm(uid, pan)[:topk]]
     num_hit = len(test_set & set(result))
-    display(num_hit, result)
+    print '(2) Top: %d, Hit: %d' % (topk, num_hit)
+
+    precision = num_hit * 1.0 / len(result)
+    recall = num_hit * 1.0 / len(test_set)
+    f_score = 2 * precision * recall / (precision + recall) \
+        if precision or recall else 0
+    print '(3) Precision: %f, Recall: %f, F-Score: %f' \
+          % (precision, recall, f_score)
+
+    return precision, recall, f_score
 
 
 if __name__ == '__main__':
-    print recommend_gan_based('a1')
+    # print recommend_gan_based('a1')
     # print recommend_pan_based('a1')
     # print recommend_mf_based('a1')
+
+    # evaluate('a1', 100, recommend_gan_based)
+    evaluate('a1', 10, recommend_pan_based)
+    # evaluate('a1', 30, recommend_mf_based)
