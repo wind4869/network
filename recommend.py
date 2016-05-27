@@ -18,9 +18,9 @@ def recommend_gan_based(uid, pan):
     # the score is: Σ(edge weight * node weight)
     for common in apps_pan & apps_gan:
         for app in set(gan.predecessors(common)) - apps_pan:
-            result[app] += gan[app][common]['weight'] * pan.node[common]['weight']
+            result[app] += gan[app][common]['weight']  # * pan.node[common]['weight']
         for app in set(gan.successors(common)) - apps_pan:
-            result[app] += gan[common][app]['weight'] * pan.node[common]['weight']
+            result[app] += gan[common][app]['weight']  # * pan.node[common]['weight']
 
     temp = []
     for app, score in result.iteritems():
@@ -44,9 +44,9 @@ def recommend_by_pan(pan_base, pan_other):
     # the score is: Σ(sim * edge weight * node weight)
     for common in apps_base & apps_other:
         for app in set(pan_other.predecessors(common)) - apps_base:
-            scores[app] += sim * pan_other[app][common]['weight'] * pan_base.node[common]['weight']
+            scores[app] += sim * pan_other[app][common]['weight']  # * pan_base.node[common]['weight']
         for app in set(pan_other.successors(common)) - apps_base:
-            scores[app] += sim * pan_other[common][app]['weight'] * pan_base.node[common]['weight']
+            scores[app] += sim * pan_other[common][app]['weight']  # * pan_base.node[common]['weight']
 
     return scores
 
@@ -73,13 +73,13 @@ def recommend_pan_based(uid, pan_base):
 
 
 # get "user-app-rating" matrix from pan
-def get_ratings(uid, pan_base):
-    capps, users = load_capps(), load_uids()
+def get_rating_matrix(uid, pan_base):
+    capps, users = load_apps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
 
     for index in xrange(num_users):
-        pan = load_pan(users[index])
+        pan = adjust_ratings(load_pan(users[index]))
         if users[index] == uid:
             pan = pan_base
         for app in pan.nodes():
@@ -101,7 +101,7 @@ def get_ratings(uid, pan_base):
 # get output file the predict result
 def get_output(uid, pan_base):
     # step 1: prepare "user-app-rating" matrix
-    get_ratings(uid, pan_base)
+    get_rating_matrix(uid, pan_base)
     # step 2: train the model
     run(TRAIN_CMD)
     # step 3: do predict using the model
@@ -111,7 +111,7 @@ def get_output(uid, pan_base):
 # Method 3rd: MF(matrix factorization) method on usage records
 def recommend_mf_based(uid, pan_base):
     get_output(uid, pan_base)
-    capps, users = load_capps(), load_uids()
+    capps, users = load_apps(), load_uids()
     num_capps, num_users = [len(l) for l in capps, users]
     ratings = [[0 for i in xrange(num_capps)] for j in xrange(num_users)]
 
@@ -135,7 +135,7 @@ def recommend_mf_based(uid, pan_base):
 
 # get training and test set (8/2)
 def get_dataset(uid):
-    pan = load_pan(uid)
+    pan = adjust_ratings(load_pan(uid))
 
     # remove native apps
     training_set = set(pan.nodes()) - set(load_napps())
@@ -155,31 +155,89 @@ def get_dataset(uid):
         nx.subgraph(pan, training_set)
 
 
-# get precision and recall
-def evaluate(uid, topk, recommend_algorithm):
+# get precision, recall and f-score
+def evaluate(uid, recommend_algorithm, num):
 
     training_set, test_set, pan = get_dataset(uid)
-    print '(1) Training: %d, Test: %d' % (len(training_set), len(test_set))
+    # print '(1) Training: %d, Test: %d' % (len(training_set), len(test_set))
+    rank_list = [x[0] for x in recommend_algorithm(uid, pan)]
 
-    result = [x[0] for x in recommend_algorithm(uid, pan)[:topk]]
-    num_hit = len(test_set & set(result))
-    print '(2) Top: %d, Hit: %d' % (topk, num_hit)
+    result = {}
 
-    precision = num_hit * 1.0 / len(result)
-    recall = num_hit * 1.0 / len(test_set)
-    f_score = 2 * precision * recall / (precision + recall) \
-        if precision or recall else 0
-    print '(3) Precision: %f, Recall: %f, F-Score: %f' \
-          % (precision, recall, f_score)
+    for k in num:
+        topk = rank_list[:k]
+        hit = test_set & set(topk)
+        # print '(2) Top: %d, Hit: %d' % (topk, len(hit))
 
-    return precision, recall, f_score
+        precision = len(hit) * 1.0 / len(topk)
+        recall = len(hit) * 1.0 / len(test_set)
+        # f_score = 2 * precision * recall / (precision + recall) \
+        #     if precision or recall else 0
+        # print '(3) Precision: %f, Recall: %f' \
+        #        % (precision, recall)
+        # print hit
+
+        result[k] = (precision, recall)
+
+    return result
+
+
+def test(recommend_algorithm, num, iters=100):
+
+    sp = {n: 0 for n in num}
+    sr = {n: 0 for n in num}
+
+    for i in xrange(iters):
+        result = evaluate('a1', recommend_algorithm, num)
+        for k, v in result.items():
+            sp[k] += v[0]
+            sr[k] += v[1]
+
+    for k in num:
+        p = sp[k] / iters
+        r = sr[k] / iters
+        print p, r, 2 * p * r / (p + r)
+        # print 2 * p * r / (p + r)
+
+
+def adjust_ratings(pan):
+    rank_list = []
+
+    for app in pan.nodes():
+        w = pan.node[app]['weight']
+        rank_list.append([app, w])
+    rank_list.sort(key=lambda x: x[1])
+    step = len(rank_list) / 5 + 1
+
+    for i in xrange(len(rank_list)):
+        app, w = rank_list[i]
+        pan.node[app]['weight'] = i / step + 1
+
+    return pan
+
+
+def draw():
+    gan_based = [
+        (0.108, 0.062, 0.048),
+        (0.054, 0.062, 0.072),
+        (0.072, 0.062, 0.058)
+    ]
+    pan_based = [
+        (0.144, 0.106, 0.077),
+        (0.069, 0.099, 0.114),
+        (0.093, 0.102, 0.092)
+    ]
+    mf_based = [
+        (0.09, 0.034, 0.05),
+        (0.046, 0.035, 0.04),
+        (0.032, 0.037, 0.034)
+    ]
 
 
 if __name__ == '__main__':
-    # print recommend_gan_based('a1')
-    # print recommend_pan_based('a1')
-    # print recommend_mf_based('a1')
-
-    # evaluate('a1', 100, recommend_gan_based)
-    evaluate('a1', 10, recommend_pan_based)
-    # evaluate('a1', 30, recommend_mf_based)
+    num = [5, 10, 15]
+    test(recommend_gan_based, num)
+    print '---------------------------'
+    test(recommend_pan_based, num)
+    print '---------------------------'
+    test(recommend_mf_based, num)

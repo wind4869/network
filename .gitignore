@@ -6,4 +6,7 @@ htmls/
 temp/
 *.pyc
 *.dot
+output
+test.txt
+train.txt
 .DS_Store

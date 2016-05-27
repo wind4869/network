@@ -119,8 +119,13 @@ def load_apps():
 
 # load all uids
 def load_uids():
-    return [re.findall(r'[a-z]\d+', name)[0]
-            for name in os.listdir(LOG_DIR) if name != '.DS_Store']
+    return [
+        'a1', 'a6', 'a7', 'a9', 'a11', 'a12', 'l1', 'd2', 'd3', 'd4',
+        'd5', 'd6', 'd7', 'd8', 'd9', 'd10', 'f1', 'f2', 'f3', 'f4',
+        'f5', 'f6', 'g2', 'g4', 'g6', 'n4', 'n5', 'w2']
+
+    # return [re.findall(r'[a-z]\d+', name)[0]
+    #         for name in os.listdir(LOG_DIR) if name != '.DS_Store']
 
 
 def packageName(title):
@@ -269,16 +274,8 @@ def neighbors(lan, app):
 
 # compute similarity of two pans
 def g_sim(pan1, pan2):
-    medges = pan1.number_of_edges() + pan2.number_of_edges()
-    mcs = 0
-
-    for app_from, app_to in pan1.edges():
-        if pan2.has_edge(app_from, app_to):
-            mcs += 1
-            # mcs += pan1[app_from][app_to]['weight'] + \
-            #        pan2[app_from][app_to]['weight']
-
-    return 2 * mcs / float(medges)
+    edges1, edges2 = [set(pan.edges()) for pan in pan1, pan2]
+    return len(edges1 & edges2) * 1.0 / len(edges1 | edges2)
 
 
 # calculate cosine similarity of two vectors
