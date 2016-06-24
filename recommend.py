@@ -18,9 +18,9 @@ def recommend_gan_based(uid, pan):
     # the score is: Σ(edge weight * node weight)
     for common in apps_pan & apps_gan:
         for app in set(gan.predecessors(common)) - apps_pan:
-            result[app] += gan[app][common]['weight']  # * pan.node[common]['weight']
+            result[app] += gan[app][common]['weight'] * pan.node[common]['weight']
         for app in set(gan.successors(common)) - apps_pan:
-            result[app] += gan[common][app]['weight']  # * pan.node[common]['weight']
+            result[app] += gan[common][app]['weight'] * pan.node[common]['weight']
 
     temp = []
     for app, score in result.iteritems():
@@ -44,9 +44,9 @@ def recommend_by_pan(pan_base, pan_other):
     # the score is: Σ(sim * edge weight * node weight)
     for common in apps_base & apps_other:
         for app in set(pan_other.predecessors(common)) - apps_base:
-            scores[app] += sim * pan_other[app][common]['weight']  # * pan_base.node[common]['weight']
+            scores[app] += sim * pan_other[app][common]['weight'] * pan_base.node[common]['weight']
         for app in set(pan_other.successors(common)) - apps_base:
-            scores[app] += sim * pan_other[common][app]['weight']  # * pan_base.node[common]['weight']
+            scores[app] += sim * pan_other[common][app]['weight'] * pan_base.node[common]['weight']
 
     return scores
 
@@ -54,7 +54,7 @@ def recommend_by_pan(pan_base, pan_other):
 # Method 2nd: use "pans->pan" pattern to recommend
 def recommend_pan_based(uid, pan_base):
     # pan_base = load_pan(uid)
-    pans_other = [load_pan(u) for u in load_uids() if u != uid]
+    pans_other = [adjust_ratings(load_pan(u)) for u in load_uids() if u != uid]
 
     result = {}  # record score of each app candidate
     for pan_other in pans_other:
@@ -138,7 +138,7 @@ def get_dataset(uid):
     pan = adjust_ratings(load_pan(uid))
 
     # remove native apps
-    training_set = set(pan.nodes()) - set(load_napps())
+    training_set = set(pan.nodes())  # - set(load_napps())
     test_set = set([])
 
     # the number of apps should in test set
@@ -201,6 +201,7 @@ def test(recommend_algorithm, num, iters=100):
 
 
 def adjust_ratings(pan):
+
     rank_list = []
 
     for app in pan.nodes():
@@ -216,28 +217,60 @@ def adjust_ratings(pan):
     return pan
 
 
-def draw():
+def draw(x):
     gan_based = [
-        (0.108, 0.062, 0.048),
-        (0.054, 0.062, 0.072),
-        (0.072, 0.062, 0.058)
+        (0.108, 0.061, 0.044, 0.036, 0.032),
+        (0.054, 0.061, 0.066, 0.072, 0.079),
+        (0.072, 0.061, 0.053, 0.048, 0.045)
     ]
     pan_based = [
-        (0.144, 0.106, 0.077),
-        (0.069, 0.099, 0.114),
-        (0.093, 0.102, 0.092)
+        (0.144, 0.107, 0.077, 0.077, 0.075),
+        (0.072, 0.107, 0.116, 0.154, 0.188),
+        (0.096, 0.107, 0.093, 0.103, 0.107)
     ]
     mf_based = [
-        (0.09, 0.034, 0.05),
-        (0.046, 0.035, 0.04),
-        (0.032, 0.037, 0.034)
+        (0.066, 0.033, 0.024, 0.023, 0.031),
+        (0.033, 0.033, 0.036, 0.046, 0.077),
+        (0.044, 0.033, 0.029, 0.031, 0.044)
     ]
+
+    plt.figure(figsize=(16, 9))
+
+    plt.subplot(3, 1, 1)
+    plt.plot(x, gan_based[0], 'ro-', label='GAN-based')
+    plt.plot(x, pan_based[0], 'gs-', label='PAN-based')
+    plt.plot(x, mf_based[0], 'bd-', label='MF-based')
+    plt.xticks(x, ['' for i in xrange(len(x))])
+    plt.ylabel('Precision')
+    plt.legend(loc=0)
+    plt.grid()
+
+    plt.subplot(3, 1, 2)
+    plt.plot(x, gan_based[1], 'ro-', label='GAN Based')
+    plt.plot(x, pan_based[1], 'gs-', label='PAN Based')
+    plt.plot(x, mf_based[1], 'bd-', label='MF Based')
+    plt.xticks(x, ['', '', ''])
+    plt.ylabel('Recall')
+    plt.grid()
+
+    plt.subplot(3, 1, 3)
+    plt.plot(x, gan_based[2], 'ro-', label='GAN Based')
+    plt.plot(x, pan_based[2], 'gs-', label='PAN Based')
+    plt.plot(x, mf_based[2], 'bd-', label='MF Based')
+    plt.xticks(x, x)
+    plt.ylabel('F-measure')
+    plt.xlabel('Rank Position')
+    plt.grid()
+
+    plt.savefig(FIGURE_PATH % 'precision_recall', format='pdf')
+    plt.show()
 
 
 if __name__ == '__main__':
-    num = [5, 10, 15]
-    test(recommend_gan_based, num)
-    print '---------------------------'
-    test(recommend_pan_based, num)
-    print '---------------------------'
-    test(recommend_mf_based, num)
+    num = [5, 10, 15, 20, 25]
+    # test(recommend_gan_based, num)
+    # print '---------------------------'
+    # test(recommend_pan_based, num)
+    # print '---------------------------'
+    # test(recommend_mf_based, num)
+    draw(num)
